@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type React from 'react'
 import type { Dish, LogEntry, MealSlot, Targets, WaterEntry } from '../core/types'
 import { WaterCard } from './Water'
@@ -51,6 +51,9 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   // 左滑露出「删除」：只在水平位移占优时跟手，松手超过 44px 就停在打开态
   const [swiped, setSwiped] = useState<string | null>(null)
   const [showBudget, setShowBudget] = useState(false)
+  const budgetRef = useRef<HTMLDivElement>(null)
+  // 展开时把列表滚进视野，让人看见它出现在哪、也看见右上角的「收起」
+  useEffect(() => { if (showBudget) budgetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [showBudget])
   const touch = useRef<{ id: string; x: number; y: number; dx: number; el: HTMLElement } | null>(null)
   const onSwipeStart = (id: string, ev: React.TouchEvent<HTMLDivElement>) => {
     const t = ev.touches[0]
@@ -105,7 +108,6 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
             <div className="hero-sub">
               <span>蔬菜 <b>{(stat.vegG / 100).toFixed(1)}</b> 份</span>
               <span>水果 <b>{r0(stat.fruitG)}</b> g</span>
-              <span>纤维 <b>{r0(n.fiber)}</b> g</span>
               {showNa && <span>钠 <b style={n.sodium > targets.sodiumMax ? { color: 'var(--bad-text)' } : undefined}>{r0(n.sodium)}</b> / {targets.sodiumMax} mg</span>}
               {conditions.map((c) => <button key={c} className="pill accent" style={{ border: 'none', cursor: 'pointer' }} onClick={goModes}>{CONDITION_LABEL[c]}模式</button>)}
               {remain > 50 && budgetPicks.length > 0 && onQuickLog && (
@@ -124,12 +126,13 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
           <Meter label="蛋白" value={n.protein} target={targets.protein} unit="g" color="var(--protein)" soft="var(--protein-soft)" />
           <Meter label="脂肪" value={n.fat} target={targets.fat} unit="g" color="var(--fat)" soft="var(--fat-soft)" />
           <Meter label="碳水" value={n.carbs} target={targets.carbs} unit="g" color="var(--carbs)" soft="var(--carbs-soft)" />
+          <Meter label="纤维" value={n.fiber} target={targets.fiber} unit="g" color="var(--fiber)" soft="var(--fiber-soft)" />
         </div>
       </div>
 
       {showBudget && remain > 50 && budgetPicks.length > 0 && onQuickLog && (
-        <div className="card">
-          <div className="section-title"><h2>用剩下的 {r0(remain)} 千卡还能吃什么</h2><span className="small muted">按{SLOT_LABEL[nextSlot]}挑</span></div>
+        <div className="card" ref={budgetRef}>
+          <div className="section-title"><h2>用剩下的 {r0(remain)} 千卡还能吃什么</h2><div className="row" style={{ gap: 4, flex: 'none', whiteSpace: 'nowrap' }}><span className="small muted">按{SLOT_LABEL[nextSlot]}挑</span><button className="btn ghost sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }} onClick={() => setShowBudget(false)} aria-label="收起还能吃什么">收起<IconClose size={12} /></button></div></div>
           <div className="list">
             {budgetPicks.map((p) => (
               <div key={p.dish.id} className="list-item">
