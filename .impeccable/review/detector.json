@@ -1,0 +1,12 @@
+[
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/Users/tap4fun/Demo/nutri/src/styles.css",
+    "line": 53,
+    "snippet": "cubic-bezier(.34, 1.45, .64, 1)"
+  }
+]

@@ -1,0 +1,147 @@
+{
+  "title": "给「私人营养师」选一个视觉世界",
+  "question": "骰子指到了「菜市场价签」。保留它、换一张备选、走行业标准，或重掷。所有方向都保留底部四页签、浅色为主。",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "菜市场价签（白昼版）",
+      "kicker": "THE ROLL",
+      "lineage": "菜市场白瓷砖摊位、荧光手写价牌、电子秤",
+      "thesis": "把每天吃的当成今天在市场「买」的：每道菜是一张手写价牌，千卡是价格，日总账是摊主的小本。",
+      "palette": ["#F5F4EE", "#FFE45C", "#D7262B", "#1F1F1D", "#3A8F4E"],
+      "materials": ["白瓷砖底", "荧光黄价牌", "红马克笔数字", "电子秤液晶"],
+      "viewport": "今日页：顶部一块电子秤液晶显示「还可以吃 833」，下面是今天买过的菜，一张张黄价牌横排，红字千卡当价格；蛋白/脂肪/碳水三条是摊主小本上的横线账。",
+      "risk": "手写字只能用在主数字，其余全部工整无衬线，否则数据页会乱。翻译自暗色黑板世界，走的是白瓷砖日光版。",
+      "raised": [
+        { "from": "challenger-quote-grammar", "raise": "每个区域用它的字面名字标出来，不靠图标猜。" },
+        { "from": "challenger-cyclorama", "raise": "超标、达标、缺记录每个状态都有文字或图案标记，颜色不是唯一信号。" },
+        { "from": "challenger-labanotation", "raise": "所有条形长度按真实克数等比，不截轴。" },
+        { "from": "challenger-datamatics", "raise": "数字一律 tabular 等宽对齐成列。" }
+      ],
+      "wireframe": { "cols": 6, "rows": 12, "regions": [
+        { "label": "电子秤液晶：还可以吃 833", "x": 0, "y": 0, "w": 6, "h": 3, "accent": true },
+        { "label": "三条横线账 蛋白/脂肪/碳水", "x": 0, "y": 3, "w": 6, "h": 2 },
+        { "label": "价牌 早餐", "x": 0, "y": 5, "w": 2, "h": 3 },
+        { "label": "价牌 午餐", "x": 2, "y": 5, "w": 2, "h": 3 },
+        { "label": "价牌 午餐", "x": 4, "y": 5, "w": 2, "h": 3 },
+        { "label": "晚餐 空牌：去推荐挑一份", "x": 0, "y": 8, "w": 6, "h": 3 },
+        { "label": "今日 推荐 分析 我的", "x": 0, "y": 11, "w": 6, "h": 1 }
+      ] },
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-seven-segment-alarm-clock-hero.webp"
+    },
+    {
+      "id": "model-pick",
+      "label": "营养成分表（GB 28050）",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "预包装食品背面的黑白营养成分表与 NRV%",
+      "thesis": "整个应用就是一张会动的营养成分表：每个摄入值旁边永远是它的目标和 NRV%，菜品由食材构成推导这件事直接印在表上。",
+      "palette": ["#FFFFFF", "#111111", "#BFBFB8", "#2F7D4F"],
+      "materials": ["黑色细线表格", "NRV% 列", "哑光纸板白", "一处产地绿"],
+      "viewport": "今日页：一张全宽成分表，行是热量/蛋白/脂肪/碳水/钠，列是「已吃 · 目标 · %」，超标的百分比加粗；表下是今天吃的菜按餐次列成同一张表的续页。",
+      "risk": "最贴产品机制、最清楚，也是数据型项目最常落到的方向；处理不好会冷、像药品说明书。",
+      "wireframe": { "cols": 6, "rows": 12, "regions": [
+        { "label": "成分表头：已吃 · 目标 · NRV%", "x": 0, "y": 0, "w": 6, "h": 1, "accent": true },
+        { "label": "热量 987 / 1820 · 54%", "x": 0, "y": 1, "w": 6, "h": 1 },
+        { "label": "蛋白 · 脂肪 · 碳水 · 钠 各一行", "x": 0, "y": 2, "w": 6, "h": 3 },
+        { "label": "早餐 馒头配豆浆 316", "x": 0, "y": 5, "w": 6, "h": 2 },
+        { "label": "午餐 三道菜 671", "x": 0, "y": 7, "w": 6, "h": 3 },
+        { "label": "晚餐 空行 + 记一笔", "x": 0, "y": 10, "w": 6, "h": 1 },
+        { "label": "今日 推荐 分析 我的", "x": 0, "y": 11, "w": 6, "h": 1 }
+      ] }
+    },
+    {
+      "id": "challenger-zoo-map",
+      "label": "动物园导览图",
+      "verdict": "competitive",
+      "lineage": "折成八折的动物园与植物园导览图，平涂色块与海岸线",
+      "thesis": "一天的饮食是一张导览图：每一餐是一块平涂色地，色地之间的岸线分区，控件是黄/珊瑚/蓝的胶囊。",
+      "palette": ["#8ED462", "#F5F1E4", "#2C2E2A", "#F5E211", "#FF705D", "#2BA0FF"],
+      "materials": ["平涂无颗粒色块", "米色纸底当水面", "单一 grotesk 单字重", "胶囊控件"],
+      "viewport": "今日页：一块占屏的苹果绿「今天」色地，岸线从右上斜切出去，已吃的菜沿岸线排成地名式标签，右下一颗黄胶囊写「记一笔」。",
+      "case": "带小孩的父母周末都摸过这张图，识别度高；但色地拓扑对数据密的分析页不友好，清晰度略输。",
+      "risk": "0.4 秒过冲动效与大色地在 Operate 型应用里容易显得像营销页。",
+      "hero": "https://impeccable.style/worlds/cards/aww2-zoo-gardens-guide-map-hero.webp"
+    },
+    {
+      "id": "challenger-lcd-scale",
+      "label": "厨房秤液晶（七段数码）",
+      "verdict": "competitive",
+      "lineage": "七段数码管家族：厨房秤、微波炉面板、菜市场电子秤",
+      "thesis": "数字是产品本身：已吃的段亮着，目标的段是灰影，一眼看出还差多少；没亮的段也是设计过的。",
+      "palette": ["#E0E6D3", "#1E2A1E", "#5C6B5A", "#C9D3B8"],
+      "materials": ["淡绿灰液晶底", "深墨绿七段数字", "灰影未亮段", "工整无衬线正文"],
+      "viewport": "今日页：顶部一块横向液晶条，987 的段亮、1820 的段灰影叠在同一位置；下面正文是普通列表。",
+      "case": "在「摄入 / 目标」这一点上比市场价牌更清楚；但七段字承载不了菜名与建议，整页只能靠正文撑，识别度一般。已从夜间 LED 译成白昼液晶。",
+      "risk": "只有数字这一个记忆点，其余页面容易退回普通列表。",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-seven-segment-alarm-clock-hero.webp"
+    },
+    {
+      "id": "challenger-quote-grammar",
+      "label": "工装引号字法",
+      "verdict": "declined",
+      "lineage": "工业街头服饰：直引号里的大写字、扎带吊牌、斜纹警示条",
+      "thesis": "每个区域用引号写上它的字面名字。",
+      "palette": ["#FFFFFF", "#111111", "#FF6A00"],
+      "materials": ["白棉黑尼龙", "斜纹警示条", "橙色扎带"],
+      "viewport": "所有标签带直引号，禁用项打斜纹。",
+      "case": "融合失败：三十多岁记晚饭的父母不会在街头服饰里认出自己；斜纹与引号在数据页是噪音。",
+      "kept": "每个区域用字面名字标出，导航靠阅读不靠猜。",
+      "risk": "读起来像潮牌，不像营养师。",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-industrial-quote-grammar-hero.webp"
+    },
+    {
+      "id": "challenger-cyclorama",
+      "label": "天幕破晓",
+      "verdict": "declined",
+      "lineage": "舞台天幕：从黑夜经钴蓝、玫红到白昼的无缝渐变",
+      "thesis": "一天的三餐是从暗到亮的地平线色带。",
+      "palette": ["#0A0A0F", "#1F4FB8", "#E58BA0", "#FFFFFF"],
+      "materials": ["黑色天幕底", "钴蓝地平线", "玫红渐层"],
+      "viewport": "早餐在暗带、晚餐在亮带。",
+      "case": "融合失败：黑底违背浅色约束，且相位靠颜色区分；舞台灯光世界与家常饮食无关。",
+      "kept": "每个相位都有文字标签与图案，颜色从不是唯一信号。",
+      "risk": "深色渐变背景在数据页上吃掉对比。",
+      "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp"
+    },
+    {
+      "id": "challenger-labanotation",
+      "label": "拉班舞谱",
+      "verdict": "declined",
+      "lineage": "舞蹈记谱：竖向中央谱线自下而上读，块长即时长",
+      "thesis": "一天的每一餐是谱上一个块，块长就是热量。",
+      "palette": ["#FFFFFF", "#000000", "#DDDDDD"],
+      "materials": ["白谱纸", "黑符号块", "灰色当前拍"],
+      "viewport": "时间从下往上流，左右两列对称。",
+      "case": "融合失败：自下而上阅读违背手机习惯，舞蹈记谱与用户世界不相交。",
+      "kept": "长度就是精确数量，条形按真实克数等比，不截轴。",
+      "risk": "读法反直觉。",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-labanotation-hero.webp"
+    },
+    {
+      "id": "challenger-datamatics",
+      "label": "数据崇高（Ikeda）",
+      "verdict": "declined",
+      "lineage": "池田亮司 datamatics：纯黑白条码列与正弦格",
+      "thesis": "整页是一片闪动的黑白数据场。",
+      "palette": ["#000000", "#FFFFFF"],
+      "materials": ["纯黑纯白", "细线条码列", "等宽数字"],
+      "viewport": "条码列与正弦曲线结构页面。",
+      "case": "融合失败：闪动与纯黑白对日常饮食工具毫无亲和，识别与清晰双输。",
+      "kept": "一种等宽字体、数字紧排成对齐的列。",
+      "risk": "像装置艺术，不像工具。",
+      "hero": "https://impeccable.style/worlds/cards/ikeda-datamatics-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code", "toggle": false },
+  "canon": true,
+  "canonCard": {
+    "label": "行业标准（健康类应用卡片）",
+    "thesis": "苹果健康 / 薄荷健康那一套：圆环、卡片、系统字体，做到最高完成度。",
+    "palette": ["#FFFFFF", "#17201B", "#1F7A4D"],
+    "materials": ["白卡片", "柔和投影", "系统无衬线", "进度圆环"],
+    "viewport": "现在这版的样子，只是每个细节都更讲究。",
+    "risk": "与同类应用无法区分，这是它的设计目标。"
+  },
+  "steer": true
+}

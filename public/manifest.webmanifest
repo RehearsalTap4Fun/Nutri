@@ -1,0 +1,17 @@
+{
+  "name": "私人营养师",
+  "short_name": "营养师",
+  "description": "按身体数据算目标、按规则推荐三餐、录餐后按近 7 天实际吃法调整的个人饮食管家",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F1E4",
+  "theme_color": "#F5F1E4",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

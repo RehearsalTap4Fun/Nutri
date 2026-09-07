@@ -1,0 +1,32 @@
+{
+  "name": "nutri",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "validate": "tsx scripts/validateData.ts",
+    "deploy": "npm test && scripts/deploy.sh",
+    "release": "npm run build && rm -rf release && mkdir -p release/pwa && cp -R dist/. release/pwa/ && cp dist/index.html \"release/私人营养师.html\" && echo \"单机版: release/私人营养师.html · PWA 目录: release/pwa（整目录上传到静态托管）\""
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "tsx": "^4.23.13",
+    "typescript": "^5.5.4",
+    "vite": "^8.2.2",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^4.1.11"
+  }
+}

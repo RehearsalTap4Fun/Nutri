@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- 动物园导览图语言：米色水面、苹果绿陆地、墨色岸线、白色碗 -->
+  <rect width="512" height="512" fill="#F5F1E4"/>
+  <path d="M84 118C120 62 214 46 300 66C388 86 462 150 452 250C442 350 380 438 274 452C168 466 86 404 66 318C50 250 56 162 84 118Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M138 258H374C374 340 322 396 256 396C190 396 138 340 138 258Z" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M206 396V424M306 396V424" stroke="#2C2E2A" stroke-width="12" stroke-linecap="round"/>
+  <path d="M226 214C226 186 246 178 246 148M286 214C286 186 306 178 306 148" stroke="#2C2E2A" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <circle cx="392" cy="128" r="30" fill="#FFD23F" stroke="#2C2E2A" stroke-width="10"/>
+</svg>

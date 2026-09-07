@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-04T00:00:00+08:00",
+  "title": "Design System: 私人营养师",
+  "extensions": {
+    "colorMeta": {
+      "water": { "role": "neutral", "displayName": "水面 Water", "canonical": "#F5F1E4", "cssVar": "--bg", "dark": "#151712", "tonalRamp": ["#262319", "#3F3A2B", "#5C5540", "#7E7659", "#A39A78", "#C7BF9C", "#E4DEC8", "#F5F1E4"] },
+      "shore-white": { "role": "neutral", "displayName": "白色岸地 Shore", "canonical": "#FFFFFF", "cssVar": "--surface", "dark": "#1E211B", "tonalRamp": ["#1E211B", "#33372E", "#4B5044", "#666B5E", "#858A7C", "#A9AEA1", "#D3D6CC", "#FFFFFF"] },
+      "shallows": { "role": "neutral", "displayName": "浅滩 Shallows", "canonical": "#ECE6D3", "cssVar": "--surface-2", "dark": "#262A22", "tonalRamp": ["#262A22", "#3B3C2E", "#57553F", "#767355", "#97926E", "#B9B38C", "#D6CFAF", "#ECE6D3"] },
+      "land": { "role": "primary", "displayName": "陆地绿 Land", "canonical": "#8ED462", "cssVar": "--land", "dark": "#5FA83C", "tonalRamp": ["#16300F", "#2F4A22", "#2E7A1F", "#4F8F2E", "#6CBF3E", "#8ED462", "#C6EAA8", "#E3EBCF"] },
+      "land-light": { "role": "primary", "displayName": "浅陆地 Land Light", "canonical": "#C6EAA8", "cssVar": "--land-2", "dark": "#2F4D24", "tonalRamp": ["#1A2A12", "#2F4D24", "#3E5A2A", "#5A7F3D", "#7FA24A", "#A6CF7F", "#C6EAA8", "#E6F5D8"] },
+      "sun": { "role": "secondary", "displayName": "太阳黄 Sun", "canonical": "#FFD23F", "cssVar": "--sun", "dark": "#E3B92B", "tonalRamp": ["#3A2C05", "#6B5410", "#7A5208", "#A57F12", "#D9A43E", "#E3B92B", "#FFD23F", "#FFEBA6"] },
+      "coral-coast": { "role": "secondary", "displayName": "珊瑚岸线 Coral Coast", "canonical": "#FF6B5A", "cssVar": "--coral", "dark": "#E36A57", "tonalRamp": ["#3A1611", "#6E2A20", "#9C3C2E", "#C8452F", "#E36A57", "#FF6B5A", "#FF9E92", "#FFD3CD"] },
+      "ink": { "role": "neutral", "displayName": "墨 Ink", "canonical": "#2C2E2A", "cssVar": "--ink", "dark": "#ECEEE6", "tonalRamp": ["#14170F", "#2C2E2A", "#5A5D58", "#6B6E68", "#9C9F97", "#B3B7AC", "#D6D8D1", "#ECEEE6"] },
+      "ink-2": { "role": "neutral", "displayName": "墨 2", "canonical": "#5A5D58", "cssVar": "--ink-2", "dark": "#B3B7AC" },
+      "muted": { "role": "neutral", "displayName": "说明灰 Muted", "canonical": "#6B6E68", "cssVar": "--muted", "dark": "#9A9E93" },
+      "faint": { "role": "neutral", "displayName": "占位灰 Faint", "canonical": "#9C9F97", "cssVar": "--faint", "dark": "#6F736A" },
+      "stroke": { "role": "neutral", "displayName": "岸线描边 Stroke", "canonical": "rgba(44, 46, 42, .92)", "cssVar": "--stroke", "dark": "rgba(236, 238, 230, .85)" },
+      "hair": { "role": "neutral", "displayName": "细线 Hair", "canonical": "rgba(44, 46, 42, .14)", "cssVar": "--hair", "dark": "rgba(236, 238, 230, .14)" },
+      "axis": { "role": "neutral", "displayName": "轴 Axis", "canonical": "rgba(44, 46, 42, .38)", "cssVar": "--axis", "dark": "rgba(236, 238, 230, .38)" },
+      "accent-green": { "role": "primary", "displayName": "深绿文字 Accent", "canonical": "#2E7A1F", "cssVar": "--accent", "dark": "#8ED462" },
+      "ring": { "role": "primary", "displayName": "环 Ring", "canonical": "#6CBF3E", "cssVar": "--ring", "dark": "#5FA83C" },
+      "ring-track": { "role": "neutral", "displayName": "环轨 Ring Track", "canonical": "#E4DEC8", "cssVar": "--ring-track", "dark": "#2A2E25" },
+      "protein": { "role": "tertiary", "displayName": "蛋白红 Protein", "canonical": "#E45A3F", "cssVar": "--protein", "dark": "#D5624A", "tonalRamp": ["#3A211C", "#7A2A1C", "#B8422C", "#D5624A", "#E45A3F", "#F08A70", "#F9D8D0", "#FDEEEA"] },
+      "protein-soft": { "role": "tertiary", "displayName": "蛋白底", "canonical": "#F9D8D0", "cssVar": "--protein-soft", "dark": "#3A211C" },
+      "protein-text": { "role": "tertiary", "displayName": "蛋白文字", "canonical": "#B8422C", "cssVar": "--protein-text", "dark": "#F08A70" },
+      "fat": { "role": "tertiary", "displayName": "脂肪蓝 Fat", "canonical": "#3D8FD6", "cssVar": "--fat", "dark": "#4C86E6", "tonalRamp": ["#1B2A44", "#1B4470", "#23629E", "#3D8FD6", "#4C86E6", "#7BA4F5", "#D3E6F7", "#EBF3FB"] },
+      "fat-soft": { "role": "tertiary", "displayName": "脂肪底", "canonical": "#D3E6F7", "cssVar": "--fat-soft", "dark": "#1B2A44" },
+      "fat-text": { "role": "tertiary", "displayName": "脂肪文字", "canonical": "#23629E", "cssVar": "--fat-text", "dark": "#7BA4F5" },
+      "carbs": { "role": "tertiary", "displayName": "碳水琥珀 Carbs", "canonical": "#B8780A", "cssVar": "--carbs", "dark": "#B8892A", "tonalRamp": ["#362B14", "#5A3C06", "#7A5208", "#B8780A", "#B8892A", "#F0B95A", "#F4E4BF", "#FBF3E2"] },
+      "carbs-soft": { "role": "tertiary", "displayName": "碳水底", "canonical": "#F4E4BF", "cssVar": "--carbs-soft", "dark": "#362B14" },
+      "carbs-text": { "role": "tertiary", "displayName": "碳水文字", "canonical": "#7A5208", "cssVar": "--carbs-text", "dark": "#F0B95A" },
+      "fiber": { "role": "tertiary", "displayName": "纤维橄榄 Fiber", "canonical": "#6E8F3A", "cssVar": "--fiber", "dark": "#7FA24A" },
+      "fiber-soft": { "role": "tertiary", "displayName": "纤维底", "canonical": "#E3EBCF", "cssVar": "--fiber-soft", "dark": "#22301A" },
+      "bad": { "role": "tertiary", "displayName": "超标红 Bad", "canonical": "#C8452F", "cssVar": "--bad", "dark": "#E0553F" },
+      "bad-text": { "role": "tertiary", "displayName": "超标文字", "canonical": "#B83A26", "cssVar": "--bad-text", "dark": "#F26B5B" },
+      "warn-text": { "role": "tertiary", "displayName": "偏离文字", "canonical": "#7A5208", "cssVar": "--warn-text", "dark": "#F0B95A" },
+      "lobe-ink": { "role": "neutral", "displayName": "色地正文", "canonical": "#2C2E2A", "cssVar": "--lobe-ink", "dark": "#14170F" },
+      "lobe-ink-sun": { "role": "neutral", "displayName": "黄地次级文字", "canonical": "#6B5410", "cssVar": "--lobe-ink-sun", "dark": "#4A3A0C" },
+      "lobe-ink-land": { "role": "neutral", "displayName": "绿地次级文字", "canonical": "#2F4A22", "cssVar": "--lobe-ink-land", "dark": "#16300F" },
+      "lobe-ink-land2": { "role": "neutral", "displayName": "浅绿地次级文字", "canonical": "#3E5A2A", "cssVar": "--lobe-ink-land2", "dark": "#C9E6B4" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "湖中的余量数字 .lake-num；≤430px 缩到 34px。" },
+      "headline": { "displayName": "Headline", "purpose": "页面 h1。" },
+      "title": { "displayName": "Title", "purpose": "区块地名 h2；抽屉 h2 为 20px。" },
+      "body": { "displayName": "Body", "purpose": "全站正文，也是最小正文字号。" },
+      "label": { "displayName": "Label", "purpose": "按钮 14px、chip / seg / 字段 label / 宏量条 13px。" },
+      "caption": { "displayName": "Caption", "purpose": "pill、tiny、reason、hero-sub、图表说明；导航文字与图表刻度 11px。" }
+    },
+    "shadows": [
+      { "name": "shadow-card", "value": "none", "purpose": "刻意为空：页面区块无投影。" },
+      { "name": "shadow-float", "value": "none", "purpose": "刻意为空：抽屉、FAB、Toast 无投影。" },
+      { "name": "inset-stroke", "value": "inset 0 0 0 1.5px var(--stroke)", "purpose": "描边控件（btn / chip / seg / stepper / nav-inner / 搜索框）的边。" },
+      { "name": "inset-hair", "value": "inset 0 0 0 1.5px var(--hair)", "purpose": "输入框静默边、已吃 lobe、日历格。" },
+      { "name": "inset-focus", "value": "inset 0 0 0 2px var(--ink)", "purpose": "输入框焦点态。" }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(.23, 1, .32, 1)", "purpose": "状态切换的默认缓动。" },
+      { "name": "ease-coast", "value": "cubic-bezier(.34, 1.45, .64, 1)", "purpose": "岸线：一次过冲。陆地、湖、抽屉、FAB、导航圆片、Toast。" },
+      { "name": "ease-drawer", "value": "var(--ease-coast)", "purpose": "抽屉与主页面缩放。" },
+      { "name": "t-fast", "value": "150ms", "purpose": "hover / active。" },
+      { "name": "t-med", "value": "220ms", "purpose": "背景、颜色、遮罩 fade。" },
+      { "name": "t-slow", "value": "400ms", "purpose": "主页面缩放、抽屉回弹。" },
+      { "name": "t-coast", "value": "400ms", "purpose": "岸线动画。" }
+    ],
+    "breakpoints": [
+      { "name": "container", "value": "640px" },
+      { "name": "lake-shrink", "value": "430px" },
+      { "name": "lake-stack", "value": "359px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "默认按钮：透明底、1.5px 墨色 inset 描边、岸线胶囊。",
+      "html": "<button class=\"ds-btn\">全天换一换</button>",
+      "css": ".ds-btn { position: relative; border: none; background: transparent; color: var(--ink, #2C2E2A); border-radius: 22px 20px 24px 19px / 20px 24px 19px 22px; padding: 10px 16px; font-weight: 600; font-size: 14px; line-height: 1.2; white-space: nowrap; box-shadow: inset 0 0 0 1.5px var(--stroke, rgba(44,46,42,.92)); cursor: pointer; transition: transform 150ms cubic-bezier(.23,1,.32,1), background 150ms cubic-bezier(.23,1,.32,1); } .ds-btn:hover { background: var(--surface-2, #ECE6D3); } .ds-btn:active { transform: scale(.97); } .ds-btn:focus-visible { outline: 2px solid var(--ink, #2C2E2A); outline-offset: 2px; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主操作：太阳黄底，右端一颗墨色圆片。",
+      "html": "<button class=\"ds-btn-primary\">照这个吃，记为已吃</button>",
+      "css": ".ds-btn-primary { position: relative; border: none; background: var(--sun, #FFD23F); color: var(--ink, #2C2E2A); border-radius: 22px 20px 24px 19px / 20px 24px 19px 22px; padding: 10px 32px 10px 16px; font-weight: 600; font-size: 14px; line-height: 1.2; white-space: nowrap; cursor: pointer; transition: transform 150ms cubic-bezier(.23,1,.32,1), filter 150ms; } .ds-btn-primary::after { content: ''; position: absolute; top: 50%; right: 11px; width: 11px; height: 11px; margin-top: -5.5px; border-radius: 50%; background: var(--ink, #2C2E2A); } .ds-btn-primary:hover { filter: brightness(1.04); } .ds-btn-primary:active { transform: scale(.97); } .ds-btn-primary:disabled { opacity: .45; cursor: default; } .ds-btn-primary:focus-visible { outline: 2px solid var(--ink, #2C2E2A); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "文字按钮：深绿字，hover 下划线。",
+      "html": "<button class=\"ds-btn-ghost\">换一换</button>",
+      "css": ".ds-btn-ghost { border: none; background: transparent; color: var(--accent, #2E7A1F); border-radius: 22px 20px 24px 19px / 20px 24px 19px 22px; padding: 6px 8px; font-weight: 600; font-size: 13px; line-height: 1.2; cursor: pointer; text-underline-offset: 3px; } .ds-btn-ghost:hover { text-decoration: underline; } .ds-btn-ghost:focus-visible { outline: 2px solid var(--ink, #2C2E2A); outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "筛选 chip：描边胶囊，选中填陆地绿。",
+      "html": "<div style=\"display:flex;gap:6px\"><button class=\"ds-chip ds-chip-on\">全部</button><button class=\"ds-chip\">家常</button><button class=\"ds-chip\">外卖</button></div>",
+      "css": ".ds-chip { flex: 0 0 auto; border: none; background: transparent; color: var(--ink, #2C2E2A); border-radius: 16px 14px 17px 13px / 14px 17px 13px 16px; padding: 6px 13px; font-size: 13px; font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--stroke, rgba(44,46,42,.92)); cursor: pointer; transition: background 150ms, transform 150ms cubic-bezier(.23,1,.32,1); } .ds-chip:active { transform: scale(.96); } .ds-chip-on { background: var(--land, #8ED462); box-shadow: none; } .ds-chip:focus-visible { outline: 2px solid var(--ink, #2C2E2A); outline-offset: 2px; }"
+    },
+    {
+      "name": "Pill",
+      "kind": "chip",
+      "refersTo": "pill",
+      "description": "状态标签：默认浅滩、good 浅绿、warn 太阳黄、bad 蛋白底红字。",
+      "html": "<span class=\"ds-pill\">1 份</span> <span class=\"ds-pill ds-pill-good\">已吃</span> <span class=\"ds-pill ds-pill-warn\">偏多</span> <span class=\"ds-pill ds-pill-bad\">超标</span>",
+      "css": ".ds-pill { display: inline-block; border-radius: 11px 9px 12px 8px / 9px 12px 8px 11px; padding: 2px 9px; font-size: 12px; font-weight: 600; background: var(--surface-2, #ECE6D3); color: var(--ink-2, #5A5D58); } .ds-pill-good { background: var(--land-2, #C6EAA8); color: var(--ink, #2C2E2A); } .ds-pill-warn { background: var(--sun, #FFD23F); color: var(--ink, #2C2E2A); } .ds-pill-bad { background: var(--protein-soft, #F9D8D0); color: var(--bad-text, #B83A26); }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "白色岸地里的胶囊输入，焦点态描边变 2px 墨色。",
+      "html": "<input class=\"ds-input\" placeholder=\"搜菜名、食材\" />",
+      "css": ".ds-input { width: 100%; border: none; box-shadow: inset 0 0 0 1.5px var(--stroke, rgba(44,46,42,.92)); background: var(--surface, #FFFFFF); color: var(--ink, #2C2E2A); border-radius: 22px 20px 24px 19px / 20px 24px 19px 22px; padding: 12px 16px; font-size: 16px; font-family: inherit; transition: box-shadow 150ms; } .ds-input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink, #2C2E2A); } .ds-input::placeholder { color: var(--faint, #9C9F97); }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "input",
+      "refersTo": "seg",
+      "description": "描边外壳内的分段按钮，选中填陆地绿。",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-on\">找菜</button><button>说一句</button><button>自定义</button></div>",
+      "css": ".ds-seg { display: flex; border-radius: 22px 20px 24px 19px / 20px 24px 19px 22px; padding: 3px; gap: 2px; box-shadow: inset 0 0 0 1.5px var(--stroke, rgba(44,46,42,.92)); } .ds-seg button { flex: 1; border: none; background: transparent; padding: 7px 8px; font-size: 13px; font-weight: 600; color: var(--ink-2, #5A5D58); border-radius: 16px 14px 17px 13px / 14px 17px 13px 16px; cursor: pointer; transition: background 220ms cubic-bezier(.23,1,.32,1), color 220ms; } .ds-seg button.ds-seg-on { background: var(--land, #8ED462); color: var(--ink, #2C2E2A); } .ds-seg button:focus-visible { outline: 2px solid var(--ink, #2C2E2A); outline-offset: 2px; }"
+    },
+    {
+      "name": "Bottom Nav",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "水面上的一条描边胶囊，当前页图标下垫陆地绿圆片。",
+      "html": "<div class=\"ds-nav\"><button class=\"ds-nav-active\"><span class=\"ds-ico\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 11.5h17c0 4.5-3.2 8-8.5 8s-8.5-3.5-8.5-8Z\"/><path d=\"M8 19.5v1.5M16 19.5v1.5M9 8.5c0-1.6 1-2 1-3.5M13 8.5c0-1.6 1-2 1-3.5\"/></svg></span>今日</button><button><span class=\"ds-ico\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 19c0-8 5-13 14-14 0 9-5 14-14 14Z\"/><path d=\"M5 19c3-4 6-7 10-10\"/></svg></span>推荐</button><button><span class=\"ds-ico\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 19.5h16\"/><path d=\"M6.5 16.5v-5M11 16.5V7.5M15.5 16.5v-3M20 16.5V10\"/></svg></span>分析</button><button><span class=\"ds-ico\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"8\" r=\"3.5\"/><path d=\"M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6\"/></svg></span>我的</button></div>",
+      "css": ".ds-nav { display: flex; width: 100%; max-width: 640px; height: 62px; border-radius: 34px 30px 36px 28px / 30px 36px 28px 34px; background: var(--bg, #F5F1E4); box-shadow: inset 0 0 0 1.5px var(--stroke, rgba(44,46,42,.92)); padding: 0 6px; } .ds-nav button { flex: 1; background: transparent; border: none; color: var(--ink-2, #5A5D58); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 0 3px; font-size: 11px; font-weight: 600; cursor: pointer; transition: color 150ms; } .ds-nav .ds-ico { width: 40px; height: 28px; display: grid; place-items: center; border-radius: 16px 14px 17px 13px / 14px 17px 13px 16px; transition: background 220ms cubic-bezier(.23,1,.32,1), transform 400ms cubic-bezier(.34,1.45,.64,1); } .ds-nav button:active .ds-ico { transform: scale(.92); } .ds-nav button.ds-nav-active { color: var(--ink, #2C2E2A); } .ds-nav button.ds-nav-active .ds-ico { background: var(--land, #8ED462); transform: scale(1.06); } .ds-nav button:focus-visible { outline: 2px solid var(--ink, #2C2E2A); outline-offset: -4px; }"
+    },
+    {
+      "name": "Meal Lobe",
+      "kind": "card",
+      "refersTo": "lobe-land",
+      "description": "签名容器：一块平涂陆地，四角不等的岸线圆角，次级文字从绿色相里调深。",
+      "html": "<div class=\"ds-lobe\"><div class=\"ds-lobe-head\"><h2>晚餐 <span class=\"ds-lobe-sub\">目标约 710 千卡</span></h2><button class=\"ds-lobe-ghost\">换一换</button></div><div class=\"ds-lobe-item\"><div><b>可乐鸡翅</b> × 1份<div class=\"ds-lobe-sub\">4~5个 · 蛋白 27 g · 脂肪 26 g · 碳水 19 g</div></div><span class=\"ds-lobe-num\">417</span></div><div class=\"ds-lobe-item\"><div><b>烤蔬菜拼盘</b> × 1份<div class=\"ds-lobe-reason\">近期盐偏多，选清淡做法</div></div><span class=\"ds-lobe-num\">200</span></div></div>",
+      "css": ".ds-lobe { position: relative; padding: 18px 20px 16px; border-radius: 34px 52px 44px 60px / 48px 36px 58px 40px; background: var(--land, #8ED462); color: var(--lobe-ink, #2C2E2A); font-size: 15px; line-height: 1.55; } .ds-lobe-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; } .ds-lobe h2 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.05; } .ds-lobe-sub { color: var(--lobe-ink-land, #2F4A22); font-size: 12px; font-weight: 500; } .ds-lobe-ghost { border: none; background: transparent; color: var(--lobe-ink, #2C2E2A); font-weight: 600; font-size: 13px; padding: 6px 8px; cursor: pointer; text-underline-offset: 3px; } .ds-lobe-ghost:hover { text-decoration: underline; } .ds-lobe-item { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; } .ds-lobe-item + .ds-lobe-item::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: rgba(44,46,42,.18); } .ds-lobe-num { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; } .ds-lobe-reason { color: var(--lobe-ink, #2C2E2A); font-size: 12px; font-weight: 600; margin-top: 2px; }"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "墨色胶囊提示，动作文字太阳黄。",
+      "html": "<div class=\"ds-toast\"><span class=\"ds-toast-text\">已记录 午餐 · 232 千卡</span><button class=\"ds-toast-action\">撤销</button></div>",
+      "css": ".ds-toast { width: min(92vw, 420px); background: var(--ink, #2C2E2A); color: var(--bg, #F5F1E4); border-radius: 999px; padding: 12px 18px; display: flex; align-items: center; gap: 12px; font-size: 14px; } .ds-toast-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-toast-action { background: transparent; border: none; color: var(--sun, #FFD23F); font-weight: 700; padding: 4px 6px; border-radius: 999px; cursor: pointer; } .ds-toast-action:focus-visible { outline: 2px solid var(--bg, #F5F1E4); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "动物园导览图（Zoo & Gardens Guide Map）",
+    "overview": "整个应用是一张平涂的园区导览图。米色纸底（--bg）是水面，苹果绿色地（--land）是陆地，今天的剩余热量是陆地中间挖出来的一个湖；吃得越多陆地越涨、湖越缩，超标时湖消失、岸线变珊瑚红。页面级区块不再是白卡片：它们是水面上的一块块地名，靠留白与地名式标题分区，没有边框、没有投影、没有渐变、没有颗粒。只有抽屉与表单是「白色岸地」，用白底把人从水面接到陆地上填东西。\n\n密度是手机竖屏、单手、半分钟一次操作的密度：正文 15px、行高 1.55、触控目标 ≥ 40px；数字永远与目标并排出现（「987 / 1820 千卡」），超出立刻用 --bad 标红。控件是一种统一的「胶囊」，但边缘不是完美圆，而是四角不等的椭圆半径（--r-btn / --r-chip / --r-pill / --r-bar），像手绘的岸线微微起伏；主操作按钮是太阳黄并在右端带一颗墨色圆片。\n\n已确认的视觉拒绝：同类应用的「白卡片 + 圆环 + 投影」三件套；渐变；纸张颗粒；灰色作为色地上的次级文字色（色地上的次级文字一律从该色相里调深）。",
+    "keyCharacteristics": [
+      "水 / 陆 / 湖三层地理隐喻，全部用平涂色块和 SVG 岸线表达，零阴影零渐变",
+      "一款系统无衬线（PingFang SC 优先），字重三档 500 / 600 / 700，数字 tabular-nums",
+      "控件统一为「不规则胶囊」：描边 1.5px inset --stroke，激活态填 --land，主操作填 --sun",
+      "珊瑚红 / 池塘蓝 / 琥珀只做三大宏量的数据色（蛋白 / 脂肪 / 碳水），不做装饰",
+      "浅色为主，暗色 token 完整维护但地位次之；底部四页签结构是用户承诺",
+      "图表手写 SVG，与容器 1:1 像素绘制；空心虚线柱表示「没记全」，墨色虚线是目标"
+    ],
+    "rules": [
+      { "name": "The Tokens-First Rule", "body": "所有颜色、圆角、缓动、时长都是 src/styles.css 顶部的 token，明暗两套；组件只引用 token；改视觉先改 token，不在组件规则里写裸值。", "section": "colors" },
+      { "name": "The Three-Macro Rule", "body": "--protein（红）/ --fat（蓝）/ --carbs（琥珀）三个色相分离，经 WCAG 对比度校验；琥珀与蓝只表示碳水与脂肪，不做别的语义。餐次的颜色来自 lobe 色（早餐 sun / 午餐 land / 晚餐 land-2 / 加餐 surface），与宏量色互不借用。", "section": "colors" },
+      { "name": "The Hue-Not-Grey Rule", "body": "色地（lobe、今日页陆地）上的次级文字不用 --muted 灰，用同色相的 --lobe-ink-* 深色。", "section": "colors" },
+      { "name": "The Light-First Rule", "body": "产品以浅色为主；prefers-color-scheme: dark 块存在且每个 token 都有对应值，需要同步维护，但暗色是次要的，不为暗色单独设计版式。", "section": "colors" },
+      { "name": "The Three-Weights Rule", "body": "只用 500（正文）/ 600（标签、按钮、次级强调）/ 700（标题、数字、.reason 在色地上）。不引入 400 或 800。", "section": "typography" },
+      { "name": "The Paired-Number Rule", "body": "每个摄入数字旁边都有它的目标（「45 / 127 g」），数字开 tabular-nums；超出时数字改用 --bad-text，不靠颜色单独传达（湖里同时写「已超出」）。", "section": "typography" },
+      { "name": "The No-Shadow Rule", "body": "不加 box-shadow 外投影、filter: drop-shadow、渐变或颗粒纹理；一切层级用平涂色块和 1.5px inset 描边。（主按钮 hover 的 brightness(1.04) 是唯一 filter。）", "section": "elevation" },
+      { "name": "The Coast-Only-Motion Rule", "body": "会动的只有岸线：陆地填充、湖缩放、抽屉涨起、FAB、导航圆片、Toast 用 --ease-coast（cubic-bezier(.34,1.45,.64,1)，一次过冲）配 --t-coast 400ms；其余状态切换用 --ease-out 配 --t-fast 150ms / --t-med 220ms；prefers-reduced-motion 下全部压到 1ms。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 所有新颜色、圆角、缓动、时长先加到 src/styles.css 顶部（:root 与 dark 两处），组件只写 var(--…)。",
+      "Do 用 --protein / --fat / --carbs 三档表示蛋白 / 脂肪 / 碳水，每条数据色都配它的 -soft 轨道与 -text 文字色；改色相前重做 WCAG 对比度校验。",
+      "Do 用 lobe 色表示餐次：早餐 --sun、午餐 --land、晚餐 --land-2、加餐 / 已吃 --surface。",
+      "Do 保留共享类名 .card .btn .pill .chip .seg .stepper .meter/.track/.fill .list-item .sheet* .toast .cal .finding；可改样式，不可改名。",
+      "Do 图表按容器宽 1:1 绘制；.chart .bar.dim 空心虚线柱只表示「没记全的一天」，.chart .target 墨色虚线只表示目标。",
+      "Do 保持底部四页签、浅色为主；改动前跑 npm test && npm run build（56 测试，单文件产物约 638 kB）。",
+      "Do 色地上的次级文字用 --lobe-ink-*，图标用 1.75px 圆头 currentColor 线条 SVG（src/ui/icons.tsx）。",
+      "Do 每个摄入数字旁写目标，超出用 --bad-text 并有文字提示；正文不小于 15px，触控目标 ≥ 40px。"
+    ],
+    "donts": [
+      "Don't 加外投影、渐变、颗粒、毛玻璃；--shadow-card / --shadow-float 为 none 是刻意的。",
+      "Don't 用白卡片 + 圆环 + 投影表达今日余量；余量只在湖里出现。",
+      "Don't 把琥珀或蓝用在碳水、脂肪以外的语义上，也不要把 --protein 当作 --bad 用（两者是独立 token）。",
+      "Don't 在色地上用 --muted 灰做次级文字。",
+      "Don't 引入第二款字体、展示字体或 400 / 800 字重；不引入第三方 UI 库或图标字体。",
+      "Don't 为暗色单独改版式：暗色只是同一套 token 的另一组值。",
+      "Don't 在组件规则里写裸色值或裸圆角（现存 999px 与内联 rgba(255,255,255,.55) 是遗留，不再新增）。"
+    ]
+  }
+}
