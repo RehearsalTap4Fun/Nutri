@@ -24,6 +24,10 @@ npm run validate   # 校验食材与菜品数据（--list 打印每道菜营养�
 
 「我的」页底部显示 `v<package 版本> · 构建 <时间> · <git 短哈希>`，由 `vite.config.ts` 在构建时通过 `define` 注入（`src/version.ts`）。「检查更新」会拉服务器上的 `version.json`（构建时与 `sw.js` 同一个构建号）和当前页面比对，不一致时给刷新按钮。测试云端是否为最新：看这一行的构建时间是否等于最近一次 `npm run deploy` 打印的版本。
 
+## 云同步
+
+`server/sync-server.mjs` 是零依赖 Node 服务（systemd 单元 `nutri-sync`，监听 127.0.0.1:18790，数据目录 `/var/lib/nutri/sync`），nginx 以 `location /nutri/api/` 反代到它（模板见 `deploy/nginx-nutri.conf`）；每天 03:30 由 `deploy/backup-sync.sh` 做备份。服务器只存密文：客户端用同步码（6 组 × 4 字符，字母表去掉 0/O/1/I）经 PBKDF2-SHA256 派生 AES-GCM 密钥和记录 id（`src/sync/crypto.ts`），同步码丢了云端数据就解不开。合并按条目 id 取 `updatedAt` 较新者，删除用墓碑保留 90 天，档案/设置按 `meta` 时间戳整体取新（`src/sync/merge.ts`）；`src/sync/client.ts` 走乐观版本号，409 时拉下来再合并重推。App 内状态指纹变化后 4 秒防抖上传，切回前台时拉一次。同步码和 API key 一样只存本机，导出文件不带。接入流程：A 机「我的 → 云同步 → 生成同步码并开启」，B 机「输入已有同步码 → 接入」，接入后两边合并、互不覆盖。本地开发时 `vite.config.ts` 把 `/api` 代理到线上服务。
+
 ## 装到手机（PWA）
 
 `release/pwa/` 整目录上传到任意静态托管（GitHub Pages、Cloudflare Pages、Vercel、阿里云 OSS 静态站点都行，支持子路径），用手机浏览器打开后：

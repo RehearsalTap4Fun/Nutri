@@ -21,6 +21,8 @@ try {
 // 同时输出 manifest / 图标 / sw.js，丢到任意静态托管（含子路径）就是可安装、可离线的 PWA
 export default defineConfig({
   base: './',
+  // 本地开发时把 /api 转到线上同步服务，便于用两个源（localhost / 127.0.0.1）模拟两台设备
+  server: { proxy: { '/api': { target: 'http://47.109.97.108/nutri', changeOrigin: true } } },
   plugins: [react(), viteSingleFile(), swPlugin({ version: buildId })],
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),

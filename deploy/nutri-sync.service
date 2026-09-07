@@ -1,0 +1,14 @@
+[Unit]
+Description=Nutri cloud sync (encrypted blobs)
+After=network.target
+
+[Service]
+User=admin
+Environment=PORT=18790
+Environment=DATA_DIR=/var/lib/nutri/sync
+ExecStart=__NODE__ /opt/nutri/sync-server.mjs
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

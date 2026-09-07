@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Dish, LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WaterEntry, WeightEntry } from './core/types'
 import { fluidFromDrinks } from './core/water'
 import { MEAL_SLOTS } from './core/types'
@@ -26,6 +26,9 @@ import { IconBowl, IconChart, IconLeaf, IconPerson, IconPlus } from './ui/icons'
 import { SLOT_LABEL, defaultTimeForSlot, guessSlot, portionLabel, showsSodium } from './ui/format'
 import { entryName } from './core/nutrition'
 import { captureInstallPrompt, isIOS, isStandalone, isWeChat, registerSW } from './pwa'
+import { deleteRemote, syncOnce, SyncError } from './sync/client'
+import { applySyncState, fingerprint, mergeSync, toSyncState } from './sync/merge'
+import type { SyncStatus } from './ui/CloudSync'
 import type { InstallPromptEvent } from './pwa'
 
 type Tab = 'today' | 'plan' | 'analysis' | 'me'
@@ -124,9 +127,77 @@ export default function App() {
   }, [profile, targets, analysis, state.entries, state.planSeeds])
   const llm: LlmConfig = { provider: state.settings.provider, apiKey: state.settings.provider === 'deepseek' ? state.settings.deepseekKey : state.settings.anthropicKey }
 
+  // ---- 云同步 ----
+  const stateRef = useRef(state)
+  stateRef.current = state
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(() => {
+    try { const j = JSON.parse(localStorage.getItem('nutri.sync.status') || '{}'); return { busy: false, lastSyncAt: j.lastSyncAt, version: j.version } } catch { return { busy: false } }
+  })
+  const syncBusy = useRef(false)
+  const lastSyncedFp = useRef<string>('')
+  const runSync = useCallback(async (silentIfSame = true) => {
+    const cur = stateRef.current
+    const cfg = cur.settings.sync
+    if (!cfg.enabled || !cfg.code || syncBusy.current) return
+    syncBusy.current = true
+    setSyncStatus((st) => ({ ...st, busy: true }))
+    try {
+      const r = await syncOnce(cur, cfg.code)
+      if (r.pulledChanges) {
+        setState((s) => applySyncState(s, mergeSync(toSyncState(s), toSyncState(r.state))))
+        if (!silentIfSame) show('已从云端合并最新记录')
+      } else if (!silentIfSame) show(r.pushed ? '已推送到云端' : '云端已是最新')
+      lastSyncedFp.current = fingerprint(toSyncState(r.state))
+      const st = { busy: false, lastSyncAt: Date.now(), version: r.version }
+      setSyncStatus(st)
+      try { localStorage.setItem('nutri.sync.status', JSON.stringify({ lastSyncAt: st.lastSyncAt, version: st.version })) } catch { /* ignore */ }
+    } catch (e) {
+      const msg = e instanceof SyncError ? e.message : String(e)
+      setSyncStatus((st) => ({ ...st, busy: false, lastError: msg }))
+      if (!silentIfSame) show('同步失败：' + msg)
+    } finally {
+      syncBusy.current = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const syncEnabled = state.settings.sync.enabled
+  // 开启时 / 回到前台时拉一次
+  useEffect(() => {
+    if (!syncEnabled) return
+    runSync(true)
+    const onVis = () => { if (document.visibilityState === 'visible') runSync(true) }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [syncEnabled, runSync])
+  // 本地有改动后延迟 4 秒推送
+  const syncFp = useMemo(() => (syncEnabled ? fingerprint(toSyncState(state)) : ''), [state, syncEnabled])
+  useEffect(() => {
+    if (!syncEnabled || !syncFp || syncFp === lastSyncedFp.current) return
+    const t = window.setTimeout(() => runSync(true), 4000)
+    return () => window.clearTimeout(t)
+  }, [syncFp, syncEnabled, runSync])
+  const enableSync = (code: string, mode: 'new' | 'join') => {
+    const now = Date.now()
+    update((s) => ({
+      ...s,
+      settings: { ...s.settings, sync: { code, enabled: true } },
+      // 首台设备：给档案与设置盖上当前时间，避免被后来加入的新设备的默认档案覆盖；
+      // 加入的设备：清零，让云端的档案与设置优先（它的记录仍会并入）
+      meta: mode === 'new' ? { profileAt: s.meta.profileAt || now, settingsAt: s.meta.settingsAt || now } : { profileAt: 0, settingsAt: 0 },
+    }))
+    show(mode === 'new' ? '云同步已开启，正在上传…' : '已接入，正在合并云端数据…')
+  }
+  const disableSync = async (removeRemote: boolean) => {
+    const code = state.settings.sync.code
+    update((s) => ({ ...s, settings: { ...s.settings, sync: { code: '', enabled: false } } }))
+    lastSyncedFp.current = ''
+    if (removeRemote && code) { try { await deleteRemote(code) } catch { /* 网络问题也不阻塞关闭 */ } }
+    show(removeRemote ? '已关闭同步并删除云端副本' : '已在本机关闭同步，云端副本保留')
+  }
+
   // ---- actions ----
   const saveProfile = (p: Profile) => {
-    update((s) => ({ ...s, profile: p }))
+    update((s) => ({ ...s, profile: p, meta: { ...s.meta, profileAt: Date.now() } }))
     setEditingProfile(false)
   }
 
@@ -135,13 +206,14 @@ export default function App() {
     setSheet({ slot: slotGuess })
   }
 
-  const removeEntries = (ids: string[]) => update((s) => ({ ...s, entries: s.entries.filter((e) => !ids.includes(e.id)) }))
-  const restoreEntries = (list: LogEntry[]) => update((s) => ({ ...s, entries: [...s.entries, ...list] }))
+  const tomb = (coll: AppState['tombstones'][number]['coll'], ids: string[]) => ids.map((id) => ({ coll, id, at: Date.now() }))
+  const removeEntries = (ids: string[]) => update((s) => ({ ...s, entries: s.entries.filter((e) => !ids.includes(e.id)), tombstones: [...s.tombstones, ...tomb('entries', ids)] }))
+  const restoreEntries = (list: LogEntry[]) => update((s) => ({ ...s, entries: [...s.entries, ...list.map((e) => ({ ...e, updatedAt: Date.now() }))], tombstones: s.tombstones.filter((t) => !(t.coll === 'entries' && list.some((e) => e.id === t.id))) }))
 
   const onSheetResult = (r: LogSheetResult) => {
     if (r.kind === 'save') {
       const isEdit = !!r.entry.id && state.entries.some((e) => e.id === r.entry.id)
-      const entry = { ...r.entry, id: r.entry.id || uid() }
+      const entry = { ...r.entry, id: r.entry.id || uid(), updatedAt: Date.now() }
       update((s) => ({ ...s, entries: isEdit ? s.entries.map((e) => (e.id === entry.id ? entry : e)) : [...s.entries, entry] }))
       if (!isEdit) show(`已记录 · ${entryName(entry, dishMap)} × ${portionLabel(entry.portion)}`, { label: '撤销', run: () => removeEntries([entry.id]) })
       else show('已保存修改')
@@ -173,7 +245,7 @@ export default function App() {
 
   const logMeal = (meal: MealPlan) => {
     const time = date === today ? nowTimeStr() : defaultTimeForSlot(meal.slot)
-    const entries: LogEntry[] = meal.items.map((it) => ({ id: uid(), date, slot: meal.slot, time, dishId: it.dishId, portion: it.portion, ...(it.lowSalt ? { lowSalt: true } : {}), ...(it.lowOil ? { lowOil: true } : {}) }))
+    const entries: LogEntry[] = meal.items.map((it) => ({ id: uid(), updatedAt: Date.now(), date, slot: meal.slot, time, dishId: it.dishId, portion: it.portion, ...(it.lowSalt ? { lowSalt: true } : {}), ...(it.lowOil ? { lowOil: true } : {}) }))
     restoreEntries(entries)
     show(`${SLOT_LABEL[meal.slot]}已记录 ${entries.length} 项`, { label: '撤销', run: () => removeEntries(entries.map((e) => e.id)) })
   }
@@ -181,7 +253,7 @@ export default function App() {
   // 一键补记：空餐次下点常吃的菜，直接按一份记，可撤销
   const quickLog = (slot: MealSlot, dishId: string, portion = 1) => {
     const time = date === today ? nowTimeStr() : defaultTimeForSlot(slot)
-    const entry: LogEntry = { id: uid(), date, slot, time, dishId, portion }
+    const entry: LogEntry = { id: uid(), updatedAt: Date.now(), date, slot, time, dishId, portion }
     restoreEntries([entry])
     show(`已记录 · ${dishMap.get(dishId)?.name || dishId} × ${portionLabel(portion)}`, { label: '撤销', run: () => removeEntries([entry.id]) })
   }
@@ -202,7 +274,7 @@ export default function App() {
     update((s) => ({ ...s, vitals: [...s.vitals, entry] }))
     show(v.kind === 'bp' ? `已记录血压 ${v.sys}/${v.dia}` : `已记录血糖 ${v.mmol} mmol/L`, { label: '撤销', run: () => update((s) => ({ ...s, vitals: s.vitals.filter((x) => x.id !== entry.id) })) })
   }
-  const removeVital = (id: string) => update((s) => ({ ...s, vitals: s.vitals.filter((x) => x.id !== id) }))
+  const removeVital = (id: string) => update((s) => ({ ...s, vitals: s.vitals.filter((x) => x.id !== id), tombstones: [...s.tombstones, ...tomb('vitals', [id])] }))
 
   const dislikeDish = (id: string) => {
     update((s) => (s.profile ? { ...s, profile: { ...s.profile, dislikedDishes: [...new Set([...s.profile.dislikedDishes, id])] } } : s))
@@ -211,21 +283,21 @@ export default function App() {
   const undislikeDish = (id: string) => update((s) => (s.profile ? { ...s, profile: { ...s.profile, dislikedDishes: s.profile.dislikedDishes.filter((x) => x !== id) } } : s))
 
   const addWater = (ml: number) => {
-    const w: WaterEntry = { id: uid(), date, time: date === today ? nowTimeStr() : undefined, ml: Math.round(ml) }
+    const w: WaterEntry = { id: uid(), updatedAt: Date.now(), date, time: date === today ? nowTimeStr() : undefined, ml: Math.round(ml) }
     update((s) => ({ ...s, water: [...s.water, w] }))
-    show(`+${w.ml} ml`, { label: '撤销', run: () => update((s) => ({ ...s, water: s.water.filter((x) => x.id !== w.id) })) })
+    show(`+${w.ml} ml`, { label: '撤销', run: () => update((s) => ({ ...s, water: s.water.filter((x) => x.id !== w.id), tombstones: [...s.tombstones, ...tomb('water', [w.id])] })) })
   }
   const removeWater = (id: string) => {
     const w = state.water.find((x) => x.id === id)
-    update((s) => ({ ...s, water: s.water.filter((x) => x.id !== id) }))
-    if (w) show(`已删除 ${w.ml} ml`, { label: '撤销', run: () => update((s) => ({ ...s, water: [...s.water, w] })) })
+    update((s) => ({ ...s, water: s.water.filter((x) => x.id !== id), tombstones: [...s.tombstones, ...tomb('water', [id])] }))
+    if (w) show(`已删除 ${w.ml} ml`, { label: '撤销', run: () => update((s) => ({ ...s, water: [...s.water, { ...w, updatedAt: Date.now() }], tombstones: s.tombstones.filter((t) => !(t.coll === 'water' && t.id === w.id)) })) })
   }
   const addWeight = (w: WeightEntry) => {
     update((s) => ({ ...s, weights: [...s.weights.filter((x) => x.date !== w.date), w].sort((a, b) => a.date.localeCompare(b.date)) }))
     show(`已记录体重 ${w.kg} kg`)
   }
   const setConditions = (c: Condition[], trimester?: 1 | 2 | 3) => {
-    update((s) => (s.profile ? { ...s, profile: { ...s.profile, conditions: c, pregnancyTrimester: trimester } } : s))
+    update((s) => (s.profile ? { ...s, profile: { ...s.profile, conditions: c, pregnancyTrimester: trimester }, meta: { ...s.meta, profileAt: Date.now() } } : s))
     show(c.length ? `营养模式已更新：${c.length} 个` : '营养模式已全部关闭')
   }
   const goModes = () => {
@@ -233,11 +305,11 @@ export default function App() {
     window.setTimeout(() => document.getElementById('modes-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
   }
   const toggleTrainingDay = () => update((s) => ({ ...s, trainingDays: s.trainingDays.includes(date) ? s.trainingDays.filter((d) => d !== date) : [...s.trainingDays, date] }))
-  const setAdaptive = (v: boolean) => update((s) => ({ ...s, settings: { ...s.settings, useAdaptiveTdee: v } }))
-  const setProvider = (p: Provider) => update((s) => ({ ...s, settings: { ...s.settings, provider: p } }))
+  const setAdaptive = (v: boolean) => update((s) => ({ ...s, settings: { ...s.settings, useAdaptiveTdee: v }, meta: { ...s.meta, settingsAt: Date.now() } }))
+  const setProvider = (p: Provider) => update((s) => ({ ...s, settings: { ...s.settings, provider: p }, meta: { ...s.meta, settingsAt: Date.now() } }))
   const setKey = (p: Provider, k: string) => update((s) => ({ ...s, settings: { ...s.settings, [p === 'deepseek' ? 'deepseekKey' : 'anthropicKey']: k.trim() } }))
   // 导入的数据不带 key，保留本机已填的
-  const importState = (ns: AppState) => setState((s) => ({ ...ns, settings: { ...ns.settings, anthropicKey: s.settings.anthropicKey, deepseekKey: s.settings.deepseekKey } }))
+  const importState = (ns: AppState) => setState((s) => ({ ...ns, settings: { ...ns.settings, anthropicKey: s.settings.anthropicKey, deepseekKey: s.settings.deepseekKey, sync: s.settings.sync } }))
   const resetAll = () => setState(defaultState())
 
   // ---- render ----
@@ -285,7 +357,7 @@ export default function App() {
           <AnalysisView vitals={state.vitals} onAddVital={addVital} onRemoveVital={removeVital} analysis={analysis} targets={targets} weights={state.weights} entries={state.entries} water={state.water} onAddWeight={addWeight} useAdaptive={state.settings.useAdaptiveTdee} onToggleAdaptive={setAdaptive} date={date} profile={profile} dishMap={dishMap} />
         )}
         {tab === 'me' && targets && (
-          <MeView profile={profile} targets={targets} state={state} onEdit={() => setEditingProfile(true)} onUndislike={undislikeDish} onImport={importState} onReset={resetAll} dishMap={dishMap} onSetProvider={setProvider} onSetKey={setKey} onSetConditions={setConditions} canInstall={!!installEvt} onInstall={promptInstall} />
+          <MeView profile={profile} targets={targets} state={state} onEdit={() => setEditingProfile(true)} onUndislike={undislikeDish} onImport={importState} onReset={resetAll} dishMap={dishMap} onSetProvider={setProvider} onSetKey={setKey} onSetConditions={setConditions} sync={{ code: state.settings.sync.code, enabled: state.settings.sync.enabled, status: syncStatus }} onSyncEnable={enableSync} onSyncDisable={disableSync} onSyncNow={() => runSync(false)} canInstall={!!installEvt} onInstall={promptInstall} />
         )}
       </div>
 

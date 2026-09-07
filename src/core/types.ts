@@ -108,12 +108,15 @@ export interface LogEntry {
   lowSalt?: boolean
   /** 少油做法：烹调油带来的脂肪与热量减半（家常菜适用） */
   lowOil?: boolean
+  /** 最后修改时间（毫秒），多设备合并时同 id 取新的 */
+  updatedAt?: number
 }
 
 export interface WeightEntry {
   date: string
   kg: number
   bodyFatPct?: number
+  updatedAt?: number
 }
 
 /** 一次饮水记录（白水、茶等按 ml 记；含热量饮品走餐食记录） */
@@ -123,6 +126,7 @@ export interface WaterEntry {
   /** HH:mm */
   time?: string
   ml: number
+  updatedAt?: number
 }
 
 /** 血压 / 血糖记录：高血压、糖尿病模式下的联动记录 */
@@ -140,6 +144,7 @@ export interface VitalEntry {
   mmol?: number
   /** 空腹 / 餐后 2 小时 / 其他 */
   tag?: 'fasting' | 'post2h' | 'other'
+  updatedAt?: number
 }
 
 export interface Targets {

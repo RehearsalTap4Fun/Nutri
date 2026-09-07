@@ -33,15 +33,19 @@ export interface AppState {
   favorites: string[]
   /** 标记为训练日的日期（健身增肌模式） */
   trainingDays: string[]
+  /** 多设备合并用：删除记录的墓碑 */
+  tombstones: Array<{ coll: 'entries' | 'water' | 'weights' | 'vitals' | 'customFoods' | 'customDishes'; id: string; at: number }>
+  /** 档案与设置的最后修改时间（毫秒），合并时取新的 */
+  meta: { profileAt: number; settingsAt: number }
   /** 血压 / 血糖记录 */
   vitals: VitalEntry[]
-  settings: { useAdaptiveTdee: boolean; provider: 'anthropic' | 'deepseek'; anthropicKey: string; deepseekKey: string }
+  settings: { useAdaptiveTdee: boolean; provider: 'anthropic' | 'deepseek'; anthropicKey: string; deepseekKey: string ; sync: { code: string; enabled: boolean }}
 }
 
 export const STORAGE_KEY = 'nutri.v1'
 
 export function defaultState(): AppState {
-  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' } }
+  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false } } }
 }
 
 export function uid(): string {
@@ -69,6 +73,8 @@ export function normalizeState(raw: unknown): AppState {
   if (isObj(raw.planSeeds)) s.planSeeds = raw.planSeeds as Record<string, PlanSeed>
   if (Array.isArray(raw.favorites)) s.favorites = raw.favorites.filter((x) => typeof x === 'string') as string[]
   if (Array.isArray(raw.trainingDays)) s.trainingDays = raw.trainingDays.filter((x) => typeof x === 'string') as string[]
+  if (Array.isArray(raw.tombstones)) s.tombstones = raw.tombstones.filter((t) => isObj(t) && typeof t.coll === 'string' && typeof t.id === 'string' && typeof t.at === 'number') as AppState['tombstones']
+  if (isObj(raw.meta)) s.meta = { profileAt: Number(raw.meta.profileAt) || 0, settingsAt: Number(raw.meta.settingsAt) || 0 }
   if (Array.isArray(raw.vitals)) s.vitals = raw.vitals.filter((v) => isObj(v) && typeof v.date === 'string' && (v.kind === 'bp' || v.kind === 'glucose')) as VitalEntry[]
   if (isObj(raw.settings)) {
     const st = raw.settings
@@ -77,6 +83,7 @@ export function normalizeState(raw: unknown): AppState {
       provider: st.provider === 'deepseek' ? 'deepseek' : 'anthropic',
       anthropicKey: typeof st.anthropicKey === 'string' ? st.anthropicKey : '',
       deepseekKey: typeof st.deepseekKey === 'string' ? st.deepseekKey : '',
+      sync: isObj(st.sync) ? { code: typeof st.sync.code === 'string' ? st.sync.code : '', enabled: !!st.sync.enabled && typeof st.sync.code === 'string' && st.sync.code.length > 0 } : { code: '', enabled: false },
     }
   }
   if (s.profile) {
@@ -109,7 +116,7 @@ export function saveState(s: AppState): void {
 
 /** 导出不含 API key */
 export function exportJson(s: AppState): string {
-  return JSON.stringify({ ...s, settings: { ...s.settings, anthropicKey: '', deepseekKey: '' }, exportedAt: new Date().toISOString() }, null, 2)
+  return JSON.stringify({ ...s, settings: { ...s.settings, anthropicKey: '', deepseekKey: '', sync: { code: '', enabled: false } }, exportedAt: new Date().toISOString() }, null, 2)
 }
 
 export function importJson(text: string): AppState {

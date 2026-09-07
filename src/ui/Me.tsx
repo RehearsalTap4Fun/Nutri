@@ -12,6 +12,8 @@ import { Bullets, Fold, SignalChips, Stats } from './bits'
 import { IconClose, IconCoin, IconLock, IconSparkle } from './icons'
 import { isIOS, isStandalone } from '../pwa'
 import { ConditionSources, SourceList, TargetBasis } from './Sources'
+import { CloudSyncCard } from './CloudSync'
+import type { SyncStatus } from './CloudSync'
 import { VERSION_LABEL, checkRemoteVersion, formatBuildId } from '../version'
 
 const PROVIDER_NOTE: Record<Provider, string> = {
@@ -19,10 +21,14 @@ const PROVIDER_NOTE: Record<Provider, string> = {
   deepseek: 'JSON 模式，单次约 $0.002（高峰价，闲时减半）。key 在 platform.deepseek.com 生成，支持国内支付。',
 }
 
-export function MeView({ profile, targets, state, onEdit, onUndislike, onImport, onReset, dishMap, onSetProvider, onSetKey, onSetConditions, canInstall = false, onInstall }: {
+export function MeView({ profile, targets, state, onEdit, onUndislike, onImport, onReset, dishMap, onSetProvider, onSetKey, onSetConditions, sync, onSyncEnable, onSyncDisable, onSyncNow, canInstall = false, onInstall }: {
   canInstall?: boolean
   onInstall?: () => void
   onSetConditions: (c: Condition[], trimester?: 1 | 2 | 3) => void
+  sync: { code: string; enabled: boolean; status: SyncStatus }
+  onSyncEnable: (code: string, mode: 'new' | 'join') => void
+  onSyncDisable: (deleteRemote: boolean) => void
+  onSyncNow: () => void
   profile: Profile
   targets: Targets
   state: AppState
@@ -155,14 +161,16 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
         </div>
       )}
 
+      <CloudSyncCard code={sync.code} enabled={sync.enabled} status={sync.status} onEnable={onSyncEnable} onDisable={onSyncDisable} onSyncNow={onSyncNow} />
+
       <div className="card">
         <h2>数据</h2>
         <Stats items={[
           { label: '餐食记录', value: state.entries.length, unit: '条' },
           { label: '体重', value: state.weights.length, unit: '条' },
-          { label: '自定义食物', value: state.customFoods.length, unit: '个' },
+          { label: '自定义食物', value: state.customFoods.length + state.customDishes.length, unit: '个' },
         ]} />
-        <p className="tiny muted">只存这台设备的浏览器里，换设备前先导出。</p>
+        <p className="tiny muted">{sync.enabled ? '已开云同步，另一台设备用同步码接入即可；导出仍可做备份。' : '只存这台设备的浏览器里，换设备前先导出，或开云同步。'}</p>
         <div className="row" style={{ marginTop: 10 }}>
           <button className="btn" onClick={() => { setIo('export'); copyExport() }}>导出</button>
           <button className="btn" onClick={() => { setIo('import'); setText(''); setMsg('') }}>导入</button>
