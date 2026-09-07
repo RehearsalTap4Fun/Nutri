@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type React from 'react'
 import type { Dish, LogEntry, MealSlot, Targets, WaterEntry } from '../core/types'
 import { WaterCard } from './Water'
 import { MEAL_SLOTS } from '../core/types'
 import type { DayStat } from '../core/analysis'
 import { todayStr } from '../core/dates'
-import type { BudgetPick } from '../core/budget'
+import { budgetFocus, remainOf, type BudgetPick } from '../core/budget'
 import { entryName, entryNutrients } from '../core/nutrition'
 import { Meter } from './charts'
 import { useCountUp } from './hooks'
@@ -52,6 +52,8 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   const [swiped, setSwiped] = useState<string | null>(null)
   const [showBudget, setShowBudget] = useState(false)
   const budgetRef = useRef<HTMLDivElement>(null)
+  // 四个主要参数里还差得多 / 已超的，作为挑菜依据显示在面板上
+  const focus = useMemo(() => budgetFocus(remainOf(targets, stat.n), targets).slice(0, 3), [targets, stat])
   // 展开时把列表滚进视野，让人看见它出现在哪、也看见右上角的「收起」
   useEffect(() => { if (showBudget) budgetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [showBudget])
   const touch = useRef<{ id: string; x: number; y: number; dx: number; el: HTMLElement } | null>(null)
@@ -133,6 +135,12 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
       {showBudget && remain > 50 && budgetPicks.length > 0 && onQuickLog && (
         <div className="card" ref={budgetRef}>
           <div className="section-title"><h2>用剩下的 {r0(remain)} 千卡还能吃什么</h2><div className="row" style={{ gap: 4, flex: 'none', whiteSpace: 'nowrap' }}><span className="small muted">按{SLOT_LABEL[nextSlot]}挑</span><button className="btn ghost sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }} onClick={() => setShowBudget(false)} aria-label="收起还能吃什么">收起<IconClose size={12} /></button></div></div>
+          {focus.length > 0 && (
+            <div className="budget-focus tiny">
+              <span className="muted">按缺口挑</span>
+              {focus.map((f) => <span key={f.key} className={`focus-tag ${f.kind} ${f.key}`}>{f.label}</span>)}
+            </div>
+          )}
           <div className="list">
             {budgetPicks.map((p) => (
               <div key={p.dish.id} className="list-item">

@@ -5,7 +5,7 @@ import { MEAL_SLOTS } from './core/types'
 import { computeTargets } from './core/energy'
 import { analyze, dayStat } from './core/analysis'
 import { planDay } from './core/planner'
-import { suggestForBudget } from './core/budget'
+import { remainOf, suggestForBudget } from './core/budget'
 import type { MealPlan } from './core/planner'
 import { DISHES, DISH_MAP } from './data/dishes/index'
 import { addDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from './core/dates'
@@ -114,7 +114,7 @@ export default function App() {
   // 用剩下的预算还能吃什么
   const budgetPicks = useMemo(() => {
     if (!profile || !targets || !stat) return []
-    return suggestForBudget({ remainKcal: targets.kcal - stat.n.kcal, remainProtein: targets.protein - stat.n.protein, slot: nextSlot, dishes: allDishes, profile, favorites: state.favorites, recentIds: recentDishIds })
+    return suggestForBudget({ remain: remainOf(targets, stat.n), targets, slot: nextSlot, dishes: allDishes, profile, favorites: state.favorites, recentIds: recentDishIds })
   }, [profile, targets, stat, nextSlot, state.favorites, recentDishIds, allDishes])
   // 任意一天的推荐（一周视图用）：已吃的餐视为完成，其余按剩余预算给
   const planFor = useCallback((d: string) => {

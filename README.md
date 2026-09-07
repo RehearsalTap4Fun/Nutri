@@ -48,7 +48,7 @@ src/core/      纯逻辑，可单测
   nutrition.ts   菜品营养由食材构成推导；蔬菜份数、过敏原、素食判断
   analysis.ts    近 7 天滚动统计 → 调整信号 → 结构建议；体重反推实际消耗
   openFoodFacts.ts 条码 → Open Food Facts 产品解析（每 100 g 营养、份量），查询直连、可注入 fetch 测试
-  budget.ts      「用剩下的预算还能吃什么」：按剩余热量与蛋白缺口挑放得下的菜
+  budget.ts      「用剩下的预算还能吃什么」：按剩余热量与蛋白/脂肪/碳水/纤维的缺口、超额挑放得下的菜
   planner.ts     每日推荐：按饮食风格模板选菜、按目标收敛份量、避重、贴近实际吃法
   rng.ts dates.ts
 src/data/
