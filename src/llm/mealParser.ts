@@ -225,27 +225,33 @@ async function viaAnthropic(apiKey: string | undefined, system: string, user: st
   return normalizeParsed(parsed, dishMap, { ...raw, usd: estimateUsd('anthropic', raw) }, response.model)
 }
 
-/** DeepSeek：OpenAI 兼容的 chat/completions，JSON 模式（response_format json_object） */
+/**
+ * DeepSeek：OpenAI 兼容的 chat/completions，JSON 模式（response_format json_object）。
+ * 模型内部可能先想一段（算进 max_tokens），额度不够时会在想完之前被截断，content 为空但 finish_reason 是 length；
+ * 这种情况加大额度重试一次，而不是直接报错让用户手动重试同样大概率再截断一次。
+ */
 async function viaDeepSeek(apiKey: string, system: string, user: string, dishMap: Map<string, Dish>): Promise<ParseResult> {
   if (!apiKey) throw new MealParseError('没有 DeepSeek API key', 'auth')
-  let res: Response
-  try {
-    res = await fetch(DEEPSEEK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: MODELS.deepseek,
-        messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-        response_format: { type: 'json_object' },
-        temperature: 0.1,
-        max_tokens: 2000,
-        stream: false,
-      }),
-    })
-  } catch (e) {
-    throw new MealParseError('连不上 DeepSeek 接口。可能是网络问题，也可能是浏览器跨域被拦（此时需要一个转发代理）：' + (e instanceof Error ? e.message : String(e)), 'network')
+  const call = async (maxTokens: number): Promise<Response> => {
+    try {
+      return await fetch(DEEPSEEK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: MODELS.deepseek,
+          messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+          response_format: { type: 'json_object' },
+          temperature: 0.1,
+          max_tokens: maxTokens,
+          stream: false,
+        }),
+      })
+    } catch (e) {
+      throw new MealParseError('连不上 DeepSeek 接口。可能是网络问题，也可能是浏览器跨域被拦（此时需要一个转发代理）：' + (e instanceof Error ? e.message : String(e)), 'network')
+    }
   }
-  if (!res.ok) {
+  const checkOk = async (res: Response) => {
+    if (res.ok) return
     let detail = ''
     try { const j = await res.json(); detail = j?.error?.message || JSON.stringify(j).slice(0, 200) } catch { detail = await res.text().catch(() => '') }
     if (res.status === 401 || res.status === 403) throw new MealParseError('DeepSeek API key 无效或无权限，请到「我的」里重新填写', 'auth')
@@ -254,8 +260,18 @@ async function viaDeepSeek(apiKey: string, system: string, user: string, dishMap
     if (res.status === 400 || res.status === 422) throw new MealParseError('DeepSeek 拒绝了请求参数：' + detail, 'bad_request')
     throw new MealParseError(`DeepSeek 接口错误 ${res.status}：${detail}`, 'other')
   }
-  const data = await res.json()
-  const content: string | undefined = data?.choices?.[0]?.message?.content
+
+  let res = await call(4000)
+  await checkOk(res)
+  let data = await res.json()
+  let content: string | undefined = data?.choices?.[0]?.message?.content
+  const truncated = !content?.trim() && data?.choices?.[0]?.finish_reason === 'length'
+  if (truncated) {
+    res = await call(8000)
+    await checkOk(res)
+    data = await res.json()
+    content = data?.choices?.[0]?.message?.content
+  }
   if (!content || !content.trim()) throw new MealParseError('DeepSeek 返回了空内容，请再试一次', 'empty')
   const parsed = parseLooseJson(content)
   const u = data?.usage || {}

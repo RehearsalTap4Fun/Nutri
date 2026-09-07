@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DISHES, DISH_MAP } from '../src/data/dishes/index'
-import { buildCatalog, buildSystemPrompt, estimateUsd, normalizeParsed, parseLooseJson, ParsedMealSchema } from '../src/llm/mealParser'
+import { buildCatalog, buildSystemPrompt, estimateUsd, normalizeParsed, parseLooseJson, parseMealText, ParsedMealSchema } from '../src/llm/mealParser'
 import { dishNutrients } from '../src/core/nutrition'
 
 const usage = { input: 100, output: 50, cacheRead: 4000, cacheWrite: 0, usd: 0 }
@@ -57,5 +57,35 @@ describe('llm meal parser (offline parts)', () => {
     expect(p.items[1].dish_id).toBeNull()
     expect(p.items[1].estimate?.kcal).toBe(250)
     expect(() => parseLooseJson('抱歉，我不理解')).toThrow()
+  })
+})
+
+function jsonResponse(body: unknown, ok = true, status = 200): Response {
+  return { ok, status, json: async () => body, text: async () => JSON.stringify(body) } as Response
+}
+
+describe('DeepSeek：内部推理耗尽额度导致空内容时自动加大预算重试', () => {
+  afterEach(() => { vi.unstubAllGlobals() })
+
+  it('第一次 length 截断且内容为空 → 用更大 max_tokens 重试一次，成功后正常返回', async () => {
+    const ok = { slot: 'lunch', time: null, items: [{ dish_id: 'st_rice', name: '米饭', portion: 1, note: null, estimate: null }] }
+    const calls: number[] = []
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string)
+      calls.push(body.max_tokens)
+      if (calls.length === 1) return jsonResponse({ choices: [{ message: { content: '' }, finish_reason: 'length' }], usage: {} })
+      return jsonResponse({ choices: [{ message: { content: JSON.stringify(ok) }, finish_reason: 'stop' }], usage: { prompt_tokens: 500, completion_tokens: 30 } })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const r = await parseMealText({ provider: 'deepseek', apiKey: 'k' }, '一个鸡腿一个鸡翅', DISHES, DISH_MAP, { date: '2026-09-08', now: '09:58' })
+    expect(calls).toEqual([4000, 8000])
+    expect(r.items[0].dishId).toBe('st_rice')
+  })
+
+  it('内容为空但 finish_reason 不是 length → 不重试，直接报错', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ choices: [{ message: { content: '' }, finish_reason: 'stop' }], usage: {} }))
+    vi.stubGlobal('fetch', fetchMock)
+    await expect(parseMealText({ provider: 'deepseek', apiKey: 'k' }, '一碗米饭', DISHES, DISH_MAP, { date: '2026-09-08', now: '09:58' })).rejects.toThrow('空内容')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })
