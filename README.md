@@ -20,6 +20,10 @@ npm run validate   # 校验食材与菜品数据（--list 打印每道菜营养�
 
 当前已部署在阿里云轻量服务器（成都），HTTP、IP 直访，路径 `/nutri/`；根路径是项目列表页 `/var/www/index.html`，以后每个项目一个子目录加一段 `location`（模板见服务器上的 `/etc/nginx/conf.d/nutri.conf` 注释）。构建用相对路径，清单的 start_url / scope 与 sw.js 作用域都随所在目录解析，所以子目录不需要改代码。内地地域绑域名需要备案，绑了域名后用 certbot 加证书即可启用 HTTPS，离线缓存随之生效。
 
+### 版本号与「检查更新」
+
+「我的」页底部显示 `v<package 版本> · 构建 <时间> · <git 短哈希>`，由 `vite.config.ts` 在构建时通过 `define` 注入（`src/version.ts`）。「检查更新」会拉服务器上的 `version.json`（构建时与 `sw.js` 同一个构建号）和当前页面比对，不一致时给刷新按钮。测试云端是否为最新：看这一行的构建时间是否等于最近一次 `npm run deploy` 打印的版本。
+
 ## 装到手机（PWA）
 
 `release/pwa/` 整目录上传到任意静态托管（GitHub Pages、Cloudflare Pages、Vercel、阿里云 OSS 静态站点都行，支持子路径），用手机浏览器打开后：

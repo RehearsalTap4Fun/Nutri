@@ -6,14 +6,14 @@ import { join } from 'node:path'
  * 构建结束时生成 dist/sw.js。缓存名带构建时间戳，每次发版自动失效旧缓存。
  * 策略：应用壳（./ 与清单、图标）预缓存；同源 GET 网络优先、断网回退缓存，保证联网时总拿到最新版。
  */
-export function swPlugin(): Plugin {
+export function swPlugin(opts: { version?: string } = {}): Plugin {
   let outDir = 'dist'
   return {
     name: 'nutri-sw',
     apply: 'build',
     configResolved(c) { outDir = c.build.outDir },
     closeBundle() {
-      const version = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
+      const version = opts.version || new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12)
       const sw = `// 私人营养师 service worker · build ${version}
 const CACHE = 'nutri-${version}'
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-180.png']

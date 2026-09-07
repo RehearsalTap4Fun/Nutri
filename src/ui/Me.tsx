@@ -11,6 +11,7 @@ import { ModesPicker } from './ModesPicker'
 import { Bullets, Fold, SignalChips, Stats } from './bits'
 import { IconClose, IconCoin, IconLock, IconSparkle } from './icons'
 import { isIOS, isStandalone } from '../pwa'
+import { VERSION_LABEL, checkRemoteVersion, formatBuildId } from '../version'
 
 const PROVIDER_NOTE: Record<Provider, string> = {
   anthropic: '结构化输出最稳，单次约 $0.02。key 在 console.anthropic.com 生成，计费独立于 Claude 订阅。',
@@ -36,6 +37,14 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
   const [text, setText] = useState('')
   const [msg, setMsg] = useState('')
   const [confirmReset, setConfirmReset] = useState(false)
+  const [verMsg, setVerMsg] = useState('')
+  const checkVersion = async () => {
+    setVerMsg('检查中…')
+    const r = await checkRemoteVersion()
+    if (!r) setVerMsg(location.protocol === 'file:' ? '单机文件没有云端版本可比' : '没拿到云端版本，可能离线')
+    else if (r.same) setVerMsg('已是云端最新')
+    else setVerMsg(`云端是 ${formatBuildId(r.remote)}，比当前页面新，刷新即可更新`)
+  }
   const provider = state.settings.provider
   const savedKey = provider === 'deepseek' ? state.settings.deepseekKey : state.settings.anthropicKey
   const [keyDraft, setKeyDraft] = useState(savedKey)
@@ -168,6 +177,13 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
           <p>食材数据取自中国食物成分表与 USDA 常见值，属估算级精度。只有「说一句话录餐」在你填了 key 时才联网。</p>
           <p>肾病、进食障碍、未成年人以及任何在治疗中的疾病，请以医生或注册营养师的方案为准。</p>
         </Fold>
+      </div>
+
+      <div className="row" style={{ justifyContent: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
+        <span className="tiny muted num">{VERSION_LABEL}</span>
+        <button className="btn ghost sm" onClick={checkVersion}>检查更新</button>
+        {verMsg && <span className="tiny muted">{verMsg}</span>}
+        {verMsg.includes('刷新') && <button className="btn sm" onClick={() => location.reload()}>刷新</button>}
       </div>
     </div>
   )
