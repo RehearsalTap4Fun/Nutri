@@ -467,15 +467,16 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
 .finding.summary .title { font-weight: 700; }
 
 /* ========== 饮水：一排 250 ml 的小水塘沿 8~22 点排开 ========== */
-.ponds { position: relative; display: flex; gap: 6px; padding: 6px 0 22px; }
-.pond { position: relative; flex: 1; height: 46px; border: none; padding: 0; background: var(--surface); border-radius: 46% 54% 50% 50% / 58% 52% 48% 42%; box-shadow: inset 0 0 0 1.5px var(--stroke); overflow: hidden; cursor: pointer; transition: transform var(--t-coast) var(--ease-coast), box-shadow var(--t-med); }
+.ponds { position: relative; display: flex; gap: 6px; padding: 6px 0 4px; }
+.pond-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.pond { position: relative; width: 100%; height: 46px; border: none; padding: 0; background: var(--surface); border-radius: 46% 54% 50% 50% / 58% 52% 48% 42%; box-shadow: inset 0 0 0 1.5px var(--stroke); overflow: hidden; cursor: pointer; transition: transform var(--t-coast) var(--ease-coast), box-shadow var(--t-med); }
 .pond:nth-child(even) { border-radius: 52% 48% 56% 44% / 46% 58% 42% 54%; }
 .pond:active { transform: scale(.94); }
 .pond.lit { box-shadow: inset 0 0 0 1.5px var(--pond); }
 .pond-water { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; background: var(--pond); transform-origin: 50% 100%; transition: transform var(--t-coast) var(--ease-coast); }
-.pond-lbl { position: absolute; left: 0; right: 0; top: calc(100% + 4px); font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; letter-spacing: -0.02em; white-space: nowrap; }
-.pond.lit .pond-lbl { color: var(--fat-text); }
-.pond-now { position: absolute; bottom: 4px; width: 0; height: 0; border: 5px solid transparent; border-bottom-color: var(--ink); transform: translateX(-50%); }
+.pond-lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; letter-spacing: -0.02em; white-space: nowrap; line-height: 1; }
+.pond-slot.lit .pond-lbl { color: var(--fat-text); }
+.pond-now { position: absolute; top: 54px; width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--ink); transform: translateX(-50%); }
 /* 口渴：到点没喝的水塘轻轻发抖，顶上冒一颗小水滴 */
 .pond.thirsty { animation: thirsty 2.6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 180ms); box-shadow: inset 0 0 0 1.5px var(--stroke), inset 0 -6px 0 var(--surface-2); }
 .pond-drop { position: absolute; left: 50%; top: 9px; width: 8px; height: 10px; margin-left: -4px; background: var(--pond); border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%; opacity: .9; animation: drop 2.6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 180ms); }
@@ -483,6 +484,7 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
 @keyframes drop { 0%, 60%, 100% { transform: translateY(0); opacity: .9; } 78% { transform: translateY(6px) scale(1.15); opacity: 1; } 90% { transform: translateY(2px); } }
 /* 全部点亮：整排荡一下水波 */
 .ponds.done .pond { animation: ripple .7s var(--ease-coast) 1; animation-delay: calc(var(--i, 0) * 60ms); }
+.pond.thirsty { --i: inherit; }
 @keyframes ripple { 0% { transform: none; } 40% { transform: translateY(-6px) scale(1.06); } 100% { transform: none; } }
 
 /* ========== Toast：墨色胶囊 ========== */

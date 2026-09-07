@@ -62,12 +62,14 @@ export function WaterCard({ entries, targetMl, fluidMl, isToday, onSet }: {
           const fill = isLit ? 1 : i === lit + 1 ? partial : 0
           const thirsty = isToday && !isLit && h >= d
           return (
-            <button key={i} type="button" className={`pond${isLit ? ' lit' : ''}${thirsty ? ' thirsty' : ''}`} style={{ ['--i' as string]: idx }}
-              aria-pressed={isLit} aria-label={`第 ${i} 杯，${fmtHour(d)} 前${isLit ? '，已喝' : thirsty ? '，到点还没喝' : ''}`} onClick={() => tap(i)}>
-              <span className="pond-water" style={{ transform: `scaleY(${fill})` }} aria-hidden />
-              {thirsty && <span className="pond-drop" aria-hidden />}
+            <div key={i} className={`pond-slot${isLit ? ' lit' : ''}`} style={{ ['--i' as string]: idx }}>
+              <button type="button" className={`pond${isLit ? ' lit' : ''}${thirsty ? ' thirsty' : ''}`}
+                aria-pressed={isLit} aria-label={`第 ${i} 杯，${fmtHour(d)} 前${isLit ? '，已喝' : thirsty ? '，到点还没喝' : ''}`} onClick={() => tap(i)}>
+                <span className="pond-water" style={{ transform: `scaleY(${fill})` }} aria-hidden />
+                {thirsty && <span className="pond-drop" aria-hidden />}
+              </button>
               <span className="pond-lbl">{fmtHour(d)}</span>
-            </button>
+            </div>
           )
         })}
         {isToday && <span className="pond-now" style={{ left: `${nowPct}%` }} aria-hidden />}
