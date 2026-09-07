@@ -56,7 +56,7 @@
   --t-med: 220ms;
   --t-slow: 400ms;
   --t-coast: 400ms;
-  --nav-h: 74px;
+  --nav-h: 86px;   /* 岸线 + 导航带的总高，页面底部留白与悬浮键都以它为准 */
   --font-ui: -apple-system, "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Microsoft YaHei", system-ui, "Segoe UI", sans-serif;
   --font-num: var(--font-ui);
 }
@@ -188,8 +188,10 @@ p { margin: 0; }
 .fab:active { transform: scale(.94); }
 
 /* ========== Nav：水面上的一条描边胶囊，圆片是当前页 ========== */
-.nav { position: fixed; left: 0; right: 0; bottom: 0; padding: 0 14px calc(10px + env(safe-area-inset-bottom)); background: transparent; display: flex; justify-content: center; z-index: 5; pointer-events: none; }
-.nav-inner { display: flex; width: 100%; max-width: 640px; height: 62px; border-radius: var(--r-bar); background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--stroke); padding: 0 6px; pointer-events: auto; }
+/* 导航带：实底的水面，顶边一道小岸线；内容滚到底是滑到岸下，不再透在胶囊后面 */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; padding: 6px 14px calc(10px + env(safe-area-inset-bottom)); background: var(--bg); display: flex; justify-content: center; z-index: 5; }
+.nav-shore { position: absolute; left: 0; right: 0; bottom: 100%; width: 100%; height: 12px; display: block; fill: var(--bg); }
+.nav-inner { display: flex; width: 100%; max-width: 640px; height: 62px; border-radius: var(--r-bar); background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--stroke); padding: 0 6px; }
 .nav button { flex: 1; background: transparent; border: none; color: var(--ink-2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 0 3px; font-size: 11px; font-weight: 600; transition: color var(--t-fast); border-radius: 999px; }
 .nav button .ico { width: 40px; height: 28px; display: grid; place-items: center; border-radius: var(--r-chip); transition: background var(--t-med) var(--ease-out), transform var(--t-coast) var(--ease-coast); }
 .nav button:active .ico { transform: scale(.92); }

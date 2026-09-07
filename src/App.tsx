@@ -292,6 +292,7 @@ export default function App() {
       {tab === 'today' && !sheet && dayEntries.length > 0 && <button className="fab" onClick={() => openAdd()} aria-label="记录餐食"><IconPlus /></button>}
 
       <nav className="nav">
+        <svg className="nav-shore" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden focusable="false"><path d="M0 10V6.5C18 3 34 9 52 5.5C70 2 84 8 100 4.5V10Z" /></svg>
         <div className="nav-inner">
           {TABS.map((t) => (
             <button key={t.key} className={tab === t.key ? 'active' : ''} onClick={() => setTab(t.key)}>
