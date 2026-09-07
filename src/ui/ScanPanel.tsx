@@ -182,6 +182,7 @@ export function ScanPanel({ customFoods, onPick, onAddCustomFood, onManual, onBa
               { label: '蛋白', value: r0(phase.product.per100.protein), unit: 'g' },
               { label: '脂肪', value: r0(phase.product.per100.fat), unit: 'g' },
               { label: '碳水', value: r0(phase.product.per100.carbs), unit: 'g' },
+              { label: '纤维', value: r0(phase.product.per100.fiber), unit: 'g' },
             ]} />
           </div>
           <div className="field"><label>这次吃多少（克 / 毫升）</label>
@@ -197,6 +198,7 @@ export function ScanPanel({ customFoods, onPick, onAddCustomFood, onManual, onBa
             { label: '蛋白', value: r0(phase.product.per100.protein * grams / 100), unit: 'g' },
             { label: '脂肪', value: r0(phase.product.per100.fat * grams / 100), unit: 'g' },
             { label: '碳水', value: r0(phase.product.per100.carbs * grams / 100), unit: 'g' },
+            { label: '纤维', value: r0(phase.product.per100.fiber * grams / 100), unit: 'g' },
           ]} />
           <div className="row">
             <button className="btn" onClick={() => setPhase({ kind: 'idle' })}>再扫一个</button>

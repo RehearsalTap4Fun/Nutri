@@ -135,7 +135,7 @@ export function SpeakPanel({ llm, date, isToday, now, defaultSlot, dishes, dishM
               </div>
               <div className="field"><label>时间</label><input type="time" value={time} onChange={(e) => setTime(e.target.value)} /></div>
             </div>
-            <div className="note">合计 <b>{r0(totals.kcal)}</b> 千卡 · 蛋白 {r0(totals.protein)} g · 脂肪 {r0(totals.fat)} g · 碳水 {r0(totals.carbs)} g</div>
+            <div className="note">合计 <b>{r0(totals.kcal)}</b> 千卡 · 蛋白 {r0(totals.protein)} g · 脂肪 {r0(totals.fat)} g · 碳水 {r0(totals.carbs)} g · 纤维 {r0(totals.fiber)} g</div>
             {err && <p className="small" style={{ color: 'var(--bad-text)' }}>{err}</p>}
             <p className="tiny muted">本次 {PROVIDER_LABEL[llm.provider]} ({result.model}) · 输入 {result.usage.input + result.usage.cacheRead + result.usage.cacheWrite} / 输出 {result.usage.output} token · 约 ${result.usage.usd.toFixed(3)}</p>
           </div>

@@ -234,6 +234,7 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
                 { label: '蛋白', value: r0(now.protein), unit: 'g' },
                 { label: '脂肪', value: r0(now.fat), unit: 'g' },
                 { label: '碳水', value: r0(now.carbs), unit: 'g' },
+                { label: '纤维', value: r0(now.fiber), unit: 'g' },
                 ...(showSodium ? [{ label: '钠', value: r0(now.sodium), unit: 'mg' }] : []),
               ]} />
             </div>
@@ -342,7 +343,7 @@ function CustomForm({ onCancel, onDone, onDoneDish, barcode }: { onCancel: () =>
               })}
             </div>
           )}
-          {dn && <div className="note num">一份约 <b>{r0(dn.kcal)}</b> 千卡 · 蛋白 {r0(dn.protein)} g · 脂肪 {r0(dn.fat)} g · 碳水 {r0(dn.carbs)} g · 钠 {r0(dn.sodium)} mg · 蔬菜 {r0(dveg)} g</div>}
+          {dn && <div className="note num">一份约 <b>{r0(dn.kcal)}</b> 千卡 · 蛋白 {r0(dn.protein)} g · 脂肪 {r0(dn.fat)} g · 碳水 {r0(dn.carbs)} g · 纤维 {r0(dn.fiber)} g · 钠 {r0(dn.sodium)} mg · 蔬菜 {r0(dveg)} g</div>}
           <div className="row">
             <button className="btn" onClick={onCancel}>返回</button>
             <button className="btn primary grow" disabled={!okParts} onClick={saveDish}>保存并选用</button>
