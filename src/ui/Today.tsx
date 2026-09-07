@@ -4,6 +4,7 @@ import type { Dish, LogEntry, MealSlot, Targets, WaterEntry } from '../core/type
 import { WaterCard } from './Water'
 import { MEAL_SLOTS } from '../core/types'
 import type { DayStat } from '../core/analysis'
+import { todayStr } from '../core/dates'
 import type { BudgetPick } from '../core/budget'
 import { entryName, entryNutrients } from '../core/nutrition'
 import { Meter } from './charts'
@@ -16,11 +17,11 @@ import { SignalChips } from './bits'
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
 
-export function Today({ water, fluidMl, onAddWater, onRemoveWater, date, entries, targets, stat, dishMap, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner' }: {
+export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner' }: {
   water: WaterEntry[]
   fluidMl: number
-  onAddWater: (ml: number) => void
-  onRemoveWater: (id: string) => void
+  /** 把这一天的饮水总量设为 ml */
+  onSetWater: (ml: number) => void
   /** 用剩余预算还能吃什么（App 算好传入） */
   budgetPicks?: BudgetPick[]
   nextSlot?: MealSlot
@@ -150,7 +151,7 @@ export function Today({ water, fluidMl, onAddWater, onRemoveWater, date, entries
           <SignalChips notes={notes} />
         </div>
       )}
-      <WaterCard entries={water} targetMl={targets.waterMl} fluidMl={fluidMl} onAdd={onAddWater} onRemove={onRemoveWater} />
+      <WaterCard entries={water} targetMl={targets.waterMl} fluidMl={fluidMl} isToday={date === todayStr()} onSet={onSetWater} />
 
 
       <div className="card">

@@ -36,3 +36,36 @@ export function cups(ml: number, target: number, cupMl = 200): Array<'full' | 'h
   }
   return out
 }
+
+/** 一杯 250 ml；喝水窗口 8:00~22:00，把窗口均分给每一杯，第 i 杯的「应喝完」时刻就是窗口的 i/n 处 */
+export const CUP_ML = 250
+export const WATER_START_H = 8
+export const WATER_END_H = 22
+
+/** 目标折成杯数：向上取整，至少 1 杯 */
+export function cupCount(targetMl: number, cupMl = CUP_ML): number {
+  return Math.max(1, Math.ceil(targetMl / cupMl))
+}
+
+/** 每杯的应喝完时刻（小时，可带小数），如 7 杯 → [10, 12, 14, 16, 18, 20, 22] */
+export function cupDueHours(n: number, startH = WATER_START_H, endH = WATER_END_H): number[] {
+  const span = endH - startH
+  return Array.from({ length: n }, (_, i) => Math.round((startH + (span * (i + 1)) / n) * 100) / 100)
+}
+
+/** 当前时刻应该已经喝到第几杯（到点即算） */
+export function cupsDueAt(hour: number, n: number, startH = WATER_START_H, endH = WATER_END_H): number {
+  return cupDueHours(n, startH, endH).filter((h) => hour >= h).length
+}
+
+/** 口渴程度：到点还没喝的杯数（0 表示不渴） */
+export function thirst(litCups: number, hour: number, n: number, startH = WATER_START_H, endH = WATER_END_H): number {
+  return Math.max(0, cupsDueAt(hour, n, startH, endH) - litCups)
+}
+
+/** 小时数 → 「10点」「13:30」 */
+export function fmtHour(h: number): string {
+  const hh = Math.floor(h)
+  const mm = Math.round((h - hh) * 60)
+  return mm === 0 ? `${hh}点` : `${hh}:${String(mm).padStart(2, '0')}`
+}

@@ -282,15 +282,20 @@ export default function App() {
   }
   const undislikeDish = (id: string) => update((s) => (s.profile ? { ...s, profile: { ...s.profile, dislikedDishes: s.profile.dislikedDishes.filter((x) => x !== id) } } : s))
 
-  const addWater = (ml: number) => {
-    const w: WaterEntry = { id: uid(), updatedAt: Date.now(), date, time: date === today ? nowTimeStr() : undefined, ml: Math.round(ml) }
-    update((s) => ({ ...s, water: [...s.water, w] }))
-    show(`+${w.ml} ml`, { label: '撤销', run: () => update((s) => ({ ...s, water: s.water.filter((x) => x.id !== w.id), tombstones: [...s.tombstones, ...tomb('water', [w.id])] })) })
-  }
-  const removeWater = (id: string) => {
-    const w = state.water.find((x) => x.id === id)
-    update((s) => ({ ...s, water: s.water.filter((x) => x.id !== id), tombstones: [...s.tombstones, ...tomb('water', [id])] }))
-    if (w) show(`已删除 ${w.ml} ml`, { label: '撤销', run: () => update((s) => ({ ...s, water: [...s.water, { ...w, updatedAt: Date.now() }], tombstones: s.tombstones.filter((t) => !(t.coll === 'water' && t.id === w.id)) })) })
+  // 饮水按杯点亮：把这一天的总量设为 ml（旧记录打墓碑，新写一条），toast 可撤销
+  const setWater = (ml: number) => {
+    const prev = state.water.filter((w) => w.date === date)
+    const entry: WaterEntry = { id: uid(), updatedAt: Date.now(), date, time: date === today ? nowTimeStr() : undefined, ml: Math.round(ml) }
+    update((s) => ({ ...s, water: [...s.water.filter((w) => w.date !== date), ...(ml > 0 ? [entry] : [])], tombstones: [...s.tombstones, ...tomb('water', prev.map((w) => w.id))] }))
+    const cupsN = Math.round(ml / 250)
+    show(ml > 0 ? `喝到第 ${cupsN} 杯 · ${Math.round(ml)} ml` : '今天的饮水清零了', {
+      label: '撤销',
+      run: () => update((s) => ({
+        ...s,
+        water: [...s.water.filter((w) => w.date !== date), ...prev.map((w) => ({ ...w, updatedAt: Date.now() }))],
+        tombstones: [...s.tombstones.filter((t) => !(t.coll === 'water' && prev.some((w) => w.id === t.id))), ...(ml > 0 ? tomb('water', [entry.id]) : [])],
+      })),
+    })
   }
   const addWeight = (w: WeightEntry) => {
     update((s) => ({ ...s, weights: [...s.weights.filter((x) => x.date !== w.date), w].sort((a, b) => a.date.localeCompare(b.date)) }))
@@ -348,7 +353,7 @@ export default function App() {
         </div>
 
         {tab === 'today' && targets && stat && (
-          <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickIds={quickIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} water={dayWater} fluidMl={fluidMl} onAddWater={addWater} onRemoveWater={removeWater} />
+          <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickIds={quickIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} water={dayWater} fluidMl={fluidMl} onSetWater={setWater} />
         )}
         {tab === 'plan' && plan && targets && (
           <PlanView showSodium={showNa} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} />
