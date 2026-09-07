@@ -11,6 +11,7 @@ import { ModesPicker } from './ModesPicker'
 import { Bullets, Fold, SignalChips, Stats } from './bits'
 import { IconClose, IconCoin, IconLock, IconSparkle } from './icons'
 import { isIOS, isStandalone } from '../pwa'
+import { ConditionSources, SourceList, TargetBasis } from './Sources'
 import { VERSION_LABEL, checkRemoteVersion, formatBuildId } from '../version'
 
 const PROVIDER_NOTE: Record<Provider, string> = {
@@ -86,6 +87,8 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
           ? <div className="kv"><span>纤维 · 蔬菜 · 钠上限</span><span className="num">{targets.fiber} g · {targets.vegServings} 份 · {targets.sodiumMax} mg</span></div>
           : <div className="kv"><span>纤维 · 蔬菜</span><span className="num">{targets.fiber} g · {targets.vegServings} 份</span></div>}
         <div className="kv"><span>水果 · 奶类</span><span className="num">{targets.fruitG} g · {targets.dairyG} g</span></div>
+        <div className="kv"><span>饮水</span><span className="num">{targets.waterMl} ml</span></div>
+        <TargetBasis profile={profile} targets={targets} adaptive={state.settings.useAdaptiveTdee} trainingDay={targets.notes.some((n) => n.startsWith('训练日'))} />
       </div>
 
       <div className="card" id="modes-card">
@@ -93,6 +96,7 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
         <p className="small muted" style={{ marginBottom: 10 }}>{(profile.conditions || []).length ? '点一下即时生效，目标、推荐和分析都会跟着变。' : '孕期、高血压、糖尿病、健身增肌这类情况在这里勾选，点一下即时生效。'}</p>
         <ModesPicker sex={profile.sex} conditions={profile.conditions || []} trimester={profile.pregnancyTrimester} onChange={onSetConditions} />
         {targets.notes.length > 0 && <div style={{ marginTop: 10 }}><SignalChips notes={targets.notes} /></div>}
+        <ConditionSources conditions={profile.conditions || []} />
       </div>
 
       <div className="card">
@@ -176,6 +180,9 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
         <Fold summary="数据来源与免责声明">
           <p>食材数据取自中国食物成分表与 USDA 常见值，属估算级精度。只有「说一句话录餐」在你填了 key 时才联网。</p>
           <p>肾病、进食障碍、未成年人以及任何在治疗中的疾病，请以医生或注册营养师的方案为准。</p>
+        </Fold>
+        <Fold summary="参考文献">
+          <SourceList />
         </Fold>
       </div>
 

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ActivityLevel, Allergen, DietStyle, Goal, Profile, Sex } from '../core/types'
 import { ModesPicker } from './ModesPicker'
+import { TargetBasis } from './Sources'
 import { bmi, bmiLabel, computeTargets } from '../core/energy'
 import { ACTIVITY_LABEL, ALLERGEN_LABEL, GOAL_LABEL, SEX_LABEL, STYLE_DESC, STYLE_LABEL } from './format'
 
@@ -90,7 +91,8 @@ export function ProfileForm({ initial, onSave, onCancel }: { initial: Profile | 
           {conds.includes('hypertension')
             ? <div className="kv"><span>膳食纤维 · 蔬菜 · 钠上限</span><span className="num">{preview.fiber} g · {preview.vegServings} 份 · {preview.sodiumMax} mg</span></div>
             : <div className="kv"><span>膳食纤维 · 蔬菜</span><span className="num">{preview.fiber} g · {preview.vegServings} 份</span></div>}
-          <div className="kv"><span>水果 · 奶类</span><span className="num">{preview.fruitG} g · {preview.dairyG} g</span></div>
+          <div className="kv"><span>水果 · 奶类 · 饮水</span><span className="num">{preview.fruitG} g · {preview.dairyG} g · {preview.waterMl} ml</span></div>
+          <TargetBasis profile={p} targets={preview} />
           {preview.notes.length > 0 && <div className="stack" style={{ gap: 6, marginTop: 10 }}>{preview.notes.map((n, i) => <div key={i} className="note">{n}</div>)}</div>}
         </div>
       )}

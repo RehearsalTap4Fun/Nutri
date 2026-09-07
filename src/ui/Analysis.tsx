@@ -10,6 +10,7 @@ import { BarChart, LineChart, Meter } from './charts'
 import { r0, showsSodium } from './format'
 import { IconAlert, IconCheck, IconChevron, IconClose, IconInfo } from './icons'
 import { Fold, Legend, ProgressRow, ShareBar, Stats } from './bits'
+import { TargetBasis } from './Sources'
 
 export function AnalysisView({ analysis, targets, weights, entries, water = [], onAddWeight, useAdaptive, onToggleAdaptive, date, profile, dishMap, vitals = [], onAddVital, onRemoveVital }: {
   /** 血压 / 血糖记录（高血压、糖尿病模式下显示） */
@@ -124,7 +125,8 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
             {showNa && <MetricRow findings={byMetric.m.sodium}><Meter label="钠" value={w.avg.sodium} target={targets.sodiumMax} unit="mg" color="var(--ink-2)" soft="var(--surface-2)" /></MetricRow>}
             {waterAvg.days > 0 && <MetricRow findings={byMetric.m.water}><Meter label="饮水" value={waterAvg.avg} target={targets.waterMl} unit="ml" color="var(--land)" soft="var(--land-2)" /></MetricRow>}
             <ShareBar protein={share.protein} fat={share.fat} carbs={share.carbs} />
-            <Fold summary="供能比参考范围">蛋白 15~25%、脂肪 25~35%、碳水 45~60%。</Fold>
+            <Fold summary="供能比参考范围">蛋白 15~25%、脂肪 25~35%、碳水 45~60%（中国居民膳食营养素参考摄入量 2023 版）。</Fold>
+            <TargetBasis profile={profile} targets={targets} adaptive={useAdaptive} />
           </>
         )}
       </div>

@@ -483,3 +483,12 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
 .cup { flex: 1; height: 16px; border-radius: var(--r-pill); background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--stroke); transition: background var(--t-med) var(--ease-out); }
 .cup.half { background: var(--land-2); }
 .cup.full { background: var(--land); }
+
+/* ========== 目标依据与参考文献 ========== */
+.basis { display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--ink-2); }
+.basis-row { padding-bottom: 8px; border-bottom: 1px solid var(--hair); }
+.basis-row:last-of-type { border-bottom: none; }
+.basis-row b { color: var(--ink); }
+.basis-src { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.sources { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-2); display: flex; flex-direction: column; gap: 6px; }
+.sources b { color: var(--ink); font-weight: 600; }

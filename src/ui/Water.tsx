@@ -32,6 +32,9 @@ export function WaterCard({ entries, targetMl, fluidMl, onAdd, onRemove }: {
         每格 200 ml。{remain > 0 ? `还差 ${remain} ml，约 ${Math.ceil(remain / 200)} 杯` : '今天喝够了'}
         {fluidMl > 0 ? `；另有饮品 ${fluidMl} ml 不计入` : ''}
       </p>
+      <Fold summary={`为什么是 ${targetMl} ml`}>
+        <p>《中国居民膳食指南（2022）》与《中国居民膳食营养素参考摄入量（2023 版）》：成年男性每日饮水 1700 ml、女性 1500 ml，不含食物中的水分；孕中晚期 1700、哺乳期 2100 ml；痛风指南建议不低于 2000 ml；本应用在训练日额外加 500 ml。含热量饮品单独统计，不顶白水。</p>
+      </Fold>
       <div className="row wrap" style={{ gap: 6, marginTop: 10 }}>
         {QUICK.map((ml) => <button key={ml} className="chip" onClick={() => onAdd(ml)}>+{ml}</button>)}
         <input className="input num" type="number" inputMode="numeric" placeholder="自定 ml" value={custom} onChange={(e) => setCustom(e.target.value)}
