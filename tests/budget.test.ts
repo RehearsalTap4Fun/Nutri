@@ -70,6 +70,13 @@ describe('剩余预算建议 suggestForBudget', () => {
     const picks = suggestForBudget({ remain: R({ protein: 5, fiber: 18 }), targets: T, slot: 'dinner', dishes: DISHES, profile: base })
     expect(picks.some((p) => /补纤维/.test(p.why))).toBe(true)
   })
+  it('不喜欢一道后，列表补上下一个候选、其余顺序不变', () => {
+    const a = suggestForBudget({ remain: R({}), targets: T, slot: 'dinner', dishes: DISHES, profile: base })
+    const b = suggestForBudget({ remain: R({}), targets: T, slot: 'dinner', dishes: DISHES, profile: { ...base, dislikedDishes: [a[0].dish.id] } })
+    expect(b).toHaveLength(a.length)
+    expect(b.map((p) => p.dish.id)).not.toContain(a[0].dish.id)
+    expect(b.slice(0, a.length - 1).map((p) => p.dish.id)).toEqual(a.slice(1).map((p) => p.dish.id))
+  })
   it('一份放不下时可以给半份', () => {
     const picks = suggestForBudget({ remain: R({ kcal: 200, protein: 10 }), targets: T, slot: 'lunch', dishes: DISHES, profile: base, limit: 30 })
     expect(picks.some((p) => p.portion === 0.5)).toBe(true)

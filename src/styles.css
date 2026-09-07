@@ -258,6 +258,9 @@ p { margin: 0; }
 .swipe + .swipe > .list-item::before { content: ''; position: absolute; left: 8px; right: 8px; top: 0; height: 1px; background: var(--hair); }
 .swipe-del { position: absolute; right: 8px; top: 6px; bottom: 6px; width: 76px; border: none; border-radius: var(--r-btn); background: var(--bad); color: #FFFFFF; font-weight: 700; font-size: 13px; cursor: pointer; }
 .btn.ghost.row-del { color: var(--muted); padding: 6px; margin-right: -6px; }
+/* 行内弱化的幽灵图标按钮（如「不喜欢」）：默认灰，悬停转警示色 */
+.btn.ghost.quiet { color: var(--muted); padding: 6px; }
+.btn.ghost.quiet:hover { color: var(--bad-text); text-decoration: none; }
 .btn.ghost.row-del:hover { color: var(--bad-text); text-decoration: none; }
 .list-item.tap { cursor: pointer; margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 16px; transition: background var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out); }
 .list-item.tap:hover { background: var(--surface-2); }

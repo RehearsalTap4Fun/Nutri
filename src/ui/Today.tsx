@@ -17,13 +17,15 @@ import { SignalChips } from './bits'
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
 
-export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner' }: {
+export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike }: {
   water: WaterEntry[]
   fluidMl: number
   /** 把这一天的饮水总量设为 ml */
   onSetWater: (ml: number) => void
   /** 用剩余预算还能吃什么（App 算好传入） */
   budgetPicks?: BudgetPick[]
+  /** 「不喜欢」：进不推荐名单（与推荐页的叉同义），列表随即补上下一个候选 */
+  onDislike?: (dishId: string) => void
   nextSlot?: MealSlot
   /** 最近吃过与收藏的菜 id，用于空餐次的一键补记 */
   quickIds?: string[]
@@ -149,6 +151,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
                   <div className="tiny muted">{p.why}{/蛋白/.test(p.why) ? '' : ` · 蛋白 ${r0(p.n.protein)} g`}</div>
                 </div>
                 <div className="num ink2">{r0(p.n.kcal)}</div>
+                {onDislike && <button className="btn ghost sm quiet" title="不喜欢，换一个" onClick={() => onDislike(p.dish.id)} aria-label={`不喜欢${p.dish.name}，换一个`}><IconClose size={16} /></button>}
                 <button className="btn ghost sm" onClick={() => { onQuickLog(nextSlot, p.dish.id, p.portion); setShowBudget(false) }} aria-label={`记一份${p.dish.name}`}><IconPlus size={16} /></button>
               </div>
             ))}
