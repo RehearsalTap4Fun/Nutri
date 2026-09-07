@@ -132,6 +132,12 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
       {!isStandalone() && location.protocol !== 'file:' && (
         <div className="card">
           <div className="section-title"><h2>装到手机主屏幕</h2><span className="pill">离线可用</span></div>
+          {location.protocol === 'http:' && !['localhost', '127.0.0.1'].includes(location.hostname) && (
+            <div className="row" style={{ marginBottom: 10 }}>
+              <p className="small ink2 grow">现在是 HTTP 打开的，相机扫码和离线都用不了。</p>
+              <a className="btn primary sm" href={`https://${location.host}${location.pathname}${location.search}`}>切到 HTTPS</a>
+            </div>
+          )}
           {canInstall ? (
             <div className="row">
               <p className="small ink2 grow">像 App 一样全屏打开，没网也能记。</p>

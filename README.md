@@ -18,7 +18,7 @@ npm run validate   # 校验食材与菜品数据（--list 打印每道菜营养�
 
 `scripts/deploy.sh` 一条命令：构建 → rsync `release/pwa` 到服务器 → reload nginx。服务器地址等写在项目根目录的 `.deploy.env`（已 gitignore）。nginx 站点配置模板见 `deploy/nginx-nutri.conf`；服务器上实际生效的是 `/etc/nginx/conf.d/nutri.conf`，站点目录 `/var/www/nutri`。
 
-当前已部署在阿里云轻量服务器（成都），HTTP、IP 直访，路径 `/nutri/`；根路径是项目列表页 `/var/www/index.html`，以后每个项目一个子目录加一段 `location`（模板见服务器上的 `/etc/nginx/conf.d/nutri.conf` 注释）。构建用相对路径，清单的 start_url / scope 与 sw.js 作用域都随所在目录解析，所以子目录不需要改代码。内地地域绑域名需要备案，绑了域名后用 certbot 加证书即可启用 HTTPS，离线缓存随之生效。
+当前已部署在阿里云轻量服务器（成都），IP 直访，路径 `/nutri/`，**HTTPS 已开**：`https://47.109.97.108/nutri/`（HTTP 保留作兜底）。没有域名也能上 HTTPS，靠的是 Let's Encrypt 直接给 IP 签的短期证书（`shortlived` 档，6 天有效）：服务器上 admin 用户的 `~/.acme.sh` 用 HTTP-01 验证（挑战目录 `/var/www/acme`，nginx 里 `/.well-known/acme-challenge/` 指过去），证书写到 `/etc/nginx/ssl/nutri.{crt,key}`，cron 每天检查、满 3 天自动续签并 reload nginx。站点公共段抽在 `/etc/nginx/conf.d/nutri-site.inc`，80 与 443 两个 server 都 include 它。以后绑了已备案的域名，把 `server_name` 换成域名、用同一套 acme.sh 按域名再签一张（普通 90 天档）即可。注意内地服务器域名走 80/443 必须先 ICP 备案，IP 直访不需要。根路径是项目列表页 `/var/www/index.html`，以后每个项目一个子目录加一段 `location`（模板见服务器上的 `/etc/nginx/conf.d/nutri.conf` 注释）。构建用相对路径，清单的 start_url / scope 与 sw.js 作用域都随所在目录解析，所以子目录不需要改代码。内地地域绑域名需要备案，绑了域名后用 certbot 加证书即可启用 HTTPS，离线缓存随之生效。
 
 ### 版本号与「检查更新」
 
