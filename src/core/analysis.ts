@@ -40,6 +40,10 @@ export function dayStat(date: string, entries: LogEntry[], dishMap: Map<string, 
     n = add(n, en)
     bySlot[e.slot] = add(bySlot[e.slot], en)
     const dish = e.dishId ? dishMap.get(e.dishId) : undefined
+    if (e.custom) {
+      vegG += (e.custom.vegG || 0) * e.portion
+      fruitG += (e.custom.fruitG || 0) * e.portion
+    }
     if (dish) {
       vegG += vegGrams(dish) * e.portion
       fruitG += fruitGrams(dish) * e.portion

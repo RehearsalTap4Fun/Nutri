@@ -59,9 +59,10 @@ export function SpeakPanel({ llm, date, isToday, now, defaultSlot, dishes, dishM
     const customFoods: CustomFood[] = []
     const entries: LogEntry[] = items.map((it) => {
       if (it.dishId) return { id: uid(), date, slot, time, dishId: it.dishId, portion: it.portion }
-      const food: CustomFood = { id: uid(), name: it.name, serving: '1份(估算)', nutrients: it.perServing }
+      const extra = { ...(it.vegG ? { vegG: it.vegG } : {}), ...(it.fruitG ? { fruitG: it.fruitG } : {}) }
+      const food: CustomFood = { id: uid(), name: it.name, serving: '1份(估算)', nutrients: it.perServing, ...extra }
       if (it.perServing.kcal > 0) customFoods.push(food)
-      return { id: uid(), date, slot, time, portion: it.portion, custom: { name: it.name, nutrients: it.perServing } }
+      return { id: uid(), date, slot, time, portion: it.portion, custom: { name: it.name, nutrients: it.perServing, ...extra } }
     })
     onSave(entries, customFoods)
   }

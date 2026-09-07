@@ -42,7 +42,7 @@ export const ParsedMealSchema = z.object({
       portion: z.number(),
       note: z.string().nullable(),
       estimate: z
-        .object({ kcal: z.number(), protein: z.number(), fat: z.number(), carbs: z.number(), fiber: z.number(), sodium: z.number() })
+        .object({ kcal: z.number(), protein: z.number(), fat: z.number(), carbs: z.number(), fiber: z.number(), sodium: z.number(), veg_g: z.number(), fruit_g: z.number() })
         .nullable(),
     }),
   ),
@@ -55,6 +55,9 @@ export interface ParsedItem {
   portion: number
   /** 一份的营养（匹配到目录取库值，否则取模型估算） */
   perServing: Nutrients
+  /** 未匹配条目：模型估的一份蔬菜 / 水果克数 */
+  vegG?: number
+  fruitG?: number
   matched: boolean
   note?: string
 }
@@ -82,8 +85,8 @@ export function buildCatalog(dishes: Dish[]): string {
 }
 
 const JSON_SHAPE = `输出必须是一个 JSON 对象（json），不要输出任何解释文字。形如：
-{"slot":"lunch","time":null,"items":[{"dish_id":"st_rice","name":"白米饭","portion":0.5,"note":null,"estimate":null},{"dish_id":null,"name":"妈妈做的红烧鱼","portion":1,"note":"按一块约150g估","estimate":{"kcal":250,"protein":22,"fat":14,"carbs":6,"fiber":0,"sodium":600}}]}
-字段：slot 取 breakfast/lunch/dinner/snack 或 null；time 为 "HH:mm" 或 null；items 每项含 dish_id(字符串或 null)、name、portion(数字)、note(字符串或 null)、estimate(对象或 null)。`
+{"slot":"lunch","time":null,"items":[{"dish_id":"st_rice","name":"白米饭","portion":0.5,"note":null,"estimate":null},{"dish_id":null,"name":"四季豆炒肉","portion":1,"note":"按四季豆150g加瘦肉60g估","estimate":{"kcal":260,"protein":16,"fat":15,"carbs":12,"fiber":4,"sodium":600,"veg_g":150,"fruit_g":0}}]}
+字段：slot 取 breakfast/lunch/dinner/snack 或 null；time 为 "HH:mm" 或 null；items 每项含 dish_id(字符串或 null)、name、portion(数字)、note(字符串或 null)、estimate(对象或 null，含 veg_g 蔬菜克数与 fruit_g 水果克数)。`
 
 export function buildSystemPrompt(catalog: string): string {
   return `你是一个饮食记录助手。用户会用一句中文口语描述自己吃了什么，你要把它解析成结构化记录。
@@ -96,7 +99,7 @@ ${catalog}
 2. 能对应到目录里同一种食物时填 dish_id。portion 是相对目录中「一份」的倍数：目录一份是「1碗」时，「一碗」=1，「半碗」=0.5，「一小碗」=0.7，「大碗」=1.5；目录一份是「1个」时，「两个」=2。用户没说数量默认 1。
 3. 品牌或店名用别名匹配，如「麦当劳」「肯德基」「沙县」。
 4. 组合描述拆成多条：目录里没有「番茄炒蛋盖饭」，就拆成 番茄炒蛋 1 份 + 白米饭 1.25 份。
-5. 目录里找不到合适条目时 dish_id 填 null，name 写食物名，并在 estimate 里给出「一份」的常见营养估算：kcal 千卡、protein 蛋白 g、fat 脂肪 g、carbs 碳水 g、fiber 纤维 g、sodium 钠 mg，在 note 里写一句份量假设。匹配到目录时 estimate 填 null。
+5. 目录里找不到合适条目时 dish_id 填 null，name 写食物名，并在 estimate 里给出「一份」的常见营养估算：kcal 千卡、protein 蛋白 g、fat 脂肪 g、carbs 碳水 g、fiber 纤维 g、sodium 钠 mg，以及 veg_g（蔬菜菌菇克数，不含葱姜蒜和腌菜）和 fruit_g（水果克数），没有就填 0；在 note 里写一句份量假设。匹配到目录时 estimate 填 null。
 6. slot 根据「早上/中午/下午/晚上/夜宵」等推断，没提到就 null。time 只在用户明确说了时间时填「HH:mm」，否则 null。
 7. portion 精确到 0.25。name 用中文。
 
@@ -120,7 +123,7 @@ export function normalizeParsed(parsed: ParsedMeal, dishMap: Map<string, Dish>, 
       const perServing: Nutrients = e
         ? { kcal: Math.max(0, e.kcal), protein: Math.max(0, e.protein), fat: Math.max(0, e.fat), carbs: Math.max(0, e.carbs), fiber: Math.max(0, e.fiber), sodium: Math.max(0, e.sodium) }
         : { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, sodium: 0 }
-      items.push({ name: it.name.trim() || '未命名食物', portion, perServing, matched: false, note: it.note || (e ? '模型估算' : '无法估算，请手动填写') })
+      items.push({ name: it.name.trim() || '未命名食物', portion, perServing, matched: false, vegG: e ? Math.max(0, e.veg_g || 0) : undefined, fruitG: e ? Math.max(0, e.fruit_g || 0) : undefined, note: it.note || (e ? '模型估算' : '无法估算，请手动填写') })
     }
   }
   const time = parsed.time && /^\d{2}:\d{2}$/.test(parsed.time) ? parsed.time : undefined
@@ -165,7 +168,7 @@ export function parseLooseJson(text: string): ParsedMeal {
       name: typeof it.name === 'string' ? it.name : '',
       portion: num(it.portion, 1),
       note: typeof it.note === 'string' ? it.note : null,
-      estimate: est ? { kcal: num(est.kcal), protein: num(est.protein), fat: num(est.fat), carbs: num(est.carbs), fiber: num(est.fiber), sodium: num(est.sodium) } : null,
+      estimate: est ? { kcal: num(est.kcal), protein: num(est.protein), fat: num(est.fat), carbs: num(est.carbs), fiber: num(est.fiber), sodium: num(est.sodium), veg_g: num(est.veg_g), fruit_g: num(est.fruit_g) } : null,
     }
   })
   const slotRaw = typeof obj.slot === 'string' ? obj.slot : null

@@ -62,3 +62,13 @@ describe('少盐做法', () => {
     expect(e.sodium).toBeCloseTo(low.sodium * 2, 3)
   })
 })
+
+describe('存储：自建菜校验', () => {
+  it('引用未知食材或缺字段的自建菜会被丢弃', async () => {
+    const { normalizeState } = await import('../src/store/storage')
+    const good = { id: 'custom_1', name: '好菜', cat: 'veg', cuisine: 'cn', cook: 'normal', slots: ['lunch'], serving: '1份', parts: [{ ing: 'spinach', g: 200 }] }
+    const bad = { id: 'custom_2', name: '坏菜', cat: 'veg', cuisine: 'cn', cook: 'normal', slots: ['lunch'], serving: '1份', parts: [{ ing: 'unicorn', g: 200 }] }
+    const st = normalizeState({ customDishes: [good, bad, { id: 'x' }] })
+    expect(st.customDishes.map((d) => d.id)).toEqual(['custom_1'])
+  })
+})

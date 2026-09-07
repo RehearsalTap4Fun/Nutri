@@ -43,15 +43,17 @@ const dishCache = new Map<string, Nutrients>()
 
 /** 一份标准份量的营养值（由食材构成推导） */
 export function dishNutrients(dish: Dish, ingMap: Map<string, Ingredient> = INGREDIENT_MAP): Nutrients {
-  const cached = dishCache.get(dish.id)
-  if (cached && ingMap === INGREDIENT_MAP) return cached
+  // 用户自建菜（含编辑中的草稿）内容会变，不走按 id 的缓存
+  const cacheable = ingMap === INGREDIENT_MAP && !dish.id.startsWith('custom_')
+  const cached = cacheable ? dishCache.get(dish.id) : undefined
+  if (cached) return cached
   let n: Nutrients = { ...ZERO }
   for (const part of dish.parts) {
     const ing = ingMap.get(part.ing)
     if (!ing) throw new Error(`dish ${dish.id} references unknown ingredient ${part.ing}`)
     n = add(n, scale(ing.per100, part.g / 100))
   }
-  if (ingMap === INGREDIENT_MAP) dishCache.set(dish.id, n)
+  if (cacheable) dishCache.set(dish.id, n)
   return n
 }
 

@@ -236,10 +236,11 @@ export function conditionFindings(w: WindowStats, t: Targets, p: Profile, entrie
   const loggedDates = new Set(w.loggedDays.map((d) => d.date))
   const recent = entries.filter((e) => loggedDates.has(e.date))
   const dishOf = (e: LogEntry) => (e.dishId ? dishMap.get(e.dishId) : undefined)
+  const dairyOf = (e: LogEntry) => { const d = dishOf(e); return (d ? dairyGrams(d) : e.custom?.dairyG || 0) * e.portion }
   const maternal = c.includes('pregnancy') || c.includes('lactation')
 
   if (maternal) {
-    const dairy = recent.reduce((s, e) => { const d = dishOf(e); return s + (d ? dairyGrams(d) * e.portion : 0) }, 0) / k
+    const dairy = recent.reduce((s, e) => s + dairyOf(e), 0) / k
     if (dairy < t.dairyG * 0.6) out.push({ key: 'dairy_low', severity: 'warn', title: '奶类不够', detail: `日均约 ${r0(dairy)} g，孕产期建议 ${t.dairyG} g。`, action: '早餐一杯奶、下午一杯酸奶就能到 500 g，乳糖不耐可换无糖酸奶或奶酪。' })
     else out.push({ key: 'dairy_ok', severity: 'good', title: '奶类达标', detail: `日均约 ${r0(dairy)} g。`, action: '保持。' })
     const fishDays = new Set(recent.filter((e) => { const d = dishOf(e); return d && isSeafoodDish(d) }).map((e) => e.date)).size
@@ -297,7 +298,7 @@ export function conditionFindings(w: WindowStats, t: Targets, p: Profile, entrie
     if (sugary) out.push({ key: 'gout_sugar', severity: 'info', title: '含糖饮料', detail: `近 ${k} 天记了 ${sugary} 次。`, action: '果糖会升尿酸，和啤酒同一等级，换无糖饮品。' })
     const meat = recent.reduce((s, e) => { const d = dishOf(e); return s + (d ? meatGrams(d) * e.portion : 0) }, 0) / k
     if (meat > 150) out.push({ key: 'gout_meat', severity: 'info', title: '肉类偏多', detail: `日均约 ${r0(meat)} g 畜禽鱼肉。`, action: '控制在 100~150 g，用鸡蛋、豆腐、奶制品补蛋白。' })
-    const dairy = recent.reduce((s, e) => { const d = dishOf(e); return s + (d ? dairyGrams(d) * e.portion : 0) }, 0) / k
+    const dairy = recent.reduce((s, e) => s + dairyOf(e), 0) / k
     if (dairy < 200) out.push({ key: 'gout_dairy', severity: 'info', title: '奶类偏少', detail: `日均约 ${r0(dairy)} g。`, action: '低脂奶和酸奶有助尿酸排泄，每天 300~400 g。' })
   }
 
@@ -343,7 +344,7 @@ export function conditionFindings(w: WindowStats, t: Targets, p: Profile, entrie
   if (c.includes('elderly')) {
     if (w.breakfastProteinShare < 0.2 && k >= 3) out.push({ key: 'eld_protein_even', severity: 'warn', title: '早餐蛋白太少', detail: `早餐只占全天蛋白的 ${Math.round(w.breakfastProteinShare * 100)}%。`, action: '老年人每餐 25~30 g 蛋白才能有效合成肌肉，早餐加一个蛋加一杯奶。' })
     if (w.avg.protein < t.protein * 0.85) out.push({ key: 'eld_protein', severity: 'warn', title: '蛋白不够，肌肉会流失', detail: `日均 ${r0(w.avg.protein)} g，目标 ${t.protein} g。`, action: '每餐一个巴掌大的鱼、蛋、豆腐或瘦肉，牙口不好就蒸蛋、鱼、豆腐脑。' })
-    const dairy = recent.reduce((s, e) => { const d = dishOf(e); return s + (d ? dairyGrams(d) * e.portion : 0) }, 0) / k
+    const dairy = recent.reduce((s, e) => s + dairyOf(e), 0) / k
     if (dairy < t.dairyG * 0.6) out.push({ key: 'eld_dairy', severity: 'info', title: '奶类偏少', detail: `日均约 ${r0(dairy)} g，建议 ${t.dairyG} g。`, action: '补钙防骨质疏松，乳糖不耐用酸奶或奶酪。' })
     if (w.avg.kcal < t.kcal * 0.8) out.push({ key: 'eld_under', severity: 'warn', title: '吃得偏少', detail: `日均 ${r0(w.avg.kcal)} 千卡，目标 ${t.kcal}。`, action: '老年人胃口小很常见，可以加一顿下午茶：牛奶加鸡蛋或豆浆加坚果碎。' })
     const fried = recent.filter((e) => { const d = dishOf(e); return d && d.cook === 'fried' }).length

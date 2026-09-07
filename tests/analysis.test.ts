@@ -67,3 +67,19 @@ describe('analysis', () => {
     expect(r!.tdee).toBeLessThan(2450)
   })
 })
+
+describe('自定义食物的蔬菜水果份数', () => {
+  it('成分表录入带蔬菜克数时计入当日蔬菜量；自建菜按食材算', async () => {
+    const { dayStat } = await import('../src/core/analysis')
+    const entries: LogEntry[] = [
+      { id: 'a', date: today, slot: 'lunch', portion: 1.5, custom: { name: '四季豆炒肉', nutrients: { kcal: 260, protein: 16, fat: 15, carbs: 12, fiber: 4, sodium: 600 }, vegG: 150 } },
+      { id: 'b', date: today, slot: 'dinner', portion: 1, dishId: 'custom_test', },
+    ]
+    const custom = { id: 'custom_test', name: '自建番茄炒蛋', cat: 'protein' as const, cuisine: 'cn' as const, cook: 'normal' as const, slots: ['lunch' as const, 'dinner' as const], serving: '1份', parts: [{ ing: 'tomato', g: 200 }, { ing: 'egg', g: 100 }, { ing: 'oil', g: 10 }, { ing: 'salt', g: 1.5 }] }
+    const map = new Map(DISH_MAP)
+    map.set(custom.id, custom)
+    const st = dayStat(today, entries, map, 2000)
+    expect(st.vegG).toBeCloseTo(150 * 1.5 + 200, 5)
+    expect(st.n.kcal).toBeGreaterThan(260 * 1.5)
+  })
+})

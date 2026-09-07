@@ -100,8 +100,8 @@ export interface LogEntry {
   /** HH:mm，可选 */
   time?: string
   dishId?: string
-  /** 自定义条目：按一份的营养值直接录入 */
-  custom?: { name: string; nutrients: Nutrients }
+  /** 自定义条目：按一份的营养值直接录入；蔬菜/水果/奶类克数可选，用于份数统计 */
+  custom?: { name: string; nutrients: Nutrients; vegG?: number; fruitG?: number; dairyG?: number }
   /** 份量倍数，1 = 一份标准份量 */
   portion: number
   /** 少盐做法：调味料带来的钠减半（家常菜适用） */

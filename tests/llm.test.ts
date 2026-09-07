@@ -24,7 +24,7 @@ describe('llm meal parser (offline parts)', () => {
       slot: 'dinner', time: '19:05',
       items: [
         { dish_id: 'st_rice', name: '米饭', portion: 0.5, note: null, estimate: null },
-        { dish_id: 'not_a_dish', name: '妈妈做的红烧鱼', portion: 12, note: '一大块', estimate: { kcal: 300, protein: 25, fat: 15, carbs: 8, fiber: 0, sodium: 700 } },
+        { dish_id: 'not_a_dish', name: '妈妈做的红烧鱼', portion: 12, note: '一大块', estimate: { kcal: 300, protein: 25, fat: 15, carbs: 8, fiber: 0, sodium: 700, veg_g: 0, fruit_g: 0 } },
         { dish_id: null, name: '不知道', portion: -1, note: null, estimate: null },
       ],
     }, DISH_MAP, usage, 'claude-opus-5')

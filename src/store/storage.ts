@@ -1,10 +1,15 @@
-import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry, WaterEntry } from '../core/types'
+import { INGREDIENT_MAP } from '../data/ingredients'
+import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry, WaterEntry, Dish } from '../core/types'
 
 export interface CustomFood {
   id: string
   name: string
   serving: string
   nutrients: Nutrients
+  /** 一份里的蔬菜 / 水果 / 奶类克数（可选），用于份数统计 */
+  vegG?: number
+  fruitG?: number
+  dairyG?: number
   /** 包装食品条码（扫码或手动录入时记住，下次直接命中） */
   barcode?: string
 }
@@ -21,6 +26,8 @@ export interface AppState {
   weights: WeightEntry[]
   water: WaterEntry[]
   customFoods: CustomFood[]
+  /** 用户按食材搭配自建的菜（id 以 custom_ 开头），与菜品库同等参与搜索、统计与推荐 */
+  customDishes: Dish[]
   /** 按日期保存换一换计数，保证刷新后推荐不变 */
   planSeeds: Record<string, PlanSeed>
   favorites: string[]
@@ -34,7 +41,7 @@ export interface AppState {
 export const STORAGE_KEY = 'nutri.v1'
 
 export function defaultState(): AppState {
-  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' } }
+  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' } }
 }
 
 export function uid(): string {
@@ -53,6 +60,11 @@ export function normalizeState(raw: unknown): AppState {
   if (Array.isArray(raw.entries)) s.entries = raw.entries.filter((e) => isObj(e) && typeof e.date === 'string' && typeof e.slot === 'string') as LogEntry[]
   if (Array.isArray(raw.weights)) s.weights = raw.weights.filter((w) => isObj(w) && typeof w.date === 'string' && typeof w.kg === 'number') as WeightEntry[]
   if (Array.isArray(raw.water)) s.water = raw.water.filter((w) => isObj(w) && typeof w.date === 'string' && typeof w.ml === 'number') as WaterEntry[]
+  if (Array.isArray(raw.customDishes)) {
+    s.customDishes = raw.customDishes.filter((d): d is Dish => isObj(d) && typeof d.id === 'string' && d.id.startsWith('custom_') && typeof d.name === 'string'
+      && Array.isArray(d.parts) && d.parts.length > 0 && d.parts.every((x: unknown) => isObj(x) && typeof x.ing === 'string' && INGREDIENT_MAP.has(x.ing) && typeof x.g === 'number' && x.g > 0)
+      && Array.isArray(d.slots) && d.slots.length > 0)
+  }
   if (Array.isArray(raw.customFoods)) s.customFoods = raw.customFoods.filter((c) => isObj(c) && typeof c.name === 'string' && isObj(c.nutrients)) as CustomFood[]
   if (isObj(raw.planSeeds)) s.planSeeds = raw.planSeeds as Record<string, PlanSeed>
   if (Array.isArray(raw.favorites)) s.favorites = raw.favorites.filter((x) => typeof x === 'string') as string[]
