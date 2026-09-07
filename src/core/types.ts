@@ -116,6 +116,15 @@ export interface WeightEntry {
   bodyFatPct?: number
 }
 
+/** 一次饮水记录（白水、茶等按 ml 记；含热量饮品走餐食记录） */
+export interface WaterEntry {
+  id: string
+  date: string
+  /** HH:mm */
+  time?: string
+  ml: number
+}
+
 /** 血压 / 血糖记录：高血压、糖尿病模式下的联动记录 */
 export interface VitalEntry {
   id: string
@@ -149,6 +158,8 @@ export interface Targets {
   fruitG: number
   /** 奶类目标克数（孕期/哺乳期 500，其他 300） */
   dairyG: number
+  /** 饮水目标 ml（不含食物水分；男 1700 / 女 1500，孕产期、痛风、训练日上调） */
+  waterMl: number
   /** 糖尿病模式：碳水按餐均分，单餐不超过 碳水目标 × 餐次占比 × 1.15 */
   evenCarbs: boolean
   /** 模式对目标做了哪些调整，给用户看 */

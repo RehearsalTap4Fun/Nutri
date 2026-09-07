@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry } from './core/types'
+import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WaterEntry, WeightEntry } from './core/types'
+import { fluidFromDrinks } from './core/water'
 import { MEAL_SLOTS } from './core/types'
 import { computeTargets } from './core/energy'
 import { analyze, dayStat } from './core/analysis'
@@ -69,8 +70,8 @@ export default function App() {
   const isTrainingDay = state.trainingDays.includes(date)
   const baseTargets = useMemo(() => (profile ? computeTargets(profile, new Date(), undefined, { trainingDay: isTrainingDay }) : null), [profile, isTrainingDay])
   const analysis = useMemo(
-    () => (profile && baseTargets ? analyze(profile, baseTargets, state.entries, state.weights, DISH_MAP, date) : null),
-    [profile, baseTargets, state.entries, state.weights, date],
+    () => (profile && baseTargets ? analyze(profile, baseTargets, state.entries, state.weights, DISH_MAP, date, state.water) : null),
+    [profile, baseTargets, state.entries, state.weights, state.water, date],
   )
   const targets = useMemo(() => {
     if (!profile || !baseTargets) return null
@@ -78,6 +79,8 @@ export default function App() {
     return baseTargets
   }, [profile, baseTargets, analysis, state.settings.useAdaptiveTdee, isTrainingDay])
 
+  const dayWater = useMemo(() => state.water.filter((w) => w.date === date).sort((a, b) => (a.time || '').localeCompare(b.time || '')), [state.water, date])
+  const fluidMl = useMemo(() => fluidFromDrinks(state.entries, DISH_MAP, date), [state.entries, date])
   const dayEntries = useMemo(() => state.entries.filter((e) => e.date === date).sort((a, b) => (a.time || '').localeCompare(b.time || '')), [state.entries, date])
   const stat = useMemo(() => (targets ? dayStat(date, state.entries, DISH_MAP, targets.kcal) : null), [state.entries, date, targets])
 
@@ -200,6 +203,16 @@ export default function App() {
   }
   const undislikeDish = (id: string) => update((s) => (s.profile ? { ...s, profile: { ...s.profile, dislikedDishes: s.profile.dislikedDishes.filter((x) => x !== id) } } : s))
 
+  const addWater = (ml: number) => {
+    const w: WaterEntry = { id: uid(), date, time: date === today ? nowTimeStr() : undefined, ml: Math.round(ml) }
+    update((s) => ({ ...s, water: [...s.water, w] }))
+    show(`+${w.ml} ml`, { label: '撤销', run: () => update((s) => ({ ...s, water: s.water.filter((x) => x.id !== w.id) })) })
+  }
+  const removeWater = (id: string) => {
+    const w = state.water.find((x) => x.id === id)
+    update((s) => ({ ...s, water: s.water.filter((x) => x.id !== id) }))
+    if (w) show(`已删除 ${w.ml} ml`, { label: '撤销', run: () => update((s) => ({ ...s, water: [...s.water, w] })) })
+  }
   const addWeight = (w: WeightEntry) => {
     update((s) => ({ ...s, weights: [...s.weights.filter((x) => x.date !== w.date), w].sort((a, b) => a.date.localeCompare(b.date)) }))
     show(`已记录体重 ${w.kg} kg`)
@@ -256,13 +269,13 @@ export default function App() {
         </div>
 
         {tab === 'today' && targets && stat && (
-          <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={DISH_MAP} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickIds={quickIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} />
+          <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={DISH_MAP} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickIds={quickIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} water={dayWater} fluidMl={fluidMl} onAddWater={addWater} onRemoveWater={removeWater} />
         )}
         {tab === 'plan' && plan && targets && (
           <PlanView showSodium={showNa} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={DISH_MAP} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} />
         )}
         {tab === 'analysis' && analysis && targets && (
-          <AnalysisView vitals={state.vitals} onAddVital={addVital} onRemoveVital={removeVital} analysis={analysis} targets={targets} weights={state.weights} entries={state.entries} onAddWeight={addWeight} useAdaptive={state.settings.useAdaptiveTdee} onToggleAdaptive={setAdaptive} date={date} profile={profile} dishMap={DISH_MAP} />
+          <AnalysisView vitals={state.vitals} onAddVital={addVital} onRemoveVital={removeVital} analysis={analysis} targets={targets} weights={state.weights} entries={state.entries} water={state.water} onAddWeight={addWeight} useAdaptive={state.settings.useAdaptiveTdee} onToggleAdaptive={setAdaptive} date={date} profile={profile} dishMap={DISH_MAP} />
         )}
         {tab === 'me' && targets && (
           <MeView profile={profile} targets={targets} state={state} onEdit={() => setEditingProfile(true)} onUndislike={undislikeDish} onImport={importState} onReset={resetAll} dishMap={DISH_MAP} onSetProvider={setProvider} onSetKey={setKey} onSetConditions={setConditions} canInstall={!!installEvt} onInstall={promptInstall} />

@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { Dish, LogEntry, Profile, Targets, VitalEntry, WeightEntry } from '../core/types'
+import type { Dish, LogEntry, Profile, Targets, VitalEntry, WaterEntry, WeightEntry } from '../core/types'
+import { avgWater } from '../core/water'
 import type { Analysis, Finding } from '../core/analysis'
 import { windowStats } from '../core/analysis'
 import { macroKcalShare } from '../core/nutrition'
-import { addDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from '../core/dates'
+import { addDays, lastNDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from '../core/dates'
 import { BarChart, LineChart, Meter } from './charts'
 import { r0, showsSodium } from './format'
 import { IconAlert, IconCheck, IconChevron, IconClose, IconInfo } from './icons'
 import { Fold, Legend, ProgressRow, ShareBar, Stats } from './bits'
 
-export function AnalysisView({ analysis, targets, weights, entries, onAddWeight, useAdaptive, onToggleAdaptive, date, profile, dishMap, vitals = [], onAddVital, onRemoveVital }: {
+export function AnalysisView({ analysis, targets, weights, entries, water = [], onAddWeight, useAdaptive, onToggleAdaptive, date, profile, dishMap, vitals = [], onAddVital, onRemoveVital }: {
   /** 血压 / 血糖记录（高血压、糖尿病模式下显示） */
   vitals?: VitalEntry[]
   onAddVital?: (v: Omit<VitalEntry, 'id'>) => void
@@ -19,6 +20,7 @@ export function AnalysisView({ analysis, targets, weights, entries, onAddWeight,
   targets: Targets
   weights: WeightEntry[]
   entries: LogEntry[]
+  water?: WaterEntry[]
   dishMap: Map<string, Dish>
   onAddWeight: (w: WeightEntry) => void
   useAdaptive: boolean
@@ -47,10 +49,11 @@ export function AnalysisView({ analysis, targets, weights, entries, onAddWeight,
   const recentWeights = weights.filter((x) => x.date >= addDays(today, -60))
   const ad = analysis.adaptive
   const latest = weights[weights.length - 1]
+  const waterAvg = useMemo(() => avgWater(water, lastNDays(today, 7)), [water, today])
   const warn = analysis.findings.filter((f) => f.severity === 'warn' && (showNa || !f.key.startsWith('sodium_')))
   // 结论按宏量归位：挂到对应的条右侧；归不进去的是饮食习惯，单列
   const byMetric = useMemo(() => {
-    const m: Record<string, Finding[]> = { kcal: [], protein: [], fat: [], sodium: [], veg: [], fiber: [], fruit: [] }
+    const m: Record<string, Finding[]> = { kcal: [], protein: [], fat: [], sodium: [], veg: [], fiber: [], fruit: [], water: [] }
     const habits: Finding[] = []
     for (const f of analysis.findings) {
       const k = f.key
@@ -61,6 +64,7 @@ export function AnalysisView({ analysis, targets, weights, entries, onAddWeight,
       else if (k.startsWith('veg_')) m.veg.push(f)
       else if (k === 'fiber_low') m.fiber.push(f)
       else if (k === 'fruit_low') m.fruit.push(f)
+      else if (k.startsWith('water_')) m.water.push(f)
       else habits.push(f)
     }
     return { m, habits }
@@ -118,6 +122,7 @@ export function AnalysisView({ analysis, targets, weights, entries, onAddWeight,
             <MetricRow findings={byMetric.m.veg}><Meter label="蔬菜" value={w.avgVegServings} target={targets.vegServings} unit="份" color="var(--accent)" soft="var(--accent-soft)" /></MetricRow>
             <MetricRow findings={byMetric.m.fruit}><Meter label="水果" value={w.avgFruitG} target={targets.fruitG} unit="g" color="var(--ink-2)" soft="var(--surface-2)" /></MetricRow>
             {showNa && <MetricRow findings={byMetric.m.sodium}><Meter label="钠" value={w.avg.sodium} target={targets.sodiumMax} unit="mg" color="var(--ink-2)" soft="var(--surface-2)" /></MetricRow>}
+            {waterAvg.days > 0 && <MetricRow findings={byMetric.m.water}><Meter label="饮水" value={waterAvg.avg} target={targets.waterMl} unit="ml" color="var(--land)" soft="var(--land-2)" /></MetricRow>}
             <ShareBar protein={share.protein} fat={share.fat} carbs={share.carbs} />
             <Fold summary="供能比参考范围">蛋白 15~25%、脂肪 25~35%、碳水 45~60%。</Fold>
           </>

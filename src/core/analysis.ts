@@ -1,4 +1,5 @@
-import type { Dish, LogEntry, MealSlot, Nutrients, Profile, Targets, WeightEntry } from './types'
+import type { Dish, LogEntry, MealSlot, Nutrients, Profile, Targets, WaterEntry, WeightEntry } from './types'
+import { avgWater } from './water'
 import { MEAL_SLOTS, ZERO } from './types'
 import { add, entryNutrients, fruitGrams, isProcessedOrFried, macroKcalShare, scale, sum, vegGrams } from './nutrition'
 import { daysBetween, lastNDays } from './dates'
@@ -273,10 +274,16 @@ export interface Analysis {
   adaptive: AdaptiveTdee | null
 }
 
-export function analyze(profile: Profile, targets: Targets, entries: LogEntry[], weights: WeightEntry[], dishMap: Map<string, Dish>, endDate: string): Analysis {
+export function analyze(profile: Profile, targets: Targets, entries: LogEntry[], weights: WeightEntry[], dishMap: Map<string, Dish>, endDate: string, water: WaterEntry[] = []): Analysis {
   const window = windowStats(entries, dishMap, endDate, 7, targets.kcal)
   const adjustments = deriveAdjustments(window, targets, profile)
   const findings = buildFindings(window, targets, profile, adjustments, entries, dishMap)
+  // 饮水：只看有记录的日子，记满 3 天再评价
+  const w = avgWater(water, lastNDays(endDate, 7))
+  if (w.days >= 3) {
+    if (w.avg < targets.waterMl * 0.7) findings.push({ key: 'water_low', severity: 'info', title: '喝水偏少', detail: `记录的 ${w.days} 天日均 ${w.avg} ml，目标 ${targets.waterMl} ml。`, action: '早起一杯、每餐一杯、下午两杯就够了；含热量饮品另算，不顶白水。' })
+    else findings.push({ key: 'water_ok', severity: 'good', title: '饮水达标', detail: `记录的 ${w.days} 天日均 ${w.avg} ml。`, action: '保持。' })
+  }
   const adaptive = adaptiveTdee(entries, weights, dishMap, endDate, targets.tdee, targets.kcal)
   return { window, adjustments, findings, adaptive }
 }

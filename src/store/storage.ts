@@ -1,4 +1,4 @@
-import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry } from '../core/types'
+import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry, WaterEntry } from '../core/types'
 
 export interface CustomFood {
   id: string
@@ -19,6 +19,7 @@ export interface AppState {
   profile: Profile | null
   entries: LogEntry[]
   weights: WeightEntry[]
+  water: WaterEntry[]
   customFoods: CustomFood[]
   /** 按日期保存换一换计数，保证刷新后推荐不变 */
   planSeeds: Record<string, PlanSeed>
@@ -33,7 +34,7 @@ export interface AppState {
 export const STORAGE_KEY = 'nutri.v1'
 
 export function defaultState(): AppState {
-  return { version: 1, profile: null, entries: [], weights: [], customFoods: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' } }
+  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' } }
 }
 
 export function uid(): string {
@@ -51,6 +52,7 @@ export function normalizeState(raw: unknown): AppState {
   if (isObj(raw.profile)) s.profile = raw.profile as unknown as Profile
   if (Array.isArray(raw.entries)) s.entries = raw.entries.filter((e) => isObj(e) && typeof e.date === 'string' && typeof e.slot === 'string') as LogEntry[]
   if (Array.isArray(raw.weights)) s.weights = raw.weights.filter((w) => isObj(w) && typeof w.date === 'string' && typeof w.kg === 'number') as WeightEntry[]
+  if (Array.isArray(raw.water)) s.water = raw.water.filter((w) => isObj(w) && typeof w.date === 'string' && typeof w.ml === 'number') as WaterEntry[]
   if (Array.isArray(raw.customFoods)) s.customFoods = raw.customFoods.filter((c) => isObj(c) && typeof c.name === 'string' && isObj(c.nutrients)) as CustomFood[]
   if (isObj(raw.planSeeds)) s.planSeeds = raw.planSeeds as Record<string, PlanSeed>
   if (Array.isArray(raw.favorites)) s.favorites = raw.favorites.filter((x) => typeof x === 'string') as string[]

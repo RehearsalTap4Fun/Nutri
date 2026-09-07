@@ -211,6 +211,14 @@ export function computeTargets(p: Profile, now = new Date(), tdeeOverride?: numb
     carbs = Math.round(Math.max(0, kcal - protein * 4 - fat * 9) / 4)
   }
 
+  // 饮水：指南成年男 1700 / 女 1500 ml；孕中晚期 1700；哺乳期 2100；痛风 ≥2000；训练日 +500；老年人口渴感弱，按上限提醒
+  let waterMl = p.sex === 'male' ? 1700 : 1500
+  if (conds.includes('pregnancy') && (p.pregnancyTrimester || 2) >= 2) waterMl = Math.max(waterMl, 1700)
+  if (conds.includes('lactation')) waterMl = Math.max(waterMl, 2100)
+  if (gout) waterMl = Math.max(waterMl, 2000)
+  if (elderly) waterMl = Math.max(waterMl, 1700)
+  if (training && opts.trainingDay) waterMl += 500
+
   return {
     method,
     bmr: Math.round(bmr),
@@ -224,6 +232,7 @@ export function computeTargets(p: Profile, now = new Date(), tdeeOverride?: numb
     vegServings,
     fruitG,
     dairyG,
+    waterMl,
     evenCarbs: diabetes,
     notes,
     slotShare: slotShares(p.dietStyle, p.mealsPerDay),
