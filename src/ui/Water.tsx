@@ -66,12 +66,14 @@ export function WaterCard({ entries, targetMl, fluidMl, isToday, onSet }: {
               <button type="button" className={`pond${isLit ? ' lit' : ''}${thirsty ? ' thirsty' : ''}`}
                 aria-pressed={isLit} aria-label={`第 ${i} 杯，${fmtHour(d)} 前${isLit ? '，已喝' : thirsty ? '，到点还没喝' : ''}`} onClick={() => tap(i)}>
                 <span className="pond-water" style={{ transform: `scaleY(${fill})` }} aria-hidden />
+                {fill > 0.35 && <span className="pond-glint" aria-hidden />}
                 {thirsty && <span className="pond-drop" aria-hidden />}
               </button>
               <span className="pond-lbl">{fmtHour(d)}</span>
             </div>
           )
         })}
+        <span className="pond-base" aria-hidden />
         {isToday && <span className="pond-now" style={{ left: `${nowPct}%` }} aria-hidden />}
       </div>
       <p className="tiny muted" style={{ marginTop: 8 }}>

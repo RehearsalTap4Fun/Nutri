@@ -12,6 +12,7 @@
   --sun: #FFD23F;           /* 太阳黄：主操作、早餐、偏离 */
   --coral: #FF6B5A;
   --pond: #4FA6E3;
+  --pond-deep: #3E8FCE;   /* 水塘底色，比水面略深一点 */
   --lilac: #EBC1FF;
   --ink: #2C2E2A;
   --ink-2: #5A5D58;
@@ -71,6 +72,7 @@
     --sun: #E3B92B;
     --coral: #E36A57;
     --pond: #4E97D6;
+    --pond-deep: #3B7BB5;
     --lilac: #B48BC9;
     --ink: #ECEEE6;
     --ink-2: #B3B7AC;
@@ -466,25 +468,32 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
 .finding.open .finding-head svg { transform: rotate(90deg); }
 .finding.summary .title { font-weight: 700; }
 
-/* ========== 饮水：一排 250 ml 的小水塘沿 8~22 点排开 ========== */
-.ponds { position: relative; display: flex; gap: 6px; padding: 6px 0 4px; }
-.pond-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.pond { position: relative; width: 100%; height: 46px; border: none; padding: 0; background: var(--surface); border-radius: 46% 54% 50% 50% / 58% 52% 48% 42%; box-shadow: inset 0 0 0 1.5px var(--stroke); overflow: hidden; cursor: pointer; transition: transform var(--t-coast) var(--ease-coast), box-shadow var(--t-med); }
-.pond:nth-child(even) { border-radius: 52% 48% 56% 44% / 46% 58% 42% 54%; }
+/* ========== 饮水：一串小水塘沿 8~22 点的溪流排开 ==========
+   空塘是干河床（浅滩色 + 虚线岸），有水时是池塘蓝加一小片天光反光；底下一根细基线把塘串起来，
+   基线上的墨色刻度是「现在」。到点没喝的塘会渴：抖一下、上面掉一滴水。 */
+.ponds { position: relative; display: flex; gap: 8px; padding: 8px 0 2px; }
+.pond-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; position: relative; z-index: 1; }
+.pond { position: relative; width: 100%; height: 36px; border: none; padding: 0; background: var(--surface-2); border-radius: 58% 42% 55% 45% / 62% 60% 40% 38%; overflow: hidden; cursor: pointer; box-shadow: inset 0 0 0 1.5px transparent; transition: transform var(--t-coast) var(--ease-coast), box-shadow var(--t-med), background var(--t-med); }
+.pond-slot:nth-child(even) .pond { border-radius: 44% 56% 48% 52% / 40% 42% 58% 60%; }
+.pond::before { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 1.5px dashed var(--axis); opacity: 1; transition: opacity var(--t-med); pointer-events: none; }
+.pond:hover { transform: translateY(-1px); }
 .pond:active { transform: scale(.94); }
-.pond.lit { box-shadow: inset 0 0 0 1.5px var(--pond); }
+.pond.lit { background: var(--pond-deep, #3E8FCE); }
+.pond.lit::before { opacity: 0; }
 .pond-water { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; background: var(--pond); transform-origin: 50% 100%; transition: transform var(--t-coast) var(--ease-coast); }
-.pond-lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; letter-spacing: -0.02em; white-space: nowrap; line-height: 1; }
+.pond-glint { position: absolute; left: 18%; top: 18%; width: 34%; height: 24%; border-radius: 60% 40% 55% 45% / 55% 65% 35% 45%; background: rgba(255, 255, 255, .55); pointer-events: none; }
+.pond-base { position: absolute; left: 4px; right: 4px; top: 50px; height: 1px; background: var(--hair); z-index: 0; }
+.pond-lbl { font-size: 10px; font-weight: 600; color: var(--faint); text-align: center; letter-spacing: -0.02em; white-space: nowrap; line-height: 1; }
 .pond-slot.lit .pond-lbl { color: var(--fat-text); }
-.pond-now { position: absolute; top: 54px; width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--ink); transform: translateX(-50%); }
-/* 口渴：到点没喝的水塘轻轻发抖，顶上冒一颗小水滴 */
-.pond.thirsty { animation: thirsty 2.6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 180ms); box-shadow: inset 0 0 0 1.5px var(--stroke), inset 0 -6px 0 var(--surface-2); }
-.pond-drop { position: absolute; left: 50%; top: 9px; width: 8px; height: 10px; margin-left: -4px; background: var(--pond); border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%; opacity: .9; animation: drop 2.6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 180ms); }
-@keyframes thirsty { 0%, 70%, 100% { transform: none; } 76% { transform: rotate(-4deg) scale(1.02, .97); } 82% { transform: rotate(4deg) scale(.98, 1.03); } 88% { transform: rotate(-2deg); } 94% { transform: rotate(2deg); } }
-@keyframes drop { 0%, 60%, 100% { transform: translateY(0); opacity: .9; } 78% { transform: translateY(6px) scale(1.15); opacity: 1; } 90% { transform: translateY(2px); } }
+.pond-now { position: absolute; top: 44px; width: 2px; height: 13px; background: var(--ink); border-radius: 1px; transform: translateX(-50%); z-index: 2; }
+/* 口渴：干塘轻轻发抖，一滴水从上面掉进来 */
+.pond.thirsty { animation: thirsty 2.6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 180ms); }
+.pond.thirsty::before { border-color: var(--pond); opacity: .8; }
+.pond-drop { position: absolute; left: 50%; top: -12px; width: 9px; height: 12px; margin-left: -4.5px; background: var(--pond); border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%; animation: drop 2.6s ease-in infinite; animation-delay: calc(var(--i, 0) * 180ms); }
+@keyframes thirsty { 0%, 70%, 100% { transform: none; } 76% { transform: rotate(-3deg) scale(1.02, .97); } 82% { transform: rotate(3deg) scale(.98, 1.03); } 88% { transform: rotate(-1.5deg); } 94% { transform: rotate(1.5deg); } }
+@keyframes drop { 0%, 55% { transform: translateY(0); opacity: 0; } 62% { opacity: 1; } 78% { transform: translateY(26px) scale(1, 1.1); opacity: 1; } 84%, 100% { transform: translateY(30px) scale(1.6, .3); opacity: 0; } }
 /* 全部点亮：整排荡一下水波 */
 .ponds.done .pond { animation: ripple .7s var(--ease-coast) 1; animation-delay: calc(var(--i, 0) * 60ms); }
-.pond.thirsty { --i: inherit; }
 @keyframes ripple { 0% { transform: none; } 40% { transform: translateY(-6px) scale(1.06); } 100% { transform: none; } }
 
 /* ========== Toast：墨色胶囊 ========== */
