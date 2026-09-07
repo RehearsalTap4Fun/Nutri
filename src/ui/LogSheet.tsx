@@ -13,6 +13,7 @@ import { ScanPanel } from './ScanPanel'
 import { IconScan, IconSparkle, IconStar, IconClose } from './icons'
 import { Stats } from './bits'
 import type { LlmConfig } from '../llm/mealParser'
+import { searchFoods, type FoodPick } from './foodSearch'
 
 export type LogSheetResult =
   | { kind: 'save'; entry: LogEntry }
@@ -21,7 +22,7 @@ export type LogSheetResult =
   | { kind: 'needKey' }
   | { kind: 'close' }
 
-type Pick = { kind: 'dish'; dish: Dish } | { kind: 'custom'; food: CustomFood }
+type Pick = FoodPick
 
 const CAT_CHIPS: Array<DishCategory | 'all'> = ['all', 'staple', 'protein', 'veg', 'soup', 'breakfast', 'combo', 'snack', 'fruit', 'drink']
 
@@ -97,7 +98,7 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
     }
   }
 
-  const results = useMemo(() => searchDishes(q, cat, dishes, customFoods, favorites, recentDishIds, dishMap), [q, cat, dishes, customFoods, favorites, recentDishIds, dishMap])
+  const results = useMemo(() => searchFoods(q, cat, dishes, customFoods, favorites, recentDishIds, dishMap), [q, cat, dishes, customFoods, favorites, recentDishIds, dishMap])
 
   const lowSaltable = pick?.kind === 'dish' && canLowSalt(pick.dish)
   const lowOilable = pick?.kind === 'dish' && canLowOil(pick.dish)
@@ -370,33 +371,3 @@ function CustomForm({ onCancel, onDone, onDoneDish, barcode }: { onCancel: () =>
   )
 }
 
-function searchDishes(q: string, cat: DishCategory | 'all', dishes: Dish[], customFoods: CustomFood[], favorites: string[], recent: string[], dishMap: Map<string, Dish>): Pick[] {
-  const query = q.trim().toLowerCase()
-  const out: Pick[] = []
-  if (!query) {
-    if (cat === 'all') {
-      const ids = [...new Set([...recent, ...favorites])]
-      for (const id of ids) { const d = dishMap.get(id); if (d) out.push({ kind: 'dish', dish: d }) }
-      for (const f of customFoods.slice(0, 6)) out.push({ kind: 'custom', food: f })
-      if (out.length) return out
-      // 首次使用：展示常见家常菜
-      return dishes.filter((d) => d.cuisine === 'cn').slice(0, 40).map((d) => ({ kind: 'dish', dish: d }))
-    }
-    return dishes.filter((d) => d.cat === cat).map((d) => ({ kind: 'dish', dish: d }))
-  }
-  const scored: Array<{ s: number; p: Pick }> = []
-  for (const d of dishes) {
-    if (cat !== 'all' && d.cat !== cat) continue
-    const name = d.name.toLowerCase()
-    let s = 0
-    if (name === query) s = 100
-    else if (name.startsWith(query)) s = 80
-    else if (name.includes(query)) s = 60
-    else if (d.aliases?.some((a) => a.toLowerCase().includes(query))) s = 40
-    else if (query.length >= 2 && [...query].every((ch) => name.includes(ch))) s = 20
-    if (s) scored.push({ s: s + (favorites.includes(d.id) ? 5 : 0) + (recent.includes(d.id) ? 3 : 0), p: { kind: 'dish', dish: d } })
-  }
-  for (const f of customFoods) if (f.name.toLowerCase().includes(query)) scored.push({ s: 70, p: { kind: 'custom', food: f } })
-  scored.sort((a, b) => b.s - a.s)
-  return scored.slice(0, 60).map((x) => x.p)
-}

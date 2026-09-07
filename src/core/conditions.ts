@@ -41,6 +41,7 @@ const LEAN_PROTEIN = new Set(['chicken_breast', 'egg_white', 'egg', 'fish_freshw
 const ACIDIC = new Set(['tomato', 'cherry_tomato', 'orange', 'lemon', 'pomelo', 'vinegar', 'ketchup', 'orange_juice'])
 const CARBONATED = new Set(['cola', 'cola_zero', 'beer', 'sports_drink'])
 const SOFT_PROTEIN = new Set(['egg', 'tofu', 'tofu_soft', 'fish_freshwater', 'fish_bass', 'salmon', 'shrimp', 'milk', 'yogurt', 'greek_yogurt', 'chicken_breast'])
+const HARD_TO_CHEW = new Set(['beef_jerky', 'nuts_mixed', 'peanut', 'walnut', 'almond'])
 
 function has(dish: Dish, set: Set<string>, minG = 0): boolean {
   return dish.parts.some((p) => set.has(p.ing) && p.g >= minG)
@@ -97,6 +98,23 @@ export function isFattyMeat(dish: Dish): boolean {
   return has(dish, FATTY_MEAT, 40)
 }
 
+export function isAcidicDish(dish: Dish): boolean {
+  return has(dish, ACIDIC, 80)
+}
+export function isHighMercuryFish(dish: Dish): boolean {
+  return has(dish, HIGH_MERCURY_HINT)
+}
+export function isCarbonatedDish(dish: Dish): boolean {
+  return has(dish, CARBONATED, 100)
+}
+/** 反流模式的硬触发：辛辣、油炸、咖啡浓茶、酒精、碳酸、辣/巧克力类调味 */
+export function isGerdTrigger(dish: Dish): boolean {
+  return tag(dish, 'spicy') || dish.cook === 'fried' || isCaffeine(dish) || isAlcohol(dish) || isCarbonatedDish(dish) || has(dish, new Set(['chocolate', 'chili_oil', 'chili_sauce', 'doubanjiang', 'chili_fresh']), 5)
+}
+export function isHardToChew(dish: Dish): boolean {
+  return has(dish, HARD_TO_CHEW, 20)
+}
+
 /** 推荐时的硬排除 */
 export function conditionExcludes(dish: Dish, p: Profile): boolean {
   const c = p.conditions || []
@@ -109,7 +127,7 @@ export function conditionExcludes(dish: Dish, p: Profile): boolean {
   if (c.includes('fatty_liver') && (isSugary(dish) || isAlcohol(dish))) return true
   if (c.includes('gout') && (isHighPurine(dish) || isAlcohol(dish) || isSugary(dish))) return true
   if (c.includes('preconception') && (isAlcohol(dish) || isRaw(dish) || isSugary(dish))) return true
-  if (c.includes('gerd') && (tag(dish, 'spicy') || dish.cook === 'fried' || isCaffeine(dish) || isAlcohol(dish) || has(dish, CARBONATED, 100) || has(dish, new Set(['chocolate', 'chili_oil', 'chili_sauce', 'doubanjiang', 'chili_fresh']), 5))) return true
+  if (c.includes('gerd') && isGerdTrigger(dish)) return true
   return false
 }
 
@@ -203,7 +221,7 @@ export function conditionWeight(dish: Dish, role: string, p: Profile): { w: numb
     if (tag(dish, 'stew') || dish.cat === 'soup') { w *= 1.3; reason = reason || '老年人模式：软烂好消化' }
     if (has(dish, SOFT_PROTEIN, 60)) { w *= 1.3; reason = reason || '老年人模式：优质易消化蛋白' }
     if (dairyGrams(dish) >= 150) w *= 1.4
-    if (has(dish, new Set(['beef_jerky', 'nuts_mixed', 'peanut', 'walnut', 'almond']), 20)) w *= 0.5
+    if (isHardToChew(dish)) w *= 0.5
     if (dish.cuisine === 'takeout' || dish.cuisine === 'convenience') w *= 0.5
   }
   return { w, reason }

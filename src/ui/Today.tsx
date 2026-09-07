@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type React from 'react'
 import type { Dish, LogEntry, MealSlot, Targets, WaterEntry } from '../core/types'
+import type { CustomFood } from '../store/storage'
 import { WaterCard } from './Water'
 import { MEAL_SLOTS } from '../core/types'
 import type { DayStat } from '../core/analysis'
@@ -13,11 +14,12 @@ import { IconBowl, IconClose, IconPlus } from './icons'
 import { SLOT_LABEL, portionLabel, r0, showsSodium, withoutSodiumNotes } from './format'
 import { CONDITION_LABEL } from '../core/conditions'
 import { SignalChips } from './bits'
+import { CanIEat } from './CanIEat'
 
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
 
-export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike }: {
+export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, dishes, customFoods, favorites, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike }: {
   water: WaterEntry[]
   fluidMl: number
   /** 把这一天的饮水总量设为 ml */
@@ -42,6 +44,10 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   targets: Targets
   stat: DayStat
   dishMap: Map<string, Dish>
+  /** 「能不能吃」搜索用：全部菜品与自建食物 */
+  dishes: Dish[]
+  customFoods: CustomFood[]
+  favorites: string[]
   onAdd: (slot?: MealSlot) => void
   onEdit: (e: LogEntry) => void
   planNotes: string[]
@@ -167,6 +173,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
       )}
       <WaterCard entries={water} targetMl={targets.waterMl} fluidMl={fluidMl} isToday={date === todayStr()} onSet={onSetWater} />
 
+      <CanIEat dishes={dishes} dishMap={dishMap} customFoods={customFoods} favorites={favorites} recentDishIds={quickIds} conditions={conditions} targets={targets} todaySoFar={n} showSodium={showNa} nextSlot={nextSlot} onQuickLog={onQuickLog} />
 
       <div className="card">
         <div className="section-title"><h2>今日记录</h2><span className="small muted">{entries.length ? `${entries.length} 条` : ''}</span></div>
