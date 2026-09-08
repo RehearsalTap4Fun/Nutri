@@ -37,6 +37,12 @@ export function nowTimeStr(now = new Date()): string {
   return `${pad2(now.getHours())}:${pad2(now.getMinutes())}`
 }
 
+/** 现在往前推 N 分钟的时刻（HH:mm）：记录时手动改时间用，跨零点就夹到 00:00 */
+export function minutesAgoTimeStr(minutesAgo: number, now = new Date()): string {
+  const mins = Math.max(0, now.getHours() * 60 + now.getMinutes() - minutesAgo)
+  return `${pad2(Math.floor(mins / 60))}:${pad2(mins % 60)}`
+}
+
 export function weekdayLabel(s: string): string {
   return ['日', '一', '二', '三', '四', '五', '六'][parseDate(s).getDay()]
 }

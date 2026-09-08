@@ -6,7 +6,7 @@ import { INGREDIENTS, INGREDIENT_MAP } from '../data/ingredients'
 import type { Ingredient } from '../core/types'
 import type { CustomFood } from '../store/storage'
 import { uid } from '../store/storage'
-import { nowTimeStr } from '../core/dates'
+import { minutesAgoTimeStr, nowTimeStr } from '../core/dates'
 import { CAT_LABEL, COOK_LABEL, CUISINE_LABEL, SLOT_LABEL, defaultTimeForSlot, portionText, r0 } from './format'
 import { SpeakPanel } from './SpeakPanel'
 import { ScanPanel } from './ScanPanel'
@@ -233,6 +233,14 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
                 </div>
                 <div className="field"><label>时间</label><input type="time" value={time} onChange={(e) => setTime(e.target.value)} /></div>
               </div>
+              {isToday && (
+                <div className="row wrap" style={{ gap: 6 }}>
+                  {[[0, '刚刚'], [15, '15分钟前'], [30, '30分钟前'], [60, '1小时前'], [120, '2小时前']].map(([mins, label]) => {
+                    const t = minutesAgoTimeStr(mins as number)
+                    return <button key={mins} className={`chip${time === t ? ' on' : ''}`} onClick={() => setTime(t)}>{label}</button>
+                  })}
+                </div>
+              )}
               <Stats dense items={[
                 { label: '热量', value: r0(now.kcal), unit: '千卡' },
                 { label: '蛋白', value: r0(now.protein), unit: 'g' },
