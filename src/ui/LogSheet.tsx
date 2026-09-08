@@ -26,7 +26,7 @@ type Pick = FoodPick
 
 const CAT_CHIPS: Array<DishCategory | 'all'> = ['all', 'staple', 'protein', 'veg', 'soup', 'breakfast', 'combo', 'snack', 'fruit', 'drink']
 
-export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot, editing, dishes, dishMap, customFoods, favorites, recentDishIds, onResult, onAddCustomFood, onAddCustomDish, onToggleFavorite, llm, defaultLowSalt = false }: {
+export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot, editing, dishes, dishMap, customFoods, favorites, recentBySlot, onResult, onAddCustomFood, onAddCustomDish, onToggleFavorite, llm, defaultLowSalt = false }: {
   defaultLowSalt?: boolean
   /** 只有高血压模式显示钠 */
   showSodium?: boolean
@@ -39,7 +39,8 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
   dishMap: Map<string, Dish>
   customFoods: CustomFood[]
   favorites: string[]
-  recentDishIds: string[]
+  /** 各餐次的常吃菜 id；默认列表跟着当前选中的餐次变 */
+  recentBySlot: Partial<Record<MealSlot, string[]>>
   onResult: (r: LogSheetResult) => void
   onAddCustomFood: (f: CustomFood) => void
   onAddCustomDish: (d: Dish) => void
@@ -98,6 +99,7 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
     }
   }
 
+  const recentDishIds = recentBySlot[slot] || []
   const results = useMemo(() => searchFoods(q, cat, dishes, customFoods, favorites, recentDishIds, dishMap), [q, cat, dishes, customFoods, favorites, recentDishIds, dishMap])
 
   const lowSaltable = pick?.kind === 'dish' && canLowSalt(pick.dish)
@@ -151,7 +153,7 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
               {CAT_CHIPS.map((c) => <button key={c} className={`chip${cat === c ? ' on' : ''}`} onClick={() => setCat(c)}>{c === 'all' ? '全部' : CAT_LABEL[c]}</button>)}
             </div>
             <div className="card" style={{ padding: '4px 14px' }}>
-              {!q && cat === 'all' && results.length > 0 && <div className="slot-head"><span>最近吃过 / 收藏</span></div>}
+              {!q && cat === 'all' && results.length > 0 && <div className="slot-head"><span>{SLOT_LABEL[slot]}常吃 / 收藏</span></div>}
               <div className="list">
                 {results.map((r) => {
                   if (r.kind === 'custom') {

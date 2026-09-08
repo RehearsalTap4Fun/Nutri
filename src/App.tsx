@@ -6,6 +6,7 @@ import { computeTargets } from './core/energy'
 import { analyze, dayStat } from './core/analysis'
 import { planDay } from './core/planner'
 import { remainOf, suggestForBudget } from './core/budget'
+import { frequentBySlot, frequentDishes } from './core/recent'
 import type { MealPlan } from './core/planner'
 import { DISHES, DISH_MAP } from './data/dishes/index'
 import { addDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from './core/dates'
@@ -103,8 +104,16 @@ export default function App() {
     })
   }, [profile, targets, analysis, stat, state.planSeeds, state.entries, date, dishMap, allDishes])
 
-  const recentDishIds = useMemoRecent(state.entries, today)
-  const quickIds = useMemo(() => [...new Set([...recentDishIds, ...state.favorites])], [recentDishIds, state.favorites])
+  // 常吃：不分餐次的总榜给「能不能吃」搜索与预算建议加分用；分餐次的给今日页一键补记与录入页默认列表
+  const recentDishIds = useMemo(() => frequentDishes(state.entries, today), [state.entries, today])
+  const recentBySlot = useMemo(() => frequentBySlot(state.entries, today), [state.entries, today])
+  // 每个餐次的一键补记候选：该餐次常吃 → 适合该餐次的收藏 → 总榜里适合该餐次的菜补位
+  const quickBySlot = useMemo(() => {
+    const fits = (id: string, s: MealSlot) => !!dishMap.get(id)?.slots.includes(s)
+    const o = {} as Record<MealSlot, string[]>
+    for (const s of MEAL_SLOTS) o[s] = [...new Set([...recentBySlot[s], ...state.favorites.filter((id) => fits(id, s)), ...recentDishIds.filter((id) => fits(id, s))])]
+    return o
+  }, [recentBySlot, recentDishIds, state.favorites, dishMap])
   // 下一餐是哪一餐：今天按当前时间猜，其他日期按第一个没记录的餐次
   const nextSlot: MealSlot = useMemo(() => {
     const empty = MEAL_SLOTS.filter((s) => s !== 'snack' && !dayEntries.some((e) => e.slot === s))
@@ -353,7 +362,7 @@ export default function App() {
         </div>
 
         {tab === 'today' && targets && stat && (
-          <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} dishes={allDishes} customFoods={state.customFoods} favorites={state.favorites} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickIds={quickIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} onDislike={dislikeDish} water={dayWater} fluidMl={fluidMl} onSetWater={setWater} />
+          <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} dishes={allDishes} customFoods={state.customFoods} favorites={state.favorites} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickBySlot={quickBySlot} recentDishIds={recentDishIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} onDislike={dislikeDish} water={dayWater} fluidMl={fluidMl} onSetWater={setWater} />
         )}
         {tab === 'plan' && plan && targets && (
           <PlanView showSodium={showNa} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} />
@@ -382,23 +391,10 @@ export default function App() {
 
       {sheet && (
         <LogSheet showSodium={showNa} date={date} isToday={date === today} slot={sheet.slot} editing={sheet.editing} dishes={allDishes} dishMap={dishMap} customFoods={state.customFoods}
-          favorites={state.favorites} recentDishIds={recentDishIds} onResult={onSheetResult} onAddCustomFood={addCustomFood} onAddCustomDish={addCustomDish} onToggleFavorite={toggleFavorite} llm={llm} defaultLowSalt={profile.conditions.includes('hypertension')} />
+          favorites={state.favorites} recentBySlot={recentBySlot} onResult={onSheetResult} onAddCustomFood={addCustomFood} onAddCustomDish={addCustomDish} onToggleFavorite={toggleFavorite} llm={llm} defaultLowSalt={profile.conditions.includes('hypertension')} />
       )}
       <Toast toast={toast} onDismiss={dismiss} />
     </>
   )
 }
 
-function useMemoRecent(entries: LogEntry[], today: string): string[] {
-  return useMemo(() => {
-    const from = addDays(today, -14)
-    const seen = new Set<string>()
-    const out: string[] = []
-    const sorted = [...entries].filter((e) => e.dishId && e.date >= from).sort((a, b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || '')))
-    for (const e of sorted) {
-      if (e.dishId && !seen.has(e.dishId)) { seen.add(e.dishId); out.push(e.dishId) }
-      if (out.length >= 12) break
-    }
-    return out
-  }, [entries, today])
-}

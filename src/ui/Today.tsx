@@ -19,7 +19,7 @@ import { CanIEat } from './CanIEat'
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
 
-export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, dishes, customFoods, favorites, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike }: {
+export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, dishes, customFoods, favorites, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickBySlot = {}, recentDishIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike }: {
   water: WaterEntry[]
   fluidMl: number
   /** 把这一天的饮水总量设为 ml */
@@ -29,8 +29,10 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   /** 「不喜欢」：进不推荐名单（与推荐页的叉同义），列表随即补上下一个候选 */
   onDislike?: (dishId: string) => void
   nextSlot?: MealSlot
-  /** 最近吃过与收藏的菜 id，用于空餐次的一键补记 */
-  quickIds?: string[]
+  /** 每个餐次各自的常吃菜 id（含适合该餐次的收藏），用于空餐次的一键补记 */
+  quickBySlot?: Partial<Record<MealSlot, string[]>>
+  /** 不分餐次的常吃，给「能不能吃」的搜索排序用 */
+  recentDishIds?: string[]
   onQuickLog?: (slot: MealSlot, dishId: string, portion?: number) => void
   /** 删除一条记录（调用方负责 toast 撤销） */
   onRemove?: (e: LogEntry) => void
@@ -173,7 +175,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
       )}
       <WaterCard entries={water} targetMl={targets.waterMl} fluidMl={fluidMl} isToday={date === todayStr()} onSet={onSetWater} />
 
-      <CanIEat dishes={dishes} dishMap={dishMap} customFoods={customFoods} favorites={favorites} recentDishIds={quickIds} conditions={conditions} targets={targets} todaySoFar={n} showSodium={showNa} nextSlot={nextSlot} onQuickLog={onQuickLog} />
+      <CanIEat dishes={dishes} dishMap={dishMap} customFoods={customFoods} favorites={favorites} recentDishIds={recentDishIds} conditions={conditions} targets={targets} todaySoFar={n} showSodium={showNa} nextSlot={nextSlot} onQuickLog={onQuickLog} />
 
       <div className="card">
         <div className="section-title"><h2>今日记录</h2><span className="small muted">{entries.length ? `${entries.length} 条` : ''}</span></div>
@@ -188,7 +190,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
         {slots.map((slot) => {
           const list = entries.filter((e) => e.slot === slot)
           const kcal = stat.bySlot[slot].kcal
-          const quick = list.length === 0 && onQuickLog ? quickIds.map((id) => dishMap.get(id)).filter((d): d is Dish => !!d && d.slots.includes(slot)).slice(0, 3) : []
+          const quick = list.length === 0 && onQuickLog ? (quickBySlot[slot] || []).map((id) => dishMap.get(id)).filter((d): d is Dish => !!d).slice(0, 3) : []
           return (
             <div key={slot}>
               <div className="slot-head">
