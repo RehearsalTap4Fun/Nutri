@@ -5,10 +5,10 @@ import { D } from './helper'
 export const DISHES_CONVENIENCE_MORE: Dish[] = [
   // ===== 便利店即食 =====
   D('cv2_onigiri_tuna', '金枪鱼饭团', 'staple', 'convenience', 'light', 'BLS', '1个(约110g)', [
-    ['rice_cooked', 85], ['tuna_canned', 15], ['mayonnaise', 6], ['nori', 2], ['salt', 0.5],
+    ['rice_pressed', 85], ['tuna_canned', 15], ['mayonnaise', 6], ['nori', 2], ['salt', 0.5],
   ]),
   D('cv2_onigiri_plum', '梅子饭团', 'staple', 'convenience', 'light', 'BLS', '1个(约100g)', [
-    ['rice_cooked', 92], ['nori', 2], ['plum', 6], ['salt', 0.6],
+    ['rice_pressed', 92], ['nori', 2], ['plum', 6], ['salt', 0.6],
   ]),
   D('cv2_chicken_salad_cup', '鸡肉沙拉杯', 'protein', 'convenience', 'light', 'LDS', '1杯(约220g)', [
     ['chicken_breast', 70], ['lettuce', 60], ['cherry_tomato', 40], ['sweet_corn_canned', 30], ['vinaigrette', 15],
@@ -94,19 +94,19 @@ export const DISHES_CONVENIENCE_MORE: Dish[] = [
   ], { tags: ['sweet'] }),
   // ===== 水果（新增品种）=====
   D('cv2_pineapple', '菠萝', 'fruit', 'convenience', 'light', 'BLDS', '1小碗(约150g)', [['pineapple', 150]]),
-  D('cv2_cherry', '樱桃/车厘子', 'fruit', 'convenience', 'light', 'BLDS', '1小碗(约120g)', [['cherry', 120]]),
+  D('cv2_cherry', '樱桃/车厘子', 'fruit', 'convenience', 'light', 'BLDS', '1小碗(去核可食约110g)', [['cherry', 110]]),
   D('cv2_cantaloupe', '哈密瓜', 'fruit', 'convenience', 'light', 'BLDS', '2块(约200g)', [['cantaloupe', 200]]),
-  D('cv2_lychee', '荔枝', 'fruit', 'convenience', 'light', 'BLDS', '8颗(约120g)', [['lychee', 120]]),
-  D('cv2_longan', '龙眼', 'fruit', 'convenience', 'light', 'BLDS', '10颗(约100g)', [['longan', 100]]),
+  D('cv2_lychee', '荔枝', 'fruit', 'convenience', 'light', 'BLDS', '8颗(去壳去核可食约85g)', [['lychee', 85]]),
+  D('cv2_longan', '龙眼', 'fruit', 'convenience', 'light', 'BLDS', '10颗(去壳去核可食约65g)', [['longan', 65]]),
   D('cv2_durian', '榴莲', 'fruit', 'convenience', 'light', 'S', '1瓣(约120g)', [['durian', 120]]),
-  D('cv2_pomegranate', '石榴', 'fruit', 'convenience', 'light', 'BLDS', '半个(约120g)', [['pomegranate', 120]]),
-  D('cv2_papaya', '木瓜', 'fruit', 'convenience', 'light', 'BLDS', '半个(约200g)', [['papaya', 200]]),
-  D('cv2_persimmon', '柿子', 'fruit', 'convenience', 'light', 'BLDS', '1个(约170g)', [['persimmon', 170]]),
-  D('cv2_loquat', '枇杷', 'fruit', 'convenience', 'light', 'BLDS', '6个(约150g)', [['loquat', 150]]),
-  D('cv2_mandarin', '橘子/砂糖橘', 'fruit', 'convenience', 'light', 'BLDS', '3个(约150g)', [['mandarin', 150]]),
-  D('cv2_grapefruit', '西柚', 'fruit', 'convenience', 'light', 'BLDS', '半个(约180g)', [['grapefruit', 180]]),
-  D('cv2_plum', '李子', 'fruit', 'convenience', 'light', 'BLDS', '2个(约130g)', [['plum', 130]]),
-  D('cv2_apricot', '杏', 'fruit', 'convenience', 'light', 'BLDS', '3个(约120g)', [['apricot', 120]]),
+  D('cv2_pomegranate', '石榴', 'fruit', 'convenience', 'light', 'BLDS', '半个(籽粒可食约60g)', [['pomegranate', 60]]),
+  D('cv2_papaya', '木瓜', 'fruit', 'convenience', 'light', 'BLDS', '半个(可食约150g)', [['papaya', 150]]),
+  D('cv2_persimmon', '柿子', 'fruit', 'convenience', 'light', 'BLDS', '1个(可食约145g)', [['persimmon', 145]]),
+  D('cv2_loquat', '枇杷', 'fruit', 'convenience', 'light', 'BLDS', '6个(去皮去核可食约100g)', [['loquat', 100]]),
+  D('cv2_mandarin', '橘子/砂糖橘', 'fruit', 'convenience', 'light', 'BLDS', '3个(去皮可食约115g)', [['mandarin', 115]]),
+  D('cv2_grapefruit', '西柚', 'fruit', 'convenience', 'light', 'BLDS', '半个(可食约120g)', [['grapefruit', 120]]),
+  D('cv2_plum', '李子', 'fruit', 'convenience', 'light', 'BLDS', '2个(可食约120g)', [['plum', 120]]),
+  D('cv2_apricot', '杏', 'fruit', 'convenience', 'light', 'BLDS', '3个(去核可食约110g)', [['apricot', 110]]),
   D('cv2_fig', '无花果', 'fruit', 'convenience', 'light', 'BLDS', '3个(约120g)', [['fig', 120]]),
   D('cv2_coconut_water', '椰子水', 'drink', 'convenience', 'light', 'BLDS', '1瓶(330ml)', [['coconut_water', 330]]),
   // ===== 奶与甜品 =====

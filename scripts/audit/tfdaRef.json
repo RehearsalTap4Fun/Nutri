@@ -1,0 +1,3852 @@
+[
+{
+"id": "rice_cooked",
+"name": "米饭",
+"tw": {
+"id": "A04902",
+"name": "白飯",
+"kcal": 183.0,
+"protein": 3.1,
+"fat": 0.3,
+"carbs": 41.0,
+"fiber": 0.6,
+"waste": null
+}
+},
+{
+"id": "rice_raw",
+"name": "大米(生)",
+"tw": {
+"id": "A032",
+"name": "粳米平均值",
+"kcal": 354.0,
+"protein": 7.0,
+"fat": 0.7,
+"carbs": 77.8,
+"fiber": 0.7,
+"waste": null
+}
+},
+{
+"id": "glutinous_rice_raw",
+"name": "糯米(生)",
+"tw": {
+"id": "A036",
+"name": "白粳糯米平均值",
+"kcal": 358.0,
+"protein": 8.3,
+"fat": 0.8,
+"carbs": 77.4,
+"fiber": 0.7,
+"waste": null
+}
+},
+{
+"id": "oats",
+"name": "燕麦片(干)",
+"tw": {
+"id": "A05303",
+"name": "燕麥片",
+"kcal": 393.0,
+"protein": 12.3,
+"fat": 9.7,
+"carbs": 64.1,
+"fiber": 4.7,
+"waste": null
+}
+},
+{
+"id": "noodles_raw",
+"name": "面条/挂面(生)",
+"tw": {
+"id": "A01601",
+"name": "乾麵條",
+"kcal": 357.0,
+"protein": 11.5,
+"fat": 1.4,
+"carbs": 74.6,
+"fiber": 1.9,
+"waste": null
+}
+},
+{
+"id": "glass_noodles_dry",
+"name": "粉丝(干)",
+"tw": {
+"id": "H01502",
+"name": "冬粉",
+"kcal": 351.0,
+"protein": 0.1,
+"fat": 0.1,
+"carbs": 87.5,
+"fiber": 1.4,
+"waste": null
+}
+},
+{
+"id": "flour",
+"name": "面粉",
+"tw": {
+"id": "A01101",
+"name": "中筋麵粉",
+"kcal": 361.0,
+"protein": 11.5,
+"fat": 1.3,
+"carbs": 74.1,
+"fiber": 1.8,
+"waste": null
+}
+},
+{
+"id": "dumpling_wrapper",
+"name": "饺子皮",
+"tw": {
+"id": "A00801",
+"name": "水餃皮",
+"kcal": 264.0,
+"protein": 7.8,
+"fat": 0.5,
+"carbs": 57.0,
+"fiber": 1.5,
+"waste": null
+}
+},
+{
+"id": "steamed_bun",
+"name": "馒头",
+"tw": {
+"id": "R05601",
+"name": "白饅頭",
+"kcal": 248.0,
+"protein": 8.1,
+"fat": 1.2,
+"carbs": 51.3,
+"fiber": 1.1,
+"waste": null
+}
+},
+{
+"id": "bread_white",
+"name": "白吐司",
+"tw": {
+"id": "Q03101",
+"name": "土司",
+"kcal": 289.0,
+"protein": 9.5,
+"fat": 6.3,
+"carbs": 48.6,
+"fiber": 3.0,
+"waste": null
+}
+},
+{
+"id": "burger_bun",
+"name": "汉堡胚",
+"tw": {
+"id": "Q03601",
+"name": "漢堡包",
+"kcal": 322.0,
+"protein": 9.1,
+"fat": 7.4,
+"carbs": 54.9,
+"fiber": 3.0,
+"waste": null
+}
+},
+{
+"id": "croissant",
+"name": "可颂",
+"tw": {
+"id": "Q02101",
+"name": "可頌",
+"kcal": 452.0,
+"protein": 7.3,
+"fat": 26.1,
+"carbs": 47.1,
+"fiber": 2.1,
+"waste": null
+}
+},
+{
+"id": "rice_cake",
+"name": "年糕",
+"tw": {
+"id": "Q00101",
+"name": "冷藏寧波年糕",
+"kcal": 220.0,
+"protein": 3.9,
+"fat": 0.6,
+"carbs": 49.7,
+"fiber": 0.6,
+"waste": null
+}
+},
+{
+"id": "youtiao",
+"name": "油条",
+"tw": {
+"id": "R03601",
+"name": "油條",
+"kcal": 551.0,
+"protein": 10.1,
+"fat": 40.2,
+"carbs": 37.3,
+"fiber": 1.6,
+"waste": null
+}
+},
+{
+"id": "corn",
+"name": "玉米(鲜)",
+"tw": {
+"id": "A02401",
+"name": "甜玉米",
+"kcal": 107.0,
+"protein": 3.3,
+"fat": 2.5,
+"carbs": 17.8,
+"fiber": 4.7,
+"waste": "38.7"
+}
+},
+{
+"id": "starch",
+"name": "淀粉",
+"tw": {
+"id": "A02901",
+"name": "玉米粉",
+"kcal": 369.0,
+"protein": 0.3,
+"fat": 0.4,
+"carbs": 88.3,
+"fiber": 0.2,
+"waste": null
+}
+},
+{
+"id": "potato",
+"name": "土豆",
+"tw": {
+"id": "B01501",
+"name": "馬鈴薯",
+"kcal": 77.0,
+"protein": 2.6,
+"fat": 0.2,
+"carbs": 15.8,
+"fiber": 1.3,
+"waste": "9.8"
+}
+},
+{
+"id": "sweet_potato",
+"name": "红薯",
+"tw": {
+"id": "B00213",
+"name": "紅薯",
+"kcal": 92.0,
+"protein": 2.8,
+"fat": 0.1,
+"carbs": 19.6,
+"fiber": 1.1,
+"waste": "17.4"
+}
+},
+{
+"id": "taro",
+"name": "芋头",
+"tw": {
+"id": "B010",
+"name": "芋頭平均值",
+"kcal": 121.0,
+"protein": 2.0,
+"fat": 0.8,
+"carbs": 25.8,
+"fiber": 2.6,
+"waste": "13.9"
+}
+},
+{
+"id": "yam",
+"name": "山药",
+"tw": {
+"id": "B002",
+"name": "山藥平均值",
+"kcal": 87.0,
+"protein": 2.9,
+"fat": 0.1,
+"carbs": 18.2,
+"fiber": 1.3,
+"waste": "19.6"
+}
+},
+{
+"id": "bok_choy",
+"name": "小白菜/青菜",
+"tw": {
+"id": "E052",
+"name": "小白菜平均值",
+"kcal": 12.0,
+"protein": 1.2,
+"fat": 0.2,
+"carbs": 1.9,
+"fiber": 1.3,
+"waste": "10.5"
+}
+},
+{
+"id": "chinese_cabbage",
+"name": "大白菜",
+"tw": {
+"id": "E058",
+"name": "結球白菜平均值",
+"kcal": 17.0,
+"protein": 1.2,
+"fat": 0.3,
+"carbs": 2.9,
+"fiber": 0.9,
+"waste": "14.9"
+}
+},
+{
+"id": "cabbage",
+"name": "包菜/圆白菜",
+"tw": {
+"id": "E045",
+"name": "甘藍平均值",
+"kcal": 23.0,
+"protein": 1.3,
+"fat": 0.1,
+"carbs": 4.8,
+"fiber": 1.1,
+"waste": "9.0"
+}
+},
+{
+"id": "spinach",
+"name": "菠菜",
+"tw": {
+"id": "E08801",
+"name": "菠菜",
+"kcal": 18.0,
+"protein": 2.2,
+"fat": 0.3,
+"carbs": 2.4,
+"fiber": 1.9,
+"waste": "14.1"
+}
+},
+{
+"id": "broccoli",
+"name": "西兰花",
+"tw": {
+"id": "E10501",
+"name": "青花菜",
+"kcal": 28.0,
+"protein": 3.7,
+"fat": 0.2,
+"carbs": 4.4,
+"fiber": 3.1,
+"waste": "13.6"
+}
+},
+{
+"id": "cauliflower",
+"name": "花菜",
+"tw": {
+"id": "E10301",
+"name": "花椰菜",
+"kcal": 23.0,
+"protein": 1.8,
+"fat": 0.1,
+"carbs": 4.5,
+"fiber": 2.0,
+"waste": "34.4"
+}
+},
+{
+"id": "tomato",
+"name": "番茄",
+"tw": {
+"id": "E129",
+"name": "大番茄平均值(紅色系)",
+"kcal": 19.0,
+"protein": 0.8,
+"fat": 0.1,
+"carbs": 4.1,
+"fiber": 1.0,
+"waste": "2.0"
+}
+},
+{
+"id": "cherry_tomato",
+"name": "圣女果",
+"tw": {
+"id": "E13201",
+"name": "聖女小番茄",
+"kcal": 35.0,
+"protein": 1.1,
+"fat": 0.7,
+"carbs": 6.7,
+"fiber": 1.5,
+"waste": "1.4"
+}
+},
+{
+"id": "cucumber",
+"name": "黄瓜",
+"tw": {
+"id": "E11601",
+"name": "花胡瓜",
+"kcal": 13.0,
+"protein": 0.9,
+"fat": 0.2,
+"carbs": 2.4,
+"fiber": 1.3,
+"waste": "3.3"
+}
+},
+{
+"id": "eggplant",
+"name": "茄子",
+"tw": {
+"id": "E128",
+"name": "茄子平均值",
+"kcal": 23.0,
+"protein": 1.1,
+"fat": 0.1,
+"carbs": 4.9,
+"fiber": 2.2,
+"waste": "10.9"
+}
+},
+{
+"id": "green_pepper",
+"name": "青椒",
+"tw": {
+"id": "E137",
+"name": "青辣椒平均值",
+"kcal": 33.0,
+"protein": 1.3,
+"fat": 0.3,
+"carbs": 6.9,
+"fiber": 3.3,
+"waste": "9.5"
+}
+},
+{
+"id": "chili_fresh",
+"name": "小米辣/鲜辣椒",
+"tw": {
+"id": "E13802",
+"name": "朝天椒(長果)",
+"kcal": 90.0,
+"protein": 3.4,
+"fat": 1.3,
+"carbs": 17.9,
+"fiber": 13.9,
+"waste": "7.3"
+}
+},
+{
+"id": "carrot",
+"name": "胡萝卜",
+"tw": {
+"id": "E002",
+"name": "胡蘿蔔平均值",
+"kcal": 39.0,
+"protein": 1.1,
+"fat": 0.1,
+"carbs": 8.9,
+"fiber": 2.6,
+"waste": "15.4"
+}
+},
+{
+"id": "white_radish",
+"name": "白萝卜",
+"tw": {
+"id": "E006",
+"name": "白蘿蔔平均值",
+"kcal": 18.0,
+"protein": 0.5,
+"fat": 0.1,
+"carbs": 3.9,
+"fiber": 1.1,
+"waste": "9.0"
+}
+},
+{
+"id": "onion",
+"name": "洋葱",
+"tw": {
+"id": "E03801",
+"name": "黃洋葱",
+"kcal": 42.0,
+"protein": 1.0,
+"fat": 0.2,
+"carbs": 9.5,
+"fiber": 1.4,
+"waste": "6.3"
+}
+},
+{
+"id": "celery",
+"name": "芹菜",
+"tw": {
+"id": "E065",
+"name": "芹菜平均值",
+"kcal": 15.0,
+"protein": 0.8,
+"fat": 0.1,
+"carbs": 3.1,
+"fiber": 1.4,
+"waste": "35.7"
+}
+},
+{
+"id": "lettuce",
+"name": "生菜",
+"tw": {
+"id": "E09701",
+"name": "結球萵苣",
+"kcal": 13.0,
+"protein": 0.7,
+"fat": 0.1,
+"carbs": 2.8,
+"fiber": 0.9,
+"waste": null
+}
+},
+{
+"id": "youmaicai",
+"name": "油麦菜",
+"tw": {
+"id": "E095",
+"name": "本島萵苣平均值",
+"kcal": 16.0,
+"protein": 1.2,
+"fat": 0.2,
+"carbs": 2.7,
+"fiber": 1.5,
+"waste": "15.5"
+}
+},
+{
+"id": "garlic_chives",
+"name": "韭菜",
+"tw": {
+"id": "E04101",
+"name": "韮菜",
+"kcal": 23.0,
+"protein": 1.9,
+"fat": 0.4,
+"carbs": 3.9,
+"fiber": 2.4,
+"waste": "3.2"
+}
+},
+{
+"id": "choy_sum",
+"name": "菜心/芥蓝",
+"tw": {
+"id": "E07201",
+"name": "芥藍菜",
+"kcal": 20.0,
+"protein": 1.7,
+"fat": 0.3,
+"carbs": 3.2,
+"fiber": 1.9,
+"waste": "16.4"
+}
+},
+{
+"id": "water_spinach",
+"name": "空心菜",
+"tw": {
+"id": "E100",
+"name": "蕹菜平均值",
+"kcal": 21.0,
+"protein": 2.0,
+"fat": 0.3,
+"carbs": 3.5,
+"fiber": 2.5,
+"waste": "23.8"
+}
+},
+{
+"id": "bean_sprouts",
+"name": "绿豆芽",
+"tw": {
+"id": "E14701",
+"name": "綠豆芽",
+"kcal": 24.0,
+"protein": 2.3,
+"fat": 0.2,
+"carbs": 4.1,
+"fiber": 1.3,
+"waste": null
+}
+},
+{
+"id": "soy_sprouts",
+"name": "黄豆芽",
+"tw": {
+"id": "E14401",
+"name": "黃豆芽",
+"kcal": 34.0,
+"protein": 5.4,
+"fat": 1.2,
+"carbs": 2.5,
+"fiber": 2.7,
+"waste": null
+}
+},
+{
+"id": "green_beans",
+"name": "四季豆",
+"tw": {
+"id": "H01802",
+"name": "敏豆莢",
+"kcal": 30.0,
+"protein": 1.7,
+"fat": 0.2,
+"carbs": 5.3,
+"fiber": 2.0,
+"waste": "5.6"
+}
+},
+{
+"id": "long_beans",
+"name": "豇豆/豆角",
+"tw": {
+"id": "H01601",
+"name": "豇豆(莢)",
+"kcal": 35.0,
+"protein": 2.4,
+"fat": 0.1,
+"carbs": 6.2,
+"fiber": 2.3,
+"waste": "4.6"
+}
+},
+{
+"id": "snow_peas",
+"name": "荷兰豆",
+"tw": {
+"id": "H026",
+"name": "豌豆莢平均值",
+"kcal": 45.0,
+"protein": 2.7,
+"fat": 0.1,
+"carbs": 8.5,
+"fiber": 2.7,
+"waste": "8.0"
+}
+},
+{
+"id": "peas",
+"name": "豌豆(鲜)",
+"tw": {
+"id": "H02501",
+"name": "豌豆仁",
+"kcal": 123.0,
+"protein": 9.2,
+"fat": 0.3,
+"carbs": 21.7,
+"fiber": 7.5,
+"waste": null
+}
+},
+{
+"id": "edamame",
+"name": "毛豆",
+"tw": {
+"id": "H02001",
+"name": "毛豆仁",
+"kcal": 129.0,
+"protein": 14.6,
+"fat": 3.3,
+"carbs": 12.5,
+"fiber": 6.4,
+"waste": null
+}
+},
+{
+"id": "bamboo_shoot",
+"name": "竹笋",
+"tw": {
+"id": "E02201",
+"name": "綠竹筍",
+"kcal": 25.0,
+"protein": 1.7,
+"fat": 0.2,
+"carbs": 4.7,
+"fiber": 1.7,
+"waste": "41.1"
+}
+},
+{
+"id": "lotus_root",
+"name": "莲藕",
+"tw": {
+"id": "B01901",
+"name": "蓮藕",
+"kcal": 65.0,
+"protein": 2.0,
+"fat": 0.2,
+"carbs": 13.5,
+"fiber": 3.3,
+"waste": "21.1"
+}
+},
+{
+"id": "winter_melon",
+"name": "冬瓜",
+"tw": {
+"id": "E112",
+"name": "冬瓜平均值",
+"kcal": 11.0,
+"protein": 0.4,
+"fat": 0.1,
+"carbs": 2.4,
+"fiber": 1.1,
+"waste": "26.6"
+}
+},
+{
+"id": "bitter_melon",
+"name": "苦瓜",
+"tw": {
+"id": "E118",
+"name": "苦瓜平均值",
+"kcal": 20.0,
+"protein": 0.9,
+"fat": 0.1,
+"carbs": 4.2,
+"fiber": 3.2,
+"waste": "11.2"
+}
+},
+{
+"id": "zucchini",
+"name": "西葫芦",
+"tw": {
+"id": "E12702",
+"name": "綠櫛瓜",
+"kcal": 13.0,
+"protein": 2.2,
+"fat": 0.0,
+"carbs": 1.8,
+"fiber": 0.9,
+"waste": "5.6"
+}
+},
+{
+"id": "luffa",
+"name": "丝瓜",
+"tw": {
+"id": "E12301",
+"name": "絲瓜",
+"kcal": 19.0,
+"protein": 1.1,
+"fat": 0.1,
+"carbs": 3.9,
+"fiber": 1.0,
+"waste": "18.6"
+}
+},
+{
+"id": "pumpkin",
+"name": "南瓜",
+"tw": {
+"id": "E114",
+"name": "南瓜平均值",
+"kcal": 74.0,
+"protein": 1.9,
+"fat": 0.2,
+"carbs": 17.3,
+"fiber": 2.5,
+"waste": "26.9"
+}
+},
+{
+"id": "asparagus",
+"name": "芦笋",
+"tw": {
+"id": "E026",
+"name": "綠蘆筍平均值",
+"kcal": 22.0,
+"protein": 2.4,
+"fat": 0.2,
+"carbs": 3.6,
+"fiber": 1.3,
+"waste": "25.2"
+}
+},
+{
+"id": "garlic",
+"name": "大蒜",
+"tw": {
+"id": "E03101",
+"name": "大蒜",
+"kcal": 122.0,
+"protein": 6.7,
+"fat": 0.2,
+"carbs": 26.4,
+"fiber": 4.2,
+"waste": "16.4"
+}
+},
+{
+"id": "ginger",
+"name": "姜",
+"tw": {
+"id": "E02903",
+"name": "老薑",
+"kcal": 53.0,
+"protein": 1.1,
+"fat": 0.5,
+"carbs": 11.7,
+"fiber": 3.2,
+"waste": "10.0"
+}
+},
+{
+"id": "scallion",
+"name": "葱",
+"tw": {
+"id": "E035",
+"name": "青葱平均值",
+"kcal": 28.0,
+"protein": 1.4,
+"fat": 0.2,
+"carbs": 6.0,
+"fiber": 2.2,
+"waste": "21.9"
+}
+},
+{
+"id": "kelp",
+"name": "海带(鲜/水发)",
+"tw": {
+"id": "F009",
+"name": "海帶平均值",
+"kcal": 20.0,
+"protein": 0.8,
+"fat": 0.1,
+"carbs": 4.3,
+"fiber": 2.8,
+"waste": "0.0"
+}
+},
+{
+"id": "nori",
+"name": "紫菜(干)",
+"tw": {
+"id": "F00201",
+"name": "紫菜",
+"kcal": 268.0,
+"protein": 28.1,
+"fat": 0.9,
+"carbs": 47.9,
+"fiber": 29.0,
+"waste": "0.0"
+}
+},
+{
+"id": "pickled_mustard",
+"name": "榨菜",
+"tw": {
+"id": "E07102",
+"name": "榨菜",
+"kcal": 25.0,
+"protein": 1.3,
+"fat": 0.4,
+"carbs": 4.6,
+"fiber": 2.9,
+"waste": null
+}
+},
+{
+"id": "sauerkraut",
+"name": "酸菜",
+"tw": {
+"id": "E07103",
+"name": "酸菜",
+"kcal": 17.0,
+"protein": 0.8,
+"fat": 0.3,
+"carbs": 3.2,
+"fiber": 2.3,
+"waste": null
+}
+},
+{
+"id": "kimchi",
+"name": "辣白菜",
+"tw": {
+"id": "R06401",
+"name": "韓式泡菜",
+"kcal": 35.0,
+"protein": 2.0,
+"fat": 0.4,
+"carbs": 5.8,
+"fiber": 2.8,
+"waste": null
+}
+},
+{
+"id": "preserved_veg",
+"name": "梅干菜",
+"tw": {
+"id": "E07101",
+"name": "梅乾菜",
+"kcal": 105.0,
+"protein": 5.5,
+"fat": 1.1,
+"carbs": 20.8,
+"fiber": 12.8,
+"waste": null
+}
+},
+{
+"id": "coriander",
+"name": "香菜",
+"tw": {
+"id": "E07401",
+"name": "芫荽",
+"kcal": 26.0,
+"protein": 2.3,
+"fat": 0.3,
+"carbs": 4.5,
+"fiber": 3.2,
+"waste": "11.0"
+}
+},
+{
+"id": "shiitake",
+"name": "香菇(鲜)",
+"tw": {
+"id": "G015",
+"name": "香菇平均值",
+"kcal": 39.0,
+"protein": 3.0,
+"fat": 0.1,
+"carbs": 7.6,
+"fiber": 3.8,
+"waste": "0.0"
+}
+},
+{
+"id": "enoki",
+"name": "金针菇",
+"tw": {
+"id": "G02701",
+"name": "金針菇",
+"kcal": 37.0,
+"protein": 2.6,
+"fat": 0.3,
+"carbs": 7.2,
+"fiber": 2.3,
+"waste": "0.0"
+}
+},
+{
+"id": "king_oyster",
+"name": "杏鲍菇",
+"tw": {
+"id": "G024",
+"name": "杏鮑菇平均值",
+"kcal": 41.0,
+"protein": 2.7,
+"fat": 0.2,
+"carbs": 8.3,
+"fiber": 3.1,
+"waste": "0.0"
+}
+},
+{
+"id": "button_mushroom",
+"name": "口蘑/白蘑菇",
+"tw": {
+"id": "G03401",
+"name": "洋菇",
+"kcal": 25.0,
+"protein": 3.0,
+"fat": 0.2,
+"carbs": 3.8,
+"fiber": 1.3,
+"waste": "0.0"
+}
+},
+{
+"id": "wood_ear",
+"name": "木耳(水发)",
+"tw": {
+"id": "G00101",
+"name": "木耳",
+"kcal": 38.0,
+"protein": 0.9,
+"fat": 0.1,
+"carbs": 8.8,
+"fiber": 7.4,
+"waste": "0.0"
+}
+},
+{
+"id": "apple",
+"name": "苹果",
+"tw": {
+"id": "D082",
+"name": "蘋果平均值(混色)",
+"kcal": 51.0,
+"protein": 0.2,
+"fat": 0.1,
+"carbs": 13.9,
+"fiber": 1.3,
+"waste": "17.8"
+}
+},
+{
+"id": "banana",
+"name": "香蕉",
+"tw": {
+"id": "D012",
+"name": "北蕉平均值",
+"kcal": 85.0,
+"protein": 1.5,
+"fat": 0.1,
+"carbs": 22.1,
+"fiber": 1.6,
+"waste": "35.3"
+}
+},
+{
+"id": "orange",
+"name": "橙子",
+"tw": {
+"id": "D09301",
+"name": "柳橙",
+"kcal": 43.0,
+"protein": 0.8,
+"fat": 0.1,
+"carbs": 11.0,
+"fiber": 2.1,
+"waste": "26.9"
+}
+},
+{
+"id": "grape",
+"name": "葡萄",
+"tw": {
+"id": "D02901",
+"name": "巨峰葡萄",
+"kcal": 64.0,
+"protein": 0.5,
+"fat": 0.3,
+"carbs": 16.6,
+"fiber": 0.2,
+"waste": "19.2"
+}
+},
+{
+"id": "watermelon",
+"name": "西瓜",
+"tw": {
+"id": "D042",
+"name": "西瓜平均值(黃肉小瓜)",
+"kcal": 29.0,
+"protein": 0.7,
+"fat": 0.1,
+"carbs": 7.3,
+"fiber": 0.3,
+"waste": "40.1"
+}
+},
+{
+"id": "strawberry",
+"name": "草莓",
+"tw": {
+"id": "D02401",
+"name": "草莓",
+"kcal": 39.0,
+"protein": 1.0,
+"fat": 0.2,
+"carbs": 9.3,
+"fiber": 1.8,
+"waste": "2.6"
+}
+},
+{
+"id": "kiwi",
+"name": "猕猴桃",
+"tw": {
+"id": "D00801",
+"name": "奇異果",
+"kcal": 56.0,
+"protein": 1.1,
+"fat": 0.3,
+"carbs": 14.0,
+"fiber": 2.7,
+"waste": "12.9"
+}
+},
+{
+"id": "pear",
+"name": "梨",
+"tw": {
+"id": "D07306",
+"name": "豐水梨",
+"kcal": 36.0,
+"protein": 0.5,
+"fat": 0.1,
+"carbs": 9.4,
+"fiber": 1.0,
+"waste": "26.7"
+}
+},
+{
+"id": "peach",
+"name": "桃",
+"tw": {
+"id": "D068",
+"name": "水蜜桃平均值",
+"kcal": 39.0,
+"protein": 0.9,
+"fat": 0.2,
+"carbs": 9.7,
+"fiber": 1.7,
+"waste": "7.7"
+}
+},
+{
+"id": "mango",
+"name": "芒果",
+"tw": {
+"id": "D05004",
+"name": "愛文芒果",
+"kcal": 42.0,
+"protein": 0.4,
+"fat": 0.2,
+"carbs": 11.0,
+"fiber": 0.9,
+"waste": "29.5"
+}
+},
+{
+"id": "pomelo",
+"name": "柚子",
+"tw": {
+"id": "D09001",
+"name": "文旦",
+"kcal": 33.0,
+"protein": 0.7,
+"fat": 0.1,
+"carbs": 8.4,
+"fiber": 1.3,
+"waste": "41.4"
+}
+},
+{
+"id": "dragon_fruit",
+"name": "火龙果",
+"tw": {
+"id": "D01001",
+"name": "紅龍果(白肉)",
+"kcal": 51.0,
+"protein": 0.9,
+"fat": 0.4,
+"carbs": 12.4,
+"fiber": 1.7,
+"waste": "22.6"
+}
+},
+{
+"id": "avocado",
+"name": "牛油果",
+"tw": {
+"id": "D015",
+"name": "酪梨平均值(綠皮)",
+"kcal": 73.0,
+"protein": 1.5,
+"fat": 4.8,
+"carbs": 7.5,
+"fiber": 3.8,
+"waste": "30.3"
+}
+},
+{
+"id": "red_dates",
+"name": "红枣(干)",
+"tw": {
+"id": "D07801",
+"name": "紅棗",
+"kcal": 227.0,
+"protein": 3.2,
+"fat": 0.3,
+"carbs": 59.5,
+"fiber": 7.7,
+"waste": "13.0"
+}
+},
+{
+"id": "lemon",
+"name": "柠檬",
+"tw": {
+"id": "D09801",
+"name": "檸檬",
+"kcal": 33.0,
+"protein": 0.7,
+"fat": 0.5,
+"carbs": 7.3,
+"fiber": 1.2,
+"waste": "34.0"
+}
+},
+{
+"id": "raisins",
+"name": "葡萄干",
+"tw": {
+"id": "Q08301",
+"name": "葡萄乾",
+"kcal": 341.0,
+"protein": 3.2,
+"fat": 1.5,
+"carbs": 78.7,
+"fiber": 5.9,
+"waste": null
+}
+},
+{
+"id": "pork_lean",
+"name": "猪瘦肉",
+"tw": {
+"id": "I03102",
+"name": "豬後腿瘦肉",
+"kcal": 111.0,
+"protein": 21.1,
+"fat": 2.3,
+"carbs": 1.3,
+"fiber": null,
+"waste": "20.0"
+}
+},
+{
+"id": "pork_belly",
+"name": "五花肉",
+"tw": {
+"id": "I03801",
+"name": "豬帶皮腹脇肉",
+"kcal": 368.0,
+"protein": 14.5,
+"fat": 33.9,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "pork_ribs",
+"name": "排骨(可食部)",
+"tw": {
+"id": "I03401",
+"name": "豬小排",
+"kcal": 287.0,
+"protein": 18.0,
+"fat": 23.3,
+"carbs": 0.0,
+"fiber": null,
+"waste": "40.9"
+}
+},
+{
+"id": "pork_ground",
+"name": "猪肉馅(肥瘦)",
+"tw": {
+"id": "I043",
+"name": "豬絞肉平均值",
+"kcal": 212.0,
+"protein": 18.7,
+"fat": 14.6,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "pork_liver",
+"name": "猪肝",
+"tw": {
+"id": "I05101",
+"name": "豬肝",
+"kcal": 126.0,
+"protein": 20.8,
+"fat": 4.1,
+"carbs": 2.9,
+"fiber": null,
+"waste": "2.0"
+}
+},
+{
+"id": "pork_trotter",
+"name": "猪蹄(可食部)",
+"tw": {
+"id": "I062",
+"name": "豬腳平均值",
+"kcal": 252.0,
+"protein": 20.7,
+"fat": 18.2,
+"carbs": 0.0,
+"fiber": null,
+"waste": "42.1"
+}
+},
+{
+"id": "beef_lean",
+"name": "牛瘦肉",
+"tw": {
+"id": "I01001",
+"name": "牛後腿肉",
+"kcal": 122.0,
+"protein": 19.4,
+"fat": 4.3,
+"carbs": 3.7,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "beef_brisket",
+"name": "牛腩",
+"tw": {
+"id": "I00201",
+"name": "牛肋條",
+"kcal": 225.0,
+"protein": 18.6,
+"fat": 16.1,
+"carbs": 1.1,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "beef_shank",
+"name": "牛腱",
+"tw": {
+"id": "I01201",
+"name": "牛後腿腱子心",
+"kcal": 139.0,
+"protein": 19.8,
+"fat": 6.0,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "beef_steak",
+"name": "牛排(西冷)",
+"tw": {
+"id": "I00301",
+"name": "沙朗牛排",
+"kcal": 162.0,
+"protein": 20.4,
+"fat": 8.3,
+"carbs": 1.5,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "lamb",
+"name": "羊肉",
+"tw": {
+"id": "I02001",
+"name": "綿羊肉切片",
+"kcal": 198.0,
+"protein": 18.8,
+"fat": 13.0,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "chinese_sausage",
+"name": "腊肠/香肠",
+"tw": {
+"id": "R08801",
+"name": "香腸",
+"kcal": 354.0,
+"protein": 17.0,
+"fat": 26.3,
+"carbs": 12.3,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "ham_deli",
+"name": "火腿片",
+"tw": {
+"id": "R07701",
+"name": "切片火腿(牛肉)",
+"kcal": 121.0,
+"protein": 15.9,
+"fat": 2.2,
+"carbs": 9.4,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "bacon",
+"name": "培根",
+"tw": {
+"id": "R09001",
+"name": "培根",
+"kcal": 372.0,
+"protein": 13.5,
+"fat": 35.6,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "hot_dog",
+"name": "火腿肠/热狗肠",
+"tw": {
+"id": "R09201",
+"name": "熱狗",
+"kcal": 257.0,
+"protein": 13.3,
+"fat": 18.1,
+"carbs": 10.2,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "beef_jerky",
+"name": "牛肉干",
+"tw": {
+"id": "R08101",
+"name": "片狀肉乾(牛肉)",
+"kcal": 335.0,
+"protein": 30.3,
+"fat": 5.2,
+"carbs": 41.8,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "beef_balls",
+"name": "牛肉丸",
+"tw": {
+"id": "R08001",
+"name": "冷凍貢丸",
+"kcal": 244.0,
+"protein": 16.6,
+"fat": 20.3,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "chicken_breast",
+"name": "鸡胸肉",
+"tw": {
+"id": "I07101",
+"name": "去皮雞胸肉(肉雞)",
+"kcal": 104.0,
+"protein": 22.4,
+"fat": 0.9,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "chicken_thigh",
+"name": "鸡腿(带皮)",
+"tw": {
+"id": "I074",
+"name": "清腿平均值",
+"kcal": 157.0,
+"protein": 18.5,
+"fat": 8.7,
+"carbs": 0.0,
+"fiber": 0.0,
+"waste": "37.7"
+}
+},
+{
+"id": "chicken_wing",
+"name": "鸡翅",
+"tw": {
+"id": "I077",
+"name": "二節翅平均值",
+"kcal": 229.0,
+"protein": 18.1,
+"fat": 16.8,
+"carbs": 0.0,
+"fiber": null,
+"waste": "44.4"
+}
+},
+{
+"id": "chicken_whole",
+"name": "鸡(整鸡可食部)",
+"tw": {
+"id": "I067",
+"name": "全雞平均值",
+"kcal": 216.0,
+"protein": 17.7,
+"fat": 15.6,
+"carbs": 0.0,
+"fiber": null,
+"waste": "46.8"
+}
+},
+{
+"id": "duck",
+"name": "鸭肉",
+"tw": {
+"id": "I090",
+"name": "全鴨平均值",
+"kcal": 272.0,
+"protein": 17.1,
+"fat": 22.0,
+"carbs": 0.0,
+"fiber": null,
+"waste": "35.2"
+}
+},
+{
+"id": "fish_freshwater",
+"name": "淡水鱼(草鱼/鲤鱼)",
+"tw": {
+"id": "J01701",
+"name": "草魚(含皮)",
+"kcal": 91.0,
+"protein": 17.2,
+"fat": 2.0,
+"carbs": 0.8,
+"fiber": null,
+"waste": "56.0"
+}
+},
+{
+"id": "fish_bass",
+"name": "鲈鱼",
+"tw": {
+"id": "J047",
+"name": "日本花鱸平均值",
+"kcal": 98.0,
+"protein": 19.9,
+"fat": 1.5,
+"carbs": 0.9,
+"fiber": null,
+"waste": "60.2"
+}
+},
+{
+"id": "fish_sea",
+"name": "海鱼(带鱼/黄鱼)",
+"tw": {
+"id": "J14101",
+"name": "白帶魚",
+"kcal": 102.0,
+"protein": 19.6,
+"fat": 2.0,
+"carbs": 0.0,
+"fiber": null,
+"waste": "40.0"
+}
+},
+{
+"id": "salmon",
+"name": "三文鱼",
+"tw": {
+"id": "J027",
+"name": "大西洋鮭魚平均值(去皮)",
+"kcal": 221.0,
+"protein": 20.2,
+"fat": 14.9,
+"carbs": 0.0,
+"fiber": null,
+"waste": "24.8"
+}
+},
+{
+"id": "shrimp",
+"name": "虾(去壳)",
+"tw": {
+"id": "J21501",
+"name": "草蝦仁",
+"kcal": 44.0,
+"protein": 9.7,
+"fat": 0.3,
+"carbs": 0.9,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "dried_shrimp",
+"name": "虾皮/虾米",
+"tw": {
+"id": "J22001",
+"name": "蝦皮",
+"kcal": 155.0,
+"protein": 33.6,
+"fat": 1.3,
+"carbs": 2.7,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "squid",
+"name": "鱿鱼",
+"tw": {
+"id": "J23701",
+"name": "阿根廷魷",
+"kcal": 71.0,
+"protein": 12.4,
+"fat": 2.0,
+"carbs": 0.4,
+"fiber": null,
+"waste": "27.3"
+}
+},
+{
+"id": "clam",
+"name": "蛤蜊(可食部)",
+"tw": {
+"id": "J23101",
+"name": "文蛤",
+"kcal": 37.0,
+"protein": 7.6,
+"fat": 0.5,
+"carbs": 2.7,
+"fiber": null,
+"waste": "75.5"
+}
+},
+{
+"id": "crab",
+"name": "蟹(可食部)",
+"tw": {
+"id": "J21901",
+"name": "蟹腳肉",
+"kcal": 52.0,
+"protein": 11.6,
+"fat": 0.2,
+"carbs": 1.3,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "fish_balls",
+"name": "鱼丸",
+"tw": {
+"id": "R10403",
+"name": "冷凍旗魚丸",
+"kcal": 160.0,
+"protein": 12.8,
+"fat": 6.7,
+"carbs": 12.0,
+"fiber": 0.8,
+"waste": null
+}
+},
+{
+"id": "egg",
+"name": "鸡蛋",
+"tw": {
+"id": "K001",
+"name": "雞蛋平均值",
+"kcal": 134.0,
+"protein": 12.5,
+"fat": 8.8,
+"carbs": 1.8,
+"fiber": null,
+"waste": "12.9"
+}
+},
+{
+"id": "egg_white",
+"name": "蛋白",
+"tw": {
+"id": "K005",
+"name": "雞蛋白平均值",
+"kcal": 50.0,
+"protein": 11.2,
+"fat": 0.1,
+"carbs": 0.5,
+"fiber": null,
+"waste": "32.0"
+}
+},
+{
+"id": "salted_duck_egg",
+"name": "咸鸭蛋",
+"tw": {
+"id": "K032",
+"name": "鴨鹹蛋平均值",
+"kcal": 185.0,
+"protein": 13.3,
+"fat": 14.1,
+"carbs": 1.1,
+"fiber": null,
+"waste": "13.2"
+}
+},
+{
+"id": "century_egg",
+"name": "皮蛋",
+"tw": {
+"id": "K03101",
+"name": "鴨皮蛋",
+"kcal": 158.0,
+"protein": 12.8,
+"fat": 11.4,
+"carbs": 2.7,
+"fiber": null,
+"waste": "10.8"
+}
+},
+{
+"id": "milk",
+"name": "牛奶(全脂)",
+"tw": {
+"id": "L002",
+"name": "全脂鮮乳平均值",
+"kcal": 63.0,
+"protein": 3.0,
+"fat": 3.6,
+"carbs": 4.8,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "milk_skim",
+"name": "脱脂牛奶",
+"tw": {
+"id": "L00903",
+"name": "脫脂強化鮮乳(鐵強化)",
+"kcal": 41.0,
+"protein": 4.2,
+"fat": 0.2,
+"carbs": 5.6,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "yogurt",
+"name": "酸奶(含糖)",
+"tw": {
+"id": "L03201",
+"name": "全脂凝態發酵乳",
+"kcal": 97.0,
+"protein": 3.1,
+"fat": 3.3,
+"carbs": 13.6,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "cheese",
+"name": "奶酪(切达/马苏里拉)",
+"tw": {
+"id": "L02501",
+"name": "切片乾酪",
+"kcal": 309.0,
+"protein": 18.3,
+"fat": 23.7,
+"carbs": 5.9,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "butter",
+"name": "黄油",
+"tw": {
+"id": "M032",
+"name": "奶油平均值(固態)",
+"kcal": 716.0,
+"protein": 0.6,
+"fat": 80.1,
+"carbs": 2.3,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "ice_cream",
+"name": "冰淇淋",
+"tw": {
+"id": "Q04002",
+"name": "香草冰淇淋",
+"kcal": 182.0,
+"protein": 2.5,
+"fat": 9.1,
+"carbs": 22.6,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "creamer",
+"name": "植脂末",
+"tw": {
+"id": "P10201",
+"name": "奶精粉",
+"kcal": 544.0,
+"protein": 2.2,
+"fat": 33.0,
+"carbs": 59.5,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "tofu",
+"name": "北豆腐",
+"tw": {
+"id": "R07202",
+"name": "傳統豆腐",
+"kcal": 88.0,
+"protein": 8.5,
+"fat": 3.4,
+"carbs": 6.0,
+"fiber": 0.6,
+"waste": null
+}
+},
+{
+"id": "tofu_soft",
+"name": "南豆腐/嫩豆腐",
+"tw": {
+"id": "R07205",
+"name": "嫩豆腐",
+"kcal": 51.0,
+"protein": 4.9,
+"fat": 2.6,
+"carbs": 2.0,
+"fiber": 0.8,
+"waste": null
+}
+},
+{
+"id": "tofu_dried",
+"name": "豆腐干/香干",
+"tw": {
+"id": "R06803",
+"name": "小方豆干",
+"kcal": 161.0,
+"protein": 17.4,
+"fat": 8.6,
+"carbs": 3.5,
+"fiber": 3.3,
+"waste": null
+}
+},
+{
+"id": "tofu_sheet",
+"name": "千张/豆皮",
+"tw": {
+"id": "R06901",
+"name": "豆腐皮",
+"kcal": 209.0,
+"protein": 25.3,
+"fat": 11.0,
+"carbs": 2.4,
+"fiber": 0.6,
+"waste": null
+}
+},
+{
+"id": "soybeans_dry",
+"name": "黄豆(干)",
+"tw": {
+"id": "H02201",
+"name": "黃豆",
+"kcal": 389.0,
+"protein": 35.6,
+"fat": 15.7,
+"carbs": 32.9,
+"fiber": 14.5,
+"waste": null
+}
+},
+{
+"id": "red_beans_dry",
+"name": "红豆(干)",
+"tw": {
+"id": "H00501",
+"name": "紅豆",
+"kcal": 328.0,
+"protein": 20.9,
+"fat": 0.6,
+"carbs": 61.5,
+"fiber": 18.5,
+"waste": null
+}
+},
+{
+"id": "mung_beans_dry",
+"name": "绿豆(干)",
+"tw": {
+"id": "H01202",
+"name": "綠豆",
+"kcal": 344.0,
+"protein": 22.8,
+"fat": 1.1,
+"carbs": 63.0,
+"fiber": 15.8,
+"waste": null
+}
+},
+{
+"id": "peanut",
+"name": "花生(炒)",
+"tw": {
+"id": "C03305",
+"name": "鹽酥花生仁",
+"kcal": 557.0,
+"protein": 28.8,
+"fat": 35.9,
+"carbs": 29.6,
+"fiber": 9.9,
+"waste": null
+}
+},
+{
+"id": "walnut",
+"name": "核桃仁",
+"tw": {
+"id": "C01101",
+"name": "生核桃",
+"kcal": 667.0,
+"protein": 15.4,
+"fat": 67.9,
+"carbs": 11.2,
+"fiber": 6.2,
+"waste": "58.5"
+}
+},
+{
+"id": "almond",
+"name": "杏仁/巴旦木",
+"tw": {
+"id": "C00301",
+"name": "原味杏仁果",
+"kcal": 588.0,
+"protein": 21.9,
+"fat": 49.8,
+"carbs": 23.2,
+"fiber": 9.8,
+"waste": null
+}
+},
+{
+"id": "cashew",
+"name": "腰果",
+"tw": {
+"id": "C01901",
+"name": "原味腰果",
+"kcal": 566.0,
+"protein": 16.4,
+"fat": 43.7,
+"carbs": 35.2,
+"fiber": 5.0,
+"waste": null
+}
+},
+{
+"id": "sesame",
+"name": "芝麻",
+"tw": {
+"id": "C02601",
+"name": "白芝麻(生)",
+"kcal": 598.0,
+"protein": 22.3,
+"fat": 54.9,
+"carbs": 15.0,
+"fiber": 10.5,
+"waste": null
+}
+},
+{
+"id": "sunflower_seeds",
+"name": "瓜子仁",
+"tw": {
+"id": "C03701",
+"name": "原味葵瓜子(去殼)",
+"kcal": 586.0,
+"protein": 22.0,
+"fat": 51.9,
+"carbs": 18.7,
+"fiber": 8.3,
+"waste": null
+}
+},
+{
+"id": "chia",
+"name": "奇亚籽",
+"tw": {
+"id": "C02501",
+"name": "奇亞子",
+"kcal": 483.0,
+"protein": 21.7,
+"fat": 31.8,
+"carbs": 34.8,
+"fiber": 29.7,
+"waste": null
+}
+},
+{
+"id": "peanut_butter",
+"name": "花生酱",
+"tw": {
+"id": "P09801",
+"name": "花生醬",
+"kcal": 657.0,
+"protein": 24.0,
+"fat": 54.3,
+"carbs": 17.9,
+"fiber": 10.6,
+"waste": null
+}
+},
+{
+"id": "sesame_paste",
+"name": "芝麻酱",
+"tw": {
+"id": "P05901",
+"name": "麻醬",
+"kcal": 643.0,
+"protein": 20.8,
+"fat": 52.8,
+"carbs": 21.3,
+"fiber": 11.8,
+"waste": null
+}
+},
+{
+"id": "oil",
+"name": "植物油",
+"tw": {
+"id": "M03001",
+"name": "調合植物油",
+"kcal": 887.0,
+"protein": 0.0,
+"fat": 100.3,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "lard",
+"name": "猪油",
+"tw": {
+"id": "M00201",
+"name": "豬油",
+"kcal": 890.0,
+"protein": 0.0,
+"fat": 99.7,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "olive_oil",
+"name": "橄榄油",
+"tw": {
+"id": "M02801",
+"name": "橄欖油",
+"kcal": 884.0,
+"protein": 0.0,
+"fat": 100.0,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "sesame_oil",
+"name": "香油",
+"tw": {
+"id": "P03801",
+"name": "香油",
+"kcal": 883.0,
+"protein": null,
+"fat": 99.9,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "chili_oil",
+"name": "辣椒油/红油",
+"tw": {
+"id": "P03701",
+"name": "紅辣椒油",
+"kcal": 899.0,
+"protein": 0.0,
+"fat": 99.8,
+"carbs": 0.1,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "sugar",
+"name": "白糖",
+"tw": {
+"id": "N00101",
+"name": "方糖",
+"kcal": 385.0,
+"protein": null,
+"fat": null,
+"carbs": 99.6,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "brown_sugar",
+"name": "红糖",
+"tw": {
+"id": "N00301",
+"name": "紅砂糖",
+"kcal": 385.0,
+"protein": null,
+"fat": null,
+"carbs": 99.4,
+"fiber": 0.0,
+"waste": null
+}
+},
+{
+"id": "honey",
+"name": "蜂蜜",
+"tw": {
+"id": "N00702",
+"name": "蜂蜜(春蜜)",
+"kcal": 308.0,
+"protein": 0.2,
+"fat": 0.2,
+"carbs": 79.6,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "syrup",
+"name": "糖浆/果糖",
+"tw": {
+"id": "N00901",
+"name": "果糖",
+"kcal": 297.0,
+"protein": null,
+"fat": null,
+"carbs": 76.9,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "salt",
+"name": "盐",
+"tw": {
+"id": "P03401",
+"name": "岩鹽",
+"kcal": 2.0,
+"protein": 0.0,
+"fat": 0.1,
+"carbs": 0.4,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "soy_sauce",
+"name": "酱油",
+"tw": {
+"id": "P04702",
+"name": "醬油",
+"kcal": 90.0,
+"protein": 7.8,
+"fat": null,
+"carbs": 14.7,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "oyster_sauce",
+"name": "蚝油",
+"tw": {
+"id": "P05201",
+"name": "蠔油",
+"kcal": 156.0,
+"protein": 6.5,
+"fat": 0.1,
+"carbs": 32.2,
+"fiber": 0.1,
+"waste": null
+}
+},
+{
+"id": "vinegar",
+"name": "醋",
+"tw": {
+"id": "P04201",
+"name": "米醋",
+"kcal": 10.0,
+"protein": null,
+"fat": null,
+"carbs": 2.4,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "cooking_wine",
+"name": "料酒",
+"tw": {
+"id": "O06101",
+"name": "陳年紹興酒",
+"kcal": 133.0,
+"protein": 1.8,
+"fat": 0.0,
+"carbs": 19.1,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "doubanjiang",
+"name": "豆瓣酱",
+"tw": {
+"id": "P08701",
+"name": "豆瓣醬",
+"kcal": 178.0,
+"protein": 14.2,
+"fat": 8.1,
+"carbs": 12.2,
+"fiber": 4.1,
+"waste": null
+}
+},
+{
+"id": "chili_sauce",
+"name": "辣椒酱(油制)",
+"tw": {
+"id": "P07801",
+"name": "辣椒醬",
+"kcal": 83.0,
+"protein": 2.6,
+"fat": 2.9,
+"carbs": 11.5,
+"fiber": 4.7,
+"waste": null
+}
+},
+{
+"id": "sweet_bean_sauce",
+"name": "甜面酱",
+"tw": {
+"id": "P07401",
+"name": "甜麵醬",
+"kcal": 216.0,
+"protein": 4.5,
+"fat": 2.4,
+"carbs": 44.0,
+"fiber": 1.7,
+"waste": null
+}
+},
+{
+"id": "ketchup",
+"name": "番茄酱",
+"tw": {
+"id": "P08101",
+"name": "蕃茄醬",
+"kcal": 114.0,
+"protein": 1.6,
+"fat": 0.1,
+"carbs": 26.7,
+"fiber": 1.4,
+"waste": null
+}
+},
+{
+"id": "mayonnaise",
+"name": "蛋黄酱/沙拉酱",
+"tw": {
+"id": "P06401",
+"name": "沙拉醬",
+"kcal": 645.0,
+"protein": 1.9,
+"fat": 65.7,
+"carbs": 11.4,
+"fiber": 0.1,
+"waste": null
+}
+},
+{
+"id": "thousand_island",
+"name": "千岛酱",
+"tw": {
+"id": "P06403",
+"name": "千島沙拉醬",
+"kcal": 515.0,
+"protein": 1.0,
+"fat": 49.3,
+"carbs": 16.7,
+"fiber": 0.4,
+"waste": null
+}
+},
+{
+"id": "curry_block",
+"name": "咖喱块",
+"tw": {
+"id": "P00901",
+"name": "咖哩塊",
+"kcal": 515.0,
+"protein": 5.6,
+"fat": 34.5,
+"carbs": 45.4,
+"fiber": 4.9,
+"waste": null
+}
+},
+{
+"id": "broth",
+"name": "高汤/清汤(家庭无盐)",
+"tw": {
+"id": "I05601",
+"name": "豬大骨湯",
+"kcal": 7.0,
+"protein": 1.0,
+"fat": 0.3,
+"carbs": 0.4,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "coconut_milk",
+"name": "椰浆",
+"tw": {
+"id": "P10501",
+"name": "椰漿",
+"kcal": 208.0,
+"protein": 1.1,
+"fat": 23.1,
+"carbs": 0.0,
+"fiber": 0.3,
+"waste": null
+}
+},
+{
+"id": "sichuan_pepper",
+"name": "花椒/干辣椒(香料)",
+"tw": {
+"id": "P01001",
+"name": "花椒粉",
+"kcal": 369.0,
+"protein": 10.0,
+"fat": 9.2,
+"carbs": 63.2,
+"fiber": 47.5,
+"waste": null
+}
+},
+{
+"id": "fermented_bean_curd",
+"name": "腐乳",
+"tw": {
+"id": "R07301",
+"name": "麻油辣腐乳",
+"kcal": 107.0,
+"protein": 9.0,
+"fat": 5.8,
+"carbs": 4.8,
+"fiber": 0.7,
+"waste": null
+}
+},
+{
+"id": "black_coffee",
+"name": "黑咖啡/美式",
+"tw": {
+"id": "O03801",
+"name": "美式咖啡(無糖)",
+"kcal": 2.0,
+"protein": 0.2,
+"fat": 0.1,
+"carbs": 0.3,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "tea",
+"name": "茶(无糖)",
+"tw": {
+"id": "O04501",
+"name": "烏龍茶茶湯",
+"kcal": 0.0,
+"protein": 0.0,
+"fat": null,
+"carbs": 0.0,
+"fiber": 0.0,
+"waste": null
+}
+},
+{
+"id": "cola",
+"name": "可乐",
+"tw": {
+"id": "O05601",
+"name": "可樂",
+"kcal": 51.0,
+"protein": null,
+"fat": null,
+"carbs": 12.8,
+"fiber": 0.0,
+"waste": null
+}
+},
+{
+"id": "orange_juice",
+"name": "橙汁",
+"tw": {
+"id": "O01501",
+"name": "柳橙汁(非原汁)",
+"kcal": 50.0,
+"protein": 0.1,
+"fat": 0.1,
+"carbs": 12.3,
+"fiber": 0.0,
+"waste": null
+}
+},
+{
+"id": "beer",
+"name": "啤酒",
+"tw": {
+"id": "O06002",
+"name": "啤酒",
+"kcal": 49.0,
+"protein": null,
+"fat": 0.0,
+"carbs": 8.9,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "red_wine",
+"name": "红酒",
+"tw": {
+"id": "O06301",
+"name": "紅葡萄酒",
+"kcal": 93.0,
+"protein": 0.1,
+"fat": 0.0,
+"carbs": 14.8,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "sports_drink",
+"name": "运动饮料",
+"tw": {
+"id": "O06501",
+"name": "運動飲料",
+"kcal": 28.0,
+"protein": 0.1,
+"fat": null,
+"carbs": 7.0,
+"fiber": 0.0,
+"waste": null
+}
+},
+{
+"id": "oat_milk",
+"name": "燕麦奶",
+"tw": {
+"id": "O00801",
+"name": "燕麥奶",
+"kcal": 44.0,
+"protein": 1.0,
+"fat": 0.8,
+"carbs": 8.1,
+"fiber": 1.1,
+"waste": null
+}
+},
+{
+"id": "sweet_soy_milk",
+"name": "甜豆浆",
+"tw": {
+"id": "O02901",
+"name": "豆漿",
+"kcal": 56.0,
+"protein": 2.8,
+"fat": 1.1,
+"carbs": 8.7,
+"fiber": 1.6,
+"waste": null
+}
+},
+{
+"id": "yakult",
+"name": "乳酸菌饮料",
+"tw": {
+"id": "O03501",
+"name": "乳酸飲料",
+"kcal": 45.0,
+"protein": 0.2,
+"fat": 0.0,
+"carbs": 10.9,
+"fiber": 0.0,
+"waste": null
+}
+},
+{
+"id": "instant_noodles",
+"name": "方便面(干,含料包)",
+"tw": {
+"id": "R00902",
+"name": "泡麵(鮮蝦口味)",
+"kcal": 475.0,
+"protein": 9.6,
+"fat": 23.8,
+"carbs": 55.5,
+"fiber": 1.7,
+"waste": null
+}
+},
+{
+"id": "potato_chips",
+"name": "薯片",
+"tw": {
+"id": "Q05101",
+"name": "洋芋片",
+"kcal": 553.0,
+"protein": 5.2,
+"fat": 34.3,
+"carbs": 55.8,
+"fiber": 2.2,
+"waste": null
+}
+},
+{
+"id": "soda_crackers",
+"name": "苏打饼干",
+"tw": {
+"id": "Q05701",
+"name": "蘇打餅乾(蔬菜)",
+"kcal": 512.0,
+"protein": 7.8,
+"fat": 24.7,
+"carbs": 64.5,
+"fiber": 2.8,
+"waste": null
+}
+},
+{
+"id": "chocolate",
+"name": "巧克力",
+"tw": {
+"id": "Q05901",
+"name": "牛奶巧克力",
+"kcal": 546.0,
+"protein": 9.4,
+"fat": 32.6,
+"carbs": 54.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "cake",
+"name": "奶油蛋糕",
+"tw": {
+"id": "Q02601",
+"name": "海綿蛋糕(圓形)",
+"kcal": 344.0,
+"protein": 5.1,
+"fat": 18.1,
+"carbs": 40.2,
+"fiber": 2.5,
+"waste": null
+}
+},
+{
+"id": "pizza",
+"name": "披萨(芝士)",
+"tw": {
+"id": "R03501",
+"name": "披薩(夏威夷)",
+"kcal": 270.0,
+"protein": 12.0,
+"fat": 8.7,
+"carbs": 35.9,
+"fiber": 2.0,
+"waste": null
+}
+},
+{
+"id": "mooncake",
+"name": "月饼",
+"tw": {
+"id": "Q00801",
+"name": "月餅(棗泥)",
+"kcal": 419.0,
+"protein": 6.0,
+"fat": 18.2,
+"carbs": 57.9,
+"fiber": 3.4,
+"waste": null
+}
+},
+{
+"id": "egg_tart",
+"name": "蛋挞",
+"tw": {
+"id": "Q02401",
+"name": "蛋塔",
+"kcal": 376.0,
+"protein": 4.1,
+"fat": 21.7,
+"carbs": 41.1,
+"fiber": 1.5,
+"waste": null
+}
+},
+{
+"id": "seaweed_snack",
+"name": "海苔(即食)",
+"tw": {
+"id": "F01601",
+"name": "壽司海苔片",
+"kcal": 278.0,
+"protein": 46.5,
+"fat": 3.7,
+"carbs": 32.1,
+"fiber": 26.5,
+"waste": null
+}
+},
+{
+"id": "jelly",
+"name": "果冻",
+"tw": {
+"id": "Q04401",
+"name": "果凍",
+"kcal": 91.0,
+"protein": null,
+"fat": 0.2,
+"carbs": 22.3,
+"fiber": 0.1,
+"waste": null
+}
+},
+{
+"id": "candy",
+"name": "糖果",
+"tw": {
+"id": "Q06701",
+"name": "枇杷糖",
+"kcal": 394.0,
+"protein": 0.2,
+"fat": 0.1,
+"carbs": 98.0,
+"fiber": 0.0,
+"waste": null
+}
+},
+{
+"id": "leek",
+"name": "大葱",
+"tw": {
+"id": "E03502",
+"name": "山東大葱",
+"kcal": 31.0,
+"protein": 1.3,
+"fat": 0.1,
+"carbs": 6.7,
+"fiber": 1.3,
+"waste": "37.9"
+}
+},
+{
+"id": "water_chestnut",
+"name": "荸荠/马蹄",
+"tw": {
+"id": "B01701",
+"name": "荸薺",
+"kcal": 67.0,
+"protein": 1.7,
+"fat": 0.1,
+"carbs": 14.5,
+"fiber": 2.1,
+"waste": null
+}
+},
+{
+"id": "lily_bulb",
+"name": "百合(鲜)",
+"tw": {
+"id": "E01001",
+"name": "百合鱗片",
+"kcal": 137.0,
+"protein": 3.8,
+"fat": 0.1,
+"carbs": 32.3,
+"fiber": 2.7,
+"waste": null
+}
+},
+{
+"id": "shiitake_dried",
+"name": "香菇(干)",
+"tw": {
+"id": "G016",
+"name": "乾香菇平均值",
+"kcal": 321.0,
+"protein": 20.9,
+"fat": 1.6,
+"carbs": 64.9,
+"fiber": 37.1,
+"waste": "0.0"
+}
+},
+{
+"id": "tremella",
+"name": "银耳(水发)",
+"tw": {
+"id": "G00401",
+"name": "銀耳",
+"kcal": 22.0,
+"protein": 0.5,
+"fat": 0.2,
+"carbs": 4.8,
+"fiber": 5.1,
+"waste": null
+}
+},
+{
+"id": "job_tears",
+"name": "薏米(生)",
+"tw": {
+"id": "A05601",
+"name": "薏仁",
+"kcal": 378.0,
+"protein": 14.1,
+"fat": 6.0,
+"carbs": 66.2,
+"fiber": 1.8,
+"waste": null
+}
+},
+{
+"id": "rice_pressed",
+"name": "饭团/寿司米饭(压实)",
+"tw": {
+"id": "A04902",
+"name": "白飯",
+"kcal": 183.0,
+"protein": 3.1,
+"fat": 0.3,
+"carbs": 41.0,
+"fiber": 0.6,
+"waste": null
+}
+},
+{
+"id": "pork_tenderloin",
+"name": "猪里脊",
+"tw": {
+"id": "I03201",
+"name": "豬大里肌",
+"kcal": 212.0,
+"protein": 19.2,
+"fat": 14.4,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "pork_shoulder",
+"name": "梅花肉(肩胛)",
+"tw": {
+"id": "I02701",
+"name": "豬肩胛肉",
+"kcal": 295.0,
+"protein": 16.5,
+"fat": 24.8,
+"carbs": 0.0,
+"fiber": null,
+"waste": "9.0"
+}
+},
+{
+"id": "beef_ribeye",
+"name": "肥牛(牛五花片)",
+"tw": {
+"id": "I01301",
+"name": "牛五花肉火鍋片",
+"kcal": 430.0,
+"protein": 15.7,
+"fat": 40.3,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "oyster",
+"name": "生蚝/牡蛎",
+"tw": {
+"id": "J223",
+"name": "真牡蠣平均值",
+"kcal": 54.0,
+"protein": 9.4,
+"fat": 1.6,
+"carbs": 4.2,
+"fiber": null,
+"waste": "85.0"
+}
+},
+{
+"id": "eel",
+"name": "鳗鱼",
+"tw": {
+"id": "J00501",
+"name": "日本鰻鱺魚片(生)",
+"kcal": 254.0,
+"protein": 18.1,
+"fat": 19.6,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "saury",
+"name": "秋刀鱼",
+"tw": {
+"id": "J16801",
+"name": "秋刀魚",
+"kcal": 314.0,
+"protein": 18.8,
+"fat": 25.9,
+"carbs": 0.0,
+"fiber": null,
+"waste": "48.0"
+}
+},
+{
+"id": "gai_lan",
+"name": "芥兰(菜心近亲)",
+"tw": {
+"id": "E07201",
+"name": "芥藍菜",
+"kcal": 20.0,
+"protein": 1.7,
+"fat": 0.3,
+"carbs": 3.2,
+"fiber": 1.9,
+"waste": "16.4"
+}
+},
+{
+"id": "garland_chrysanthemum",
+"name": "茼蒿",
+"tw": {
+"id": "E08001",
+"name": "茼蒿",
+"kcal": 16.0,
+"protein": 1.7,
+"fat": 0.3,
+"carbs": 2.2,
+"fiber": 1.6,
+"waste": "15.5"
+}
+},
+{
+"id": "okra",
+"name": "秋葵",
+"tw": {
+"id": "E14001",
+"name": "黃秋葵",
+"kcal": 36.0,
+"protein": 2.1,
+"fat": 0.1,
+"carbs": 7.5,
+"fiber": 3.7,
+"waste": "10.4"
+}
+},
+{
+"id": "celtuce",
+"name": "莴笋",
+"tw": {
+"id": "E02801",
+"name": "嫩莖萵苣",
+"kcal": 16.0,
+"protein": 1.0,
+"fat": 0.2,
+"carbs": 3.1,
+"fiber": 1.2,
+"waste": "24.2"
+}
+},
+{
+"id": "mustard_greens",
+"name": "芥菜",
+"tw": {
+"id": "E070",
+"name": "芥菜平均值",
+"kcal": 19.0,
+"protein": 1.5,
+"fat": 0.2,
+"carbs": 3.5,
+"fiber": 1.6,
+"waste": "11.1"
+}
+},
+{
+"id": "amaranth_leaves",
+"name": "苋菜",
+"tw": {
+"id": "E08401",
+"name": "白莧菜",
+"kcal": 17.0,
+"protein": 1.9,
+"fat": 0.3,
+"carbs": 2.6,
+"fiber": 2.4,
+"waste": "14.7"
+}
+},
+{
+"id": "sweet_potato_leaves",
+"name": "红薯叶",
+"tw": {
+"id": "E04901",
+"name": "甘藷葉",
+"kcal": 28.0,
+"protein": 3.2,
+"fat": 0.3,
+"carbs": 4.4,
+"fiber": 3.3,
+"waste": "20.1"
+}
+},
+{
+"id": "red_pepper",
+"name": "红甜椒/彩椒",
+"tw": {
+"id": "E135",
+"name": "甜椒平均值(青皮)",
+"kcal": 29.0,
+"protein": 1.0,
+"fat": 0.4,
+"carbs": 5.9,
+"fiber": 3.0,
+"waste": "14.7"
+}
+},
+{
+"id": "red_cabbage",
+"name": "紫甘蓝",
+"tw": {
+"id": "E04601",
+"name": "紫色甘藍",
+"kcal": 28.0,
+"protein": 1.5,
+"fat": 0.2,
+"carbs": 5.9,
+"fiber": 2.1,
+"waste": null
+}
+},
+{
+"id": "wakame",
+"name": "裙带菜/海白菜",
+"tw": {
+"id": "F01101",
+"name": "裙帶菜",
+"kcal": 36.0,
+"protein": 3.0,
+"fat": 0.6,
+"carbs": 5.9,
+"fiber": 6.1,
+"waste": "0.0"
+}
+},
+{
+"id": "sweet_corn_canned",
+"name": "甜玉米粒(罐头)",
+"tw": {
+"id": "A03001",
+"name": "玉米粒罐頭",
+"kcal": 90.0,
+"protein": 2.3,
+"fat": 1.4,
+"carbs": 16.9,
+"fiber": 3.6,
+"waste": null
+}
+},
+{
+"id": "oyster_mushroom",
+"name": "平菇",
+"tw": {
+"id": "G02101",
+"name": "秀珍菇",
+"kcal": 28.0,
+"protein": 3.3,
+"fat": 0.1,
+"carbs": 4.6,
+"fiber": 1.3,
+"waste": "0.0"
+}
+},
+{
+"id": "pineapple",
+"name": "菠萝",
+"tw": {
+"id": "D01903",
+"name": "金鑽鳳梨",
+"kcal": 50.0,
+"protein": 0.5,
+"fat": 0.1,
+"carbs": 13.2,
+"fiber": 1.1,
+"waste": "34.1"
+}
+},
+{
+"id": "cherry",
+"name": "樱桃/车厘子",
+"tw": {
+"id": "D08501",
+"name": "櫻桃",
+"kcal": 75.0,
+"protein": 1.2,
+"fat": 0.3,
+"carbs": 19.1,
+"fiber": 1.3,
+"waste": "9.4"
+}
+},
+{
+"id": "cantaloupe",
+"name": "哈密瓜",
+"tw": {
+"id": "D04701",
+"name": "新疆哈蜜瓜",
+"kcal": 28.0,
+"protein": 0.7,
+"fat": 0.1,
+"carbs": 6.9,
+"fiber": 0.7,
+"waste": "13.9"
+}
+},
+{
+"id": "lychee",
+"name": "荔枝",
+"tw": {
+"id": "D053",
+"name": "荔枝平均值",
+"kcal": 65.0,
+"protein": 1.0,
+"fat": 0.2,
+"carbs": 16.5,
+"fiber": 0.8,
+"waste": "30.4"
+}
+},
+{
+"id": "longan",
+"name": "龙眼",
+"tw": {
+"id": "D05501",
+"name": "龍眼",
+"kcal": 73.0,
+"protein": 1.1,
+"fat": 0.5,
+"carbs": 17.9,
+"fiber": 1.8,
+"waste": "30.8"
+}
+},
+{
+"id": "durian",
+"name": "榴莲",
+"tw": {
+"id": "D01701",
+"name": "榴槤",
+"kcal": 136.0,
+"protein": 2.6,
+"fat": 1.6,
+"carbs": 31.6,
+"fiber": 3.8,
+"waste": "64.8"
+}
+},
+{
+"id": "pomegranate",
+"name": "石榴",
+"tw": {
+"id": "D00401",
+"name": "安石榴",
+"kcal": 67.0,
+"protein": 1.7,
+"fat": 0.1,
+"carbs": 16.8,
+"fiber": 4.6,
+"waste": "59.8"
+}
+},
+{
+"id": "papaya",
+"name": "木瓜",
+"tw": {
+"id": "D002",
+"name": "木瓜平均值",
+"kcal": 38.0,
+"protein": 0.6,
+"fat": 0.1,
+"carbs": 9.9,
+"fiber": 1.4,
+"waste": "24.9"
+}
+},
+{
+"id": "persimmon",
+"name": "柿子",
+"tw": {
+"id": "D064",
+"name": "甜柿平均值",
+"kcal": 57.0,
+"protein": 0.5,
+"fat": 0.1,
+"carbs": 15.2,
+"fiber": 1.2,
+"waste": "16.5"
+}
+},
+{
+"id": "loquat",
+"name": "枇杷",
+"tw": {
+"id": "D06201",
+"name": "枇杷",
+"kcal": 38.0,
+"protein": 0.3,
+"fat": 0.2,
+"carbs": 9.8,
+"fiber": 0.9,
+"waste": "32.3"
+}
+},
+{
+"id": "mandarin",
+"name": "橘子/砂糖橘",
+"tw": {
+"id": "D08601",
+"name": "椪柑",
+"kcal": 40.0,
+"protein": 0.8,
+"fat": 0.2,
+"carbs": 10.0,
+"fiber": 1.5,
+"waste": "22.1"
+}
+},
+{
+"id": "grapefruit",
+"name": "西柚/葡萄柚",
+"tw": {
+"id": "D09501",
+"name": "紅寶石葡萄柚(古坑)",
+"kcal": 37.0,
+"protein": 0.7,
+"fat": 0.3,
+"carbs": 8.9,
+"fiber": 1.1,
+"waste": "31.7"
+}
+},
+{
+"id": "plum",
+"name": "李子",
+"tw": {
+"id": "D057",
+"name": "李子平均值(青皮黃肉)",
+"kcal": 48.0,
+"protein": 0.7,
+"fat": 0.4,
+"carbs": 11.7,
+"fiber": 1.5,
+"waste": "6.2"
+}
+},
+{
+"id": "dried_longan",
+"name": "桂圆干",
+"tw": {
+"id": "D05601",
+"name": "龍眼乾",
+"kcal": 277.0,
+"protein": 5.1,
+"fat": 0.7,
+"carbs": 70.7,
+"fiber": 2.9,
+"waste": "0.0"
+}
+},
+{
+"id": "chestnut",
+"name": "板栗(熟)",
+"tw": {
+"id": "C01401",
+"name": "糖炒栗子",
+"kcal": 210.0,
+"protein": 4.2,
+"fat": 0.8,
+"carbs": 46.3,
+"fiber": 5.7,
+"waste": "19.5"
+}
+},
+{
+"id": "pistachio",
+"name": "开心果",
+"tw": {
+"id": "C01701",
+"name": "開心果",
+"kcal": 601.0,
+"protein": 22.4,
+"fat": 52.7,
+"carbs": 20.1,
+"fiber": 13.6,
+"waste": "49.6"
+}
+},
+{
+"id": "macadamia",
+"name": "夏威夷果",
+"tw": {
+"id": "C00901",
+"name": "原味夏威夷豆",
+"kcal": 700.0,
+"protein": 7.5,
+"fat": 71.6,
+"carbs": 18.2,
+"fiber": 6.3,
+"waste": null
+}
+},
+{
+"id": "pine_nuts",
+"name": "松子",
+"tw": {
+"id": "C00601",
+"name": "松子仁",
+"kcal": 678.0,
+"protein": 16.6,
+"fat": 69.5,
+"carbs": 9.4,
+"fiber": 4.2,
+"waste": null
+}
+},
+{
+"id": "pumpkin_seeds",
+"name": "南瓜籽",
+"tw": {
+"id": "C03602",
+"name": "調味南瓜子(帶殼)",
+"kcal": 564.0,
+"protein": 25.9,
+"fat": 47.2,
+"carbs": 19.5,
+"fiber": 6.1,
+"waste": "28.0"
+}
+},
+{
+"id": "flaxseed",
+"name": "亚麻籽",
+"tw": {
+"id": "C02301",
+"name": "亞麻仁籽",
+"kcal": 524.0,
+"protein": 20.8,
+"fat": 40.3,
+"carbs": 28.1,
+"fiber": 23.1,
+"waste": null
+}
+},
+{
+"id": "beef_tripe",
+"name": "牛肚/牛百叶",
+"tw": {
+"id": "I014",
+"name": "牛肚平均值",
+"kcal": 73.0,
+"protein": 13.9,
+"fat": 1.5,
+"carbs": 0.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "pork_intestine",
+"name": "猪大肠(肥肠)",
+"tw": {
+"id": "I05901",
+"name": "豬大腸",
+"kcal": 198.0,
+"protein": 6.6,
+"fat": 18.9,
+"carbs": 1.9,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "pork_heart",
+"name": "猪心",
+"tw": {
+"id": "I04401",
+"name": "豬心",
+"kcal": 128.0,
+"protein": 13.6,
+"fat": 7.8,
+"carbs": 1.0,
+"fiber": null,
+"waste": "11.0"
+}
+},
+{
+"id": "pork_kidney",
+"name": "猪腰",
+"tw": {
+"id": "I05701",
+"name": "豬腎",
+"kcal": 82.0,
+"protein": 15.0,
+"fat": 1.9,
+"carbs": 1.7,
+"fiber": null,
+"waste": "21.0"
+}
+},
+{
+"id": "beef_tenderloin",
+"name": "牛里脊",
+"tw": {
+"id": "I00901",
+"name": "腓力牛排",
+"kcal": 184.0,
+"protein": 20.6,
+"fat": 10.7,
+"carbs": 0.1,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "beef_patty",
+"name": "汉堡牛肉饼(熟)",
+"tw": {
+"id": "R09101",
+"name": "冷凍牛肉漢堡肉",
+"kcal": 249.0,
+"protein": 14.4,
+"fat": 18.5,
+"carbs": 6.3,
+"fiber": 1.5,
+"waste": null
+}
+},
+{
+"id": "chicken_feet",
+"name": "鸡爪(可食部)",
+"tw": {
+"id": "I08801",
+"name": "雞腳(肉雞)",
+"kcal": 216.0,
+"protein": 20.7,
+"fat": 14.1,
+"carbs": 0.4,
+"fiber": null,
+"waste": "59.4"
+}
+},
+{
+"id": "chicken_liver",
+"name": "鸡肝",
+"tw": {
+"id": "I08301",
+"name": "雞肝(肉雞)",
+"kcal": 111.0,
+"protein": 18.8,
+"fat": 3.5,
+"carbs": 2.7,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "chicken_gizzard",
+"name": "鸡胗",
+"tw": {
+"id": "I08401",
+"name": "雞胗(肉雞)",
+"kcal": 89.0,
+"protein": 16.6,
+"fat": 2.0,
+"carbs": 0.3,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "turkey_breast",
+"name": "火鸡胸",
+"tw": {
+"id": "I10701",
+"name": "火雞肉",
+"kcal": 141.0,
+"protein": 21.1,
+"fat": 5.6,
+"carbs": 0.0,
+"fiber": null,
+"waste": "43.0"
+}
+},
+{
+"id": "goose",
+"name": "鹅肉",
+"tw": {
+"id": "I09801",
+"name": "鵝肉",
+"kcal": 187.0,
+"protein": 15.6,
+"fat": 13.4,
+"carbs": 2.4,
+"fiber": null,
+"waste": "59.0"
+}
+},
+{
+"id": "duck_egg",
+"name": "鸭蛋",
+"tw": {
+"id": "K02701",
+"name": "鴨蛋",
+"kcal": 187.0,
+"protein": 13.1,
+"fat": 14.4,
+"carbs": 0.2,
+"fiber": null,
+"waste": "12.5"
+}
+},
+{
+"id": "quail_egg",
+"name": "鹌鹑蛋",
+"tw": {
+"id": "K03401",
+"name": "鵪鶉蛋",
+"kcal": 172.0,
+"protein": 12.7,
+"fat": 13.0,
+"carbs": 1.2,
+"fiber": null,
+"waste": "16.7"
+}
+},
+{
+"id": "tilapia",
+"name": "罗非鱼/龙利鱼(巴沙)",
+"tw": {
+"id": "J12302",
+"name": "台灣鯛魚片(生)",
+"kcal": 110.0,
+"protein": 18.2,
+"fat": 3.6,
+"carbs": 2.5,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "croaker",
+"name": "黄花鱼",
+"tw": {
+"id": "J10701",
+"name": "大黃魚",
+"kcal": 142.0,
+"protein": 16.8,
+"fat": 7.8,
+"carbs": 0.2,
+"fiber": null,
+"waste": "65.0"
+}
+},
+{
+"id": "abalone",
+"name": "鲍鱼",
+"tw": {
+"id": "J24701",
+"name": "鮑魚",
+"kcal": 69.0,
+"protein": 15.8,
+"fat": 0.1,
+"carbs": 9.5,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "octopus",
+"name": "章鱼",
+"tw": {
+"id": "J23601",
+"name": "章魚",
+"kcal": 61.0,
+"protein": 13.0,
+"fat": 0.6,
+"carbs": 0.9,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "milk_lowfat",
+"name": "低脂牛奶",
+"tw": {
+"id": "L00401",
+"name": "低脂鮮乳",
+"kcal": 43.0,
+"protein": 3.1,
+"fat": 1.3,
+"carbs": 5.0,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "condensed_milk",
+"name": "炼乳",
+"tw": {
+"id": "L03801",
+"name": "加糖部份脫脂煉乳",
+"kcal": 318.0,
+"protein": 7.5,
+"fat": 7.8,
+"carbs": 56.2,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "pancake",
+"name": "松饼/薄煎饼",
+"tw": {
+"id": "Q03001",
+"name": "鬆餅",
+"kcal": 257.0,
+"protein": 3.2,
+"fat": 2.6,
+"carbs": 55.1,
+"fiber": 1.4,
+"waste": null
+}
+},
+{
+"id": "miso",
+"name": "味噌",
+"tw": {
+"id": "P08801",
+"name": "味噌",
+"kcal": 215.0,
+"protein": 10.6,
+"fat": 4.5,
+"carbs": 33.1,
+"fiber": 4.5,
+"waste": null
+}
+},
+{
+"id": "bbq_sauce",
+"name": "烧烤酱",
+"tw": {
+"id": "P07101",
+"name": "烤肉醬",
+"kcal": 157.0,
+"protein": 5.2,
+"fat": 0.8,
+"carbs": 32.1,
+"fiber": 0.7,
+"waste": null
+}
+},
+{
+"id": "sweet_sour_sauce",
+"name": "甜酸酱/泰式甜辣酱(近似)",
+"tw": {
+"id": "P08001",
+"name": "糖醋醬",
+"kcal": 131.0,
+"protein": 1.9,
+"fat": 2.6,
+"carbs": 25.1,
+"fiber": 0.7,
+"waste": null
+}
+},
+{
+"id": "cumin",
+"name": "孜然",
+"tw": {
+"id": "P00201",
+"name": "小茴香粉",
+"kcal": 411.0,
+"protein": 19.5,
+"fat": 25.8,
+"carbs": 37.0,
+"fiber": 36.6,
+"waste": null
+}
+},
+{
+"id": "chili_powder",
+"name": "辣椒粉",
+"tw": {
+"id": "P02001",
+"name": "辣椒粉",
+"kcal": 387.0,
+"protein": 14.7,
+"fat": 14.1,
+"carbs": 59.1,
+"fiber": 42.5,
+"waste": null
+}
+},
+{
+"id": "curry_powder",
+"name": "咖喱粉",
+"tw": {
+"id": "P00801",
+"name": "咖哩粉",
+"kcal": 417.0,
+"protein": 13.9,
+"fat": 14.1,
+"carbs": 58.5,
+"fiber": 36.4,
+"waste": null
+}
+},
+{
+"id": "cinnamon",
+"name": "桂皮/肉桂",
+"tw": {
+"id": "P00601",
+"name": "肉桂粉",
+"kcal": 343.0,
+"protein": 4.2,
+"fat": 2.9,
+"carbs": 78.8,
+"fiber": 53.7,
+"waste": null
+}
+},
+{
+"id": "yeast",
+"name": "酵母(干)",
+"tw": {
+"id": "P11101",
+"name": "酵母粉",
+"kcal": 347.0,
+"protein": 46.3,
+"fat": 0.0,
+"carbs": 40.4,
+"fiber": 21.3,
+"waste": null
+}
+},
+{
+"id": "mustard",
+"name": "芥末酱",
+"tw": {
+"id": "P06701",
+"name": "黃芥茉醬",
+"kcal": 74.0,
+"protein": 4.1,
+"fat": 3.7,
+"carbs": 6.2,
+"fiber": 5.1,
+"waste": null
+}
+},
+{
+"id": "hoisin",
+"name": "海鲜酱",
+"tw": {
+"id": "P07001",
+"name": "海鮮醬",
+"kcal": 228.0,
+"protein": 1.8,
+"fat": 2.2,
+"carbs": 50.3,
+"fiber": 1.4,
+"waste": null
+}
+},
+{
+"id": "teriyaki",
+"name": "照烧汁",
+"tw": {
+"id": "P07601",
+"name": "日式照燒醬",
+"kcal": 227.0,
+"protein": 3.0,
+"fat": 0.5,
+"carbs": 52.6,
+"fiber": 0.1,
+"waste": null
+}
+},
+{
+"id": "coconut_water",
+"name": "椰子水",
+"tw": {
+"id": "D103",
+"name": "可可椰子汁平均值",
+"kcal": 18.0,
+"protein": 0.1,
+"fat": 0.0,
+"carbs": 4.9,
+"fiber": 0.0,
+"waste": "71.5"
+}
+},
+{
+"id": "apple_juice",
+"name": "苹果汁",
+"tw": {
+"id": "O02301",
+"name": "蘋果汁(非原汁)",
+"kcal": 47.0,
+"protein": 0.1,
+"fat": 0.4,
+"carbs": 10.9,
+"fiber": 0.0,
+"waste": "16.1"
+}
+},
+{
+"id": "mango_dried",
+"name": "芒果干",
+"tw": {
+"id": "Q08201",
+"name": "芒果乾",
+"kcal": 371.0,
+"protein": 0.6,
+"fat": 1.0,
+"carbs": 90.0,
+"fiber": 3.4,
+"waste": null
+}
+},
+{
+"id": "doughnut",
+"name": "甜甜圈",
+"tw": {
+"id": "Q03402",
+"name": "糖粒甜甜圈(油炸)",
+"kcal": 401.0,
+"protein": 5.3,
+"fat": 19.8,
+"carbs": 50.3,
+"fiber": 2.0,
+"waste": null
+}
+},
+{
+"id": "cheesecake",
+"name": "芝士蛋糕",
+"tw": {
+"id": "Q02501",
+"name": "乳酪蛋糕",
+"kcal": 296.0,
+"protein": 7.0,
+"fat": 21.3,
+"carbs": 19.1,
+"fiber": 0.7,
+"waste": null
+}
+},
+{
+"id": "pudding",
+"name": "布丁",
+"tw": {
+"id": "Q03901",
+"name": "鮮奶布丁",
+"kcal": 110.0,
+"protein": 3.0,
+"fat": 5.1,
+"carbs": 13.1,
+"fiber": null,
+"waste": null
+}
+},
+{
+"id": "rice_cracker",
+"name": "米饼",
+"tw": {
+"id": "Q05301",
+"name": "雪餅",
+"kcal": 487.0,
+"protein": 5.8,
+"fat": 19.4,
+"carbs": 72.3,
+"fiber": 1.0,
+"waste": null
+}
+}
+]

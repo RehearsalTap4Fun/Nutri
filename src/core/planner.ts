@@ -398,6 +398,11 @@ function planBreakfast(T: number, P: number, ctx: Ctx, rnd: () => number): MealP
     else break
     totals = totalsOf(items, ctx.dishMap)
   }
+  // 老年人模式：早餐蛋白至少 15 g（蛋白分到三餐），不够就把蛋白配菜加到两份
+  if ((ctx.profile.conditions || []).includes('elderly') && totals.protein < 15) {
+    const extra = items.find((i) => i.role === 'bfprotein')
+    if (extra && extra.portion < 2) { extra.portion = 2; totals = totalsOf(items, ctx.dishMap) }
+  }
   if (totals.protein < P * 0.6) notes.push('早餐蛋白偏少，可再加一个蛋')
   return { slot: 'breakfast', targetKcal: T, targetProtein: P, items, totals, notes }
 }
@@ -475,10 +480,11 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
     items[0].portion = round4(items[0].portion - 0.25)
     return true
   }
-  const bumpProtein = (max: number): void => {
+  // cap：蛋白菜最多加到几份；常规 1.5，全天蛋白仍不够时第二轮放开到 2
+  const bumpProtein = (max: number, cap = 1.5): void => {
     let g = 0
     while (x.protein < budget.protein * 0.9 && g++ < max) {
-      const cand = allItems().filter((it) => (it.role === 'protein' || it.role === 'bfprotein') && it.portion < 1.5)
+      const cand = allItems().filter((it) => (it.role === 'protein' || it.role === 'bfprotein') && it.portion < cap)
       if (!cand.length) break
       // 优先加最「瘦」的那份：每克蛋白带的脂肪与钠最少
       cand.sort((a, b) => { const na = nOf(a), nb = nOf(b); return (na.fat + na.sodium / 100) / Math.max(1, na.protein) - (nb.fat + nb.sodium / 100) / Math.max(1, nb.protein) })
@@ -554,7 +560,7 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
   while (x.fat > budget.fat * 1.1 && g++ < 3) { if (!trimWorst((it) => nOf(it).fat)) break; x = total() }
 
   // C. 蛋白不能掉出 85%；脂肪还有余量时再往 90% 补；最后只用主食微调热量
-  if (x.protein < budget.protein * 0.85) { const save = budget.protein; budget.protein = save * 0.85 / 0.9; bumpProtein(4); budget.protein = save }
+  if (x.protein < budget.protein * 0.85) { const save = budget.protein; budget.protein = save * 0.85 / 0.9; bumpProtein(4); if (x.protein < budget.protein * 0.9) bumpProtein(4, 2); budget.protein = save }
   if (x.fat < budget.fat * 1.05) bumpProtein(2)
   adjustKcal(true, 0.95)
 

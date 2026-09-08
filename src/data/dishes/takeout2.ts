@@ -124,8 +124,8 @@ export const DISHES_TAKEOUT_MORE: Dish[] = [
   D('to2_mcd_grilled_chicken_burger', '麦当劳板烧鸡腿堡', 'combo', 'takeout', 'normal', 'LD', '1个(约200g)', [
     ['burger_bun', 75], ['chicken_thigh', 90], ['lettuce', 20], ['mayonnaise', 12], ['black_pepper_sauce', 8],
   ]),
-  D('to2_mcd_nuggets6', '麦乐鸡6块', 'snack', 'takeout', 'fried', 'LDS', '6块(约100g)', [
-    ['chicken_nuggets', 100], ['sweet_sour_sauce', 20],
+  D('to2_mcd_nuggets6', '麦乐鸡6块', 'snack', 'takeout', 'fried', 'LDS', '6块(约95g)', [
+    ['chicken_nuggets', 90], ['sweet_sour_sauce', 20],
   ], { tags: ['fried'] }),
   D('to2_tasting_burger', '塔斯汀香辣鸡腿堡', 'combo', 'takeout', 'fried', 'LD', '1个(约220g)', [
     ['flour', 80], ['fried_chicken', 100], ['lettuce', 20], ['mayonnaise', 12], ['chili_sauce', 5],

@@ -208,7 +208,7 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
     ['burger_bun', 60], ['fried_chicken', 60], ['mayonnaise', 10], ['lettuce', 15], ['chicken_wing', 80], ['flour', 10], ['oil', 10], ['cola', 400], ['salt', 1],
   ], { tags: ['fastfood'], aliases: ['华莱士', '炸鸡套餐'] }),
   D('to_sushi_10', '寿司拼盘10件', 'combo', 'takeout', 'light', 'LD', '10件(约430g)', [
-    ['rice_cooked', 200], ['salmon', 60], ['shrimp', 40], ['squid', 30], ['egg', 30], ['cucumber', 30], ['nori', 5], ['avocado', 20], ['soy_sauce', 15], ['sugar', 8], ['vinegar', 10],
+    ['rice_pressed', 200], ['salmon', 60], ['shrimp', 40], ['squid', 30], ['egg', 30], ['cucumber', 30], ['nori', 5], ['avocado', 20], ['soy_sauce', 15], ['sugar', 8], ['vinegar', 10],
   ], { aliases: ['寿司', '刺身寿司', '日料'] }),
   D('to_katsu_curry', '日式咖喱猪排饭', 'combo', 'takeout', 'fried', 'LD', '1份(约650g)', [
     ['rice_cooked', 300], ['pork_lean', 120], ['flour', 20], ['egg', 20], ['oil', 25], ['curry_block', 25], ['potato', 60], ['carrot', 40], ['onion', 40],
@@ -241,15 +241,15 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
     ['flour', 80], ['pork_belly', 60], ['green_pepper', 10], ['coriander', 5], ['soy_sauce', 8], ['sugar', 2], ['salt', 0.5],
   ], { aliases: ['腊汁肉夹馍', '白吉馍'] }),
   D('to_liangpi', '凉皮', 'combo', 'takeout', 'normal', 'LD', '1份(约240g)', [
-    ['starch', 70], ['flour', 20], ['cucumber', 50], ['bean_sprouts', 40], ['chili_oil', 15], ['vinegar', 15], ['soy_sauce', 8], ['garlic', 8], ['sesame_paste', 10], ['salt', 1],
+    ['starch', 50], ['flour', 20], ['cucumber', 50], ['bean_sprouts', 40], ['chili_oil', 12], ['vinegar', 15], ['soy_sauce', 8], ['garlic', 8], ['sesame_paste', 10], ['salt', 1],
   ], { tags: ['cold', 'spicy'], aliases: ['陕西凉皮', '擀面皮', '米皮'] }),
   D('to_yangrou_paomo', '羊肉泡馍', 'combo', 'takeout', 'normal', 'LD', '1碗(约650g)', [
     ['flour', 100], ['lamb', 100], ['glass_noodles_dry', 20], ['wood_ear', 15], ['broth', 400], ['coriander', 5], ['garlic', 10], ['salt', 2],
   ], { aliases: ['泡馍', '西安泡馍'] }),
   D('to_shengjian_6', '生煎6个', 'breakfast', 'takeout', 'heavy', 'BL', '6个(约200g)', [
-    ['flour', 80], ['pork_ground', 90], ['oil', 15], ['soy_sauce', 6], ['sugar', 3], ['sesame', 3], ['scallion', 5], ['salt', 1],
+    ['flour', 80], ['pork_ground', 70], ['oil', 10], ['soy_sauce', 6], ['sugar', 3], ['sesame', 3], ['scallion', 5], ['salt', 1],
   ], { aliases: ['生煎包', '上海生煎'] }),
-  D('to_xiaolongbao', '小笼包1笼(8个)', 'breakfast', 'takeout', 'normal', 'BL', '1笼(约165g)', [
+  D('to_xiaolongbao', '小笼包1笼(8个)', 'breakfast', 'takeout', 'normal', 'BL', '1笼(约220g)', [
     ['flour', 70], ['pork_ground', 80], ['soy_sauce', 6], ['sugar', 3], ['ginger', 3], ['sesame_oil', 3], ['salt', 1],
   ], { aliases: ['小笼', '汤包', '鼎泰丰'] }),
   D('to_shaoya_fan', '烧鸭饭', 'combo', 'takeout', 'heavy', 'LD', '1份(约480g)', [
@@ -264,7 +264,7 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
     ['bread_white', 60], ['ham_deli', 30], ['egg', 30], ['lettuce', 15], ['mayonnaise', 12], ['cheese', 10],
   ], { aliases: ['三明治', '全家三明治', '7-11三明治'] }),
   D('cv_onigiri', '便利店饭团', 'snack', 'convenience', 'light', 'BLS', '1个(约130g)', [
-    ['rice_cooked', 100], ['tuna_canned', 20], ['mayonnaise', 8], ['nori', 2], ['salt', 0.5],
+    ['rice_pressed', 100], ['tuna_canned', 20], ['mayonnaise', 8], ['nori', 2], ['salt', 0.5],
   ], { aliases: ['饭团', '金枪鱼饭团', '御饭团'] }),
   D('cv_oden', '关东煮一份', 'snack', 'convenience', 'light', 'LDS', '1份(约470g)', [
     ['fish_balls', 60], ['white_radish', 80], ['tofu', 50], ['kelp', 30], ['konjac', 50], ['broth', 200], ['salt', 0.5],
@@ -290,8 +290,8 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
   D('cv_chicken_breast_pack', '即食鸡胸肉1袋', 'protein', 'convenience', 'light', 'BLDS', '1袋(约100g)', [
     ['chicken_breast', 100], ['salt', 1], ['sugar', 2],
   ], { aliases: ['鸡胸肉', '即食鸡胸', '低脂鸡胸'] }),
-  D('cv_boiled_corn', '水煮玉米1根', 'staple', 'convenience', 'light', 'BLS', '1根(可食部约150g)', [
-    ['corn', 150],
+  D('cv_boiled_corn', '水煮玉米1根', 'staple', 'convenience', 'light', 'BLS', '1根(玉米粒可食约120g)', [
+    ['corn', 120],
   ], { aliases: ['玉米', '甜玉米', '煮玉米'] }),
   D('cv_braised_egg', '卤蛋1个', 'snack', 'convenience', 'light', 'BS', '1个(约55g)', [
     ['egg', 50], ['soy_sauce', 5], ['sugar', 1],

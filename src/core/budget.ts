@@ -128,10 +128,12 @@ export function suggestForBudget(opts: {
 }
 
 function whyFor(n: Nutrients, remain: MacroGap, targets: MacroGap, bestGain: { k: MacroKey; v: number; rank: number } | null, fill: number): string {
-  if (bestGain && bestGain.rank >= 0.06) return `补${MACRO_CN[bestGain.k]} ${Math.round(n[bestGain.k])} g`
-  // 有参数已经超了、而这道菜在那一项上很轻：说出来，这就是选它的原因
-  for (const k of ['fat', 'carbs', 'protein'] as MacroKey[]) {
-    if (remain[k] < -0.05 * targets[k] && n[k] <= 0.08 * targets[k]) return OVER_WHY[k]
+  // 有参数已经超了、而这道菜在那一项上很轻：这是选它的首要原因，除非补缺口的理由特别强
+  if (!bestGain || bestGain.rank < 0.25) {
+    for (const k of ['fat', 'carbs', 'protein'] as MacroKey[]) {
+      if (remain[k] < -0.05 * targets[k] && n[k] <= 0.08 * targets[k]) return OVER_WHY[k]
+    }
   }
+  if (bestGain && bestGain.rank >= 0.06) return `补${MACRO_CN[bestGain.k]} ${Math.round(n[bestGain.k])} g`
   return fill > 0.6 ? '正好吃满今天的量' : '小份，留点余地'
 }

@@ -30,11 +30,11 @@ export const DISHES_STAPLES_MORE: Dish[] = [
     ['steamed_bun', 90], ['oil', 3], ['scallion', 5], ['salt', 0.5],
   ]),
   D('st_wotou', '玉米面窝头', 'staple', 'cn', 'light', 'BLD', '2个(约100g)', [
-    ['corn', 60], ['flour', 40],
+    ['cornmeal', 45], ['flour', 20],
   ], { aliases: ['窝窝头'] }),
   D('st_whole_bread', '全麦面包片', 'staple', 'west', 'light', 'BLD', '2片(约70g)', [['bread_whole', 70]], { tags: ['quick'] }),
   D('st_steamed_sweet_potato', '蒸红薯', 'staple', 'cn', 'light', 'BLDS', '1个(约200g)', [['sweet_potato', 200]], { aliases: ['蒸地瓜'] }),
-  D('st_boiled_corn', '水煮玉米', 'staple', 'cn', 'light', 'BLDS', '1根(约180g)', [['corn', 180]]),
+  D('st_boiled_corn', '水煮玉米', 'staple', 'cn', 'light', 'BLDS', '1根(玉米粒可食约120g)', [['corn', 120]]),
   D('st_steamed_yam', '蒸山药', 'staple', 'cn', 'light', 'BLD', '1段(约200g)', [['yam', 200]]),
   D('st_steamed_potato', '蒸土豆', 'staple', 'cn', 'light', 'BLD', '1个(约200g)', [['potato', 200]]),
   D('st_plain_noodles', '白水煮面(无汤)', 'staple', 'cn', 'light', 'LD', '1碗(约250g)', [['noodles_cooked', 250]]),
@@ -72,10 +72,10 @@ export const DISHES_STAPLES_MORE: Dish[] = [
     ['flour', 50], ['chinese_cabbage', 40], ['tofu_dried', 15], ['wood_ear', 10], ['shiitake', 10], ['oil', 5], ['salt', 1],
   ], { aliases: ['菜包', '香菇青菜包'] }),
   D('st_scallion_pancake', '葱油饼', 'staple', 'cn', 'heavy', 'BLD', '1张(约110g)', [
-    ['flour', 80], ['oil', 15], ['scallion', 15], ['salt', 1],
+    ['flour', 80], ['oil', 10], ['scallion', 15], ['salt', 1],
   ]),
   D('st_shouzhuabing', '手抓饼(原味)', 'staple', 'cn', 'heavy', 'BLD', '1张(约80g)', [
-    ['flour', 60], ['oil', 12], ['butter', 5], ['salt', 0.8],
+    ['flour', 60], ['oil', 8], ['butter', 4], ['salt', 0.8],
   ]),
   D('st_laobing', '烙饼', 'staple', 'cn', 'normal', 'BLD', '1张(约90g)', [
     ['flour', 80], ['oil', 6], ['salt', 1],
@@ -101,10 +101,10 @@ export const DISHES_STAPLES_MORE: Dish[] = [
     ['flour', 60], ['oil', 12], ['butter', 5], ['egg', 50], ['lettuce', 20], ['sweet_bean_sauce', 8],
   ]),
   D('bf_xiaolongbao', '小笼包', 'breakfast', 'cn', 'normal', 'BLD', '1笼8个(约200g)', [
-    ['flour', 60], ['pork_ground', 60], ['broth', 20], ['ginger', 3], ['soy_sauce', 5], ['sugar', 3], ['oil', 2],
+    ['flour', 60], ['pork_ground', 70], ['broth', 20], ['lard', 4], ['ginger', 3], ['soy_sauce', 5], ['sugar', 3], ['oil', 2],
   ], { aliases: ['小笼', '汤包'] }),
   D('bf_shaomai', '烧麦', 'breakfast', 'cn', 'normal', 'BLD', '4个(约200g)', [
-    ['flour', 50], ['glutinous_rice_raw', 50], ['pork_ground', 30], ['shiitake', 10], ['soy_sauce', 8], ['oil', 5],
+    ['flour', 40], ['glutinous_rice_raw', 40], ['pork_ground', 30], ['shiitake', 10], ['soy_sauce', 8], ['oil', 5],
   ], { aliases: ['烧卖', '糯米烧麦'] }),
   D('bf_steamed_dumplings', '蒸饺', 'breakfast', 'cn', 'normal', 'BLD', '8个(约190g)', [
     ['dumpling_wrapper', 100], ['pork_ground', 50], ['garlic_chives', 30], ['soy_sauce', 6], ['oil', 4],
@@ -118,7 +118,7 @@ export const DISHES_STAPLES_MORE: Dish[] = [
   D('bf_tofu_pudding', '豆腐脑', 'breakfast', 'cn', 'light', 'B', '1碗(约330g)', [
     ['tofu_soft', 300], ['soy_sauce', 5.5], ['sesame_oil', 3], ['wood_ear', 15], ['coriander', 3], ['starch', 5], ['salt', 0.5],
   ], { aliases: ['豆花', '咸豆腐脑'] }),
-  D('bf_cifantuan', '粢饭团', 'breakfast', 'cn', 'normal', 'B', '1个(约130g)', [
+  D('bf_cifantuan', '粢饭团', 'breakfast', 'cn', 'normal', 'B', '1个(约220g)', [
     ['glutinous_rice_raw', 80], ['youtiao', 30], ['pickled_mustard', 15], ['sugar', 5],
   ], { aliases: ['糍饭团', '饭团(油条榨菜)'] }),
   D('bf_tea_egg', '茶叶蛋', 'breakfast', 'cn', 'light', 'BS', '1个(约50g)', [
@@ -153,7 +153,7 @@ export const DISHES_STAPLES_MORE: Dish[] = [
     ['bread_white', 60], ['egg', 50], ['lettuce', 20], ['tomato', 30], ['mayonnaise', 8],
   ], { tags: ['quick'] }),
   D('bf_ham_sandwich', '火腿三明治', 'breakfast', 'west', 'normal', 'BS', '1个(约170g)', [
-    ['bread_white', 60], ['ham_deli', 30], ['cheese', 20], ['lettuce', 20], ['tomato', 30], ['mayonnaise', 8],
+    ['bread_white', 60], ['ham_deli', 30], ['cheese', 20], ['lettuce', 20], ['tomato', 30], ['mayonnaise', 15],
   ], { aliases: ['火腿芝士三明治'], tags: ['quick'] }),
   D('bf_toast_milk', '吐司加牛奶', 'breakfast', 'west', 'light', 'B', '2片吐司+1杯牛奶', [
     ['bread_white', 60], ['butter', 3], ['milk', 250],
@@ -168,26 +168,26 @@ export const DISHES_STAPLES_MORE: Dish[] = [
     ['bread_whole', 60], ['avocado', 70], ['egg', 50], ['olive_oil', 3], ['salt', 0.5],
   ], { aliases: ['牛油果鸡蛋吐司'] }),
   D('bf_corn_egg_milk', '玉米鸡蛋牛奶', 'breakfast', 'cn', 'light', 'B', '1根玉米+1个蛋+1杯牛奶', [
-    ['corn', 150], ['egg', 50], ['milk', 250],
+    ['corn', 110], ['egg', 50], ['milk', 250],
   ], { tags: ['quick'] }),
   D('bf_sweetpotato_egg', '红薯鸡蛋', 'breakfast', 'cn', 'light', 'B', '1个红薯+1个蛋(约250g)', [
     ['sweet_potato', 200], ['egg', 50],
   ], { tags: ['quick'] }),
 
   // ===================== 水果 fr_ =====================
-  D('fr_apple', '苹果', 'fruit', 'cn', 'light', 'BS', '1个(约200g)', [['apple', 200]]),
-  D('fr_banana', '香蕉', 'fruit', 'cn', 'light', 'BS', '1根(约120g)', [['banana', 120]]),
-  D('fr_orange', '橙子', 'fruit', 'cn', 'light', 'BS', '1个(约200g)', [['orange', 200]]),
+  D('fr_apple', '苹果', 'fruit', 'cn', 'light', 'BS', '1个(可食约170g)', [['apple', 170]]),
+  D('fr_banana', '香蕉', 'fruit', 'cn', 'light', 'BS', '1根(去皮可食约80g)', [['banana', 80]]),
+  D('fr_orange', '橙子', 'fruit', 'cn', 'light', 'BS', '1个(可食约150g)', [['orange', 150]]),
   D('fr_grape', '葡萄', 'fruit', 'cn', 'light', 'BS', '1小串(约150g)', [['grape', 150]]),
   D('fr_watermelon', '西瓜', 'fruit', 'cn', 'light', 'BS', '2块(约300g)', [['watermelon', 300]]),
   D('fr_strawberry', '草莓', 'fruit', 'cn', 'light', 'BS', '1盒(约150g)', [['strawberry', 150]]),
   D('fr_blueberry', '蓝莓', 'fruit', 'cn', 'light', 'BS', '1盒(约125g)', [['blueberry', 125]]),
-  D('fr_kiwi', '猕猴桃', 'fruit', 'cn', 'light', 'BS', '2个(约150g)', [['kiwi', 150]], { aliases: ['奇异果'] }),
-  D('fr_pear', '梨', 'fruit', 'cn', 'light', 'BS', '1个(约200g)', [['pear', 200]]),
-  D('fr_peach', '桃', 'fruit', 'cn', 'light', 'BS', '1个(约180g)', [['peach', 180]], { aliases: ['桃子', '水蜜桃'] }),
-  D('fr_mango', '芒果', 'fruit', 'cn', 'light', 'BS', '1个(约200g)', [['mango', 200]]),
+  D('fr_kiwi', '猕猴桃', 'fruit', 'cn', 'light', 'BS', '2个(去皮可食约130g)', [['kiwi', 130]], { aliases: ['奇异果'] }),
+  D('fr_pear', '梨', 'fruit', 'cn', 'light', 'BS', '1个(可食约180g)', [['pear', 180]]),
+  D('fr_peach', '桃', 'fruit', 'cn', 'light', 'BS', '1个(可食约160g)', [['peach', 160]], { aliases: ['桃子', '水蜜桃'] }),
+  D('fr_mango', '芒果', 'fruit', 'cn', 'light', 'BS', '1个(去皮去核可食约130g)', [['mango', 130]]),
   D('fr_pomelo', '柚子', 'fruit', 'cn', 'light', 'BS', '3瓣(约200g)', [['pomelo', 200]]),
-  D('fr_dragon_fruit', '火龙果', 'fruit', 'cn', 'light', 'BS', '半个(约200g)', [['dragon_fruit', 200]]),
+  D('fr_dragon_fruit', '火龙果', 'fruit', 'cn', 'light', 'BS', '半个(可食约170g)', [['dragon_fruit', 170]]),
   D('fr_cherry_tomato', '圣女果', 'fruit', 'cn', 'light', 'BS', '1碟(约150g)', [['cherry_tomato', 150]], { aliases: ['小番茄'] }),
   D('fr_avocado_half', '牛油果', 'fruit', 'west', 'light', 'BS', '半个(约80g)', [['avocado', 80]]),
   D('fr_mixed_platter', '混合水果拼盘', 'fruit', 'cn', 'light', 'BS', '1盘(约250g)', [
