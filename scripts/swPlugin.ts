@@ -14,7 +14,7 @@ export function swPlugin(opts: { version?: string } = {}): Plugin {
     configResolved(c) { outDir = c.build.outDir },
     closeBundle() {
       const version = opts.version || new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12)
-      const sw = `// 私人营养师 service worker · build ${version}
+      const sw = `// 饮食日记 service worker · build ${version}
 const CACHE = 'nutri-${version}'
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-180.png']
 

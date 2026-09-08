@@ -1,4 +1,4 @@
-# 私人营养师
+# 饮食日记
 
 个人版饮食管家：按身体数据算目标，按规则推荐每日餐食，录餐后根据近 7 天的实际吃法调整推荐并给出结构建议。纯前端、本地存储。推荐与分析全部是本地规则；唯一可选的联网功能是「说一句话录餐」，用自己的 API key 浏览器直连 Claude Opus 5 或 DeepSeek V4 Flash。
 
@@ -8,7 +8,7 @@
 npm install
 npm run dev        # 开发，手机同一 Wi-Fi 下可用局域网地址访问
 npm run build      # 构建：dist/ 下是单文件 index.html + manifest + 图标 + sw.js
-npm run release    # release/私人营养师.html 单机版；release/pwa/ 整目录上传静态托管即为 PWA
+npm run release    # release/饮食日记.html 单机版；release/pwa/ 整目录上传静态托管即为 PWA
 npm run preview    # 本机预览 dist（service worker 需要 http 或 https，file:// 下不注册）
 npm test           # vitest
 npm run validate   # 校验食材与菜品数据（--list 打印每道菜营养值）

@@ -1,5 +1,5 @@
 ---
-name: 私人营养师
+name: 饮食日记
 description: 一天的饮食是一张动物园导览图；米色纸底是水，苹果绿平涂是陆地，余量是陆地中间的湖。
 colors:
   water: "#F5F1E4"
@@ -285,7 +285,7 @@ components:
     padding: "9px 14px"
 ---
 
-# Design System: 私人营养师
+# Design System: 饮食日记
 
 ## Overview
 

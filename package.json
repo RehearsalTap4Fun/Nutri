@@ -10,7 +10,7 @@
     "test": "vitest run",
     "validate": "tsx scripts/validateData.ts",
     "deploy": "npm test && scripts/deploy.sh",
-    "release": "npm run build && rm -rf release && mkdir -p release/pwa && cp -R dist/. release/pwa/ && cp dist/index.html \"release/私人营养师.html\" && echo \"单机版: release/私人营养师.html · PWA 目录: release/pwa（整目录上传到静态托管）\""
+    "release": "npm run build && rm -rf release && mkdir -p release/pwa && cp -R dist/. release/pwa/ && cp dist/index.html \"release/饮食日记.html\" && echo \"单机版: release/饮食日记.html · PWA 目录: release/pwa（整目录上传到静态托管）\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",

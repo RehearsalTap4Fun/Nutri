@@ -1,4 +1,4 @@
-# 设计简报：私人营养师 × 动物园导览图
+# 设计简报：饮食日记 × 动物园导览图
 
 状态：已落地（2026-09-04 晚）。impeccable 收尾评审两轮后 ship（8 项修复 + 1 项回归全部 resolved）；设计系统记录见根目录 `DESIGN.md` 与 `.impeccable/design.json`。下文为落地前的设计意图，以 DESIGN.md 为准。本文是 impeccable `shape` 阶段的产物：只定意图，不定 CSS 值。
 决策记录：seed `e1ca1482`（mode operate），用户在四张全卡里选了挑战牌 `challenger-zoo-map`（动物园与植物园导览图）。落选：菜市场价签（骰子指定）、营养成分表（模型推荐）、厨房秤液晶（备选）、行业标准卡片（standing exit）。裁决理由见 `.impeccable/decision-e1ca1482.json`。

@@ -1,6 +1,6 @@
 {
-  "name": "私人营养师",
-  "short_name": "营养师",
+  "name": "饮食日记",
+  "short_name": "饮食日记",
   "description": "按身体数据算目标、按规则推荐三餐、录餐后按近 7 天实际吃法调整的个人饮食管家",
   "lang": "zh-CN",
   "start_url": "./",
