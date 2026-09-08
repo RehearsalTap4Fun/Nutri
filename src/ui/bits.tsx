@@ -19,6 +19,8 @@ export interface StatItem {
   of?: string | number
   unit?: string
   tone?: 'bad' | 'good'
+  /** 值下面的一行小字，如「已吃 800 + 推荐 1050」 */
+  sub?: string
 }
 
 /** 数据条：几个「值 / 目标」并排，替代一句里塞四个数字的说明文 */
@@ -33,6 +35,7 @@ export function Stats({ items, dense = false }: { items: StatItem[]; dense?: boo
             {it.of !== undefined && <span className="stat-of"> / {it.of}</span>}
             {it.unit && <span className="stat-unit"> {it.unit}</span>}
           </span>
+          {it.sub && <span className="stat-sub num">{it.sub}</span>}
         </div>
       ))}
     </div>

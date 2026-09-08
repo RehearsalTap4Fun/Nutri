@@ -4,7 +4,7 @@ import { MEAL_SLOTS } from '../core/types'
 import type { DayPlan, MealPlan } from '../core/planner'
 import { shoppingList } from '../core/planner'
 import { addDays, shortDate, todayStr, weekdayLabel } from '../core/dates'
-import { dishNutrientsFor, entryName, scale, servingGrams } from '../core/nutrition'
+import { dishNutrientsFor, entryName, entryNutrients, scale, servingGrams, sum } from '../core/nutrition'
 import { COOK_LABEL, SLOT_LABEL, entryPortionText, portionText, r0, withoutSodiumNotes } from './format'
 import { IconClose } from './icons'
 import { Fold, SignalChips, Stats } from './bits'
@@ -33,6 +33,9 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
   onDislike: (dishId: string) => void
   isToday: boolean
 }) {
+  // 已吃餐次的实际摄入：顶部数据条按「已吃 + 推荐」对照全天目标
+  const hasEaten = plan.eatenSlots.length > 0
+  const eatenN = useMemo(() => sum(dayEntries.filter((e) => plan.eatenSlots.includes(e.slot)).map((e) => entryNutrients(e, dishMap))), [dayEntries, plan.eatenSlots, dishMap])
   const [showList, setShowList] = useState(false)
   const [view, setView] = useState<'day' | 'week'>('day')
   const list = shoppingList(plan, dishMap)
@@ -58,11 +61,15 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
             {view === 'day' && !allEaten && <button className="btn sm" onClick={() => onReroll()}>全天换一换</button>}
           </div>
         </div>
-        {view === 'day' && <Stats items={[
+        {view === 'day' && <Stats items={hasEaten ? [
+          // 有已吃的餐次时，推荐只覆盖其余餐次；顶部按「已吃 + 推荐 = 全天」对照目标，免得看着像推荐不够
+          { label: '全天热量', value: r0(eatenN.kcal + plan.totals.kcal), of: targets.kcal, unit: '千卡', tone: eatenN.kcal + plan.totals.kcal > targets.kcal * 1.05 ? 'bad' : undefined, sub: `已吃 ${r0(eatenN.kcal)} + 推荐 ${r0(plan.totals.kcal)}` },
+          { label: '全天蛋白', value: r0(eatenN.protein + plan.totals.protein), of: targets.protein, unit: 'g', sub: `已吃 ${r0(eatenN.protein)} + 推荐 ${r0(plan.totals.protein)}` },
+        ] : [
           { label: '推荐热量', value: r0(plan.totals.kcal), of: targets.kcal, unit: '千卡', tone: plan.totals.kcal > targets.kcal * 1.05 ? 'bad' : undefined },
           { label: '推荐蛋白', value: r0(plan.totals.protein), of: targets.protein, unit: 'g' },
         ]} />}
-        {view === 'day' && plan.eatenSlots.length > 0 && <p className="tiny muted" style={{ marginTop: 2 }}>已吃 {plan.eatenSlots.map((s) => SLOT_LABEL[s]).join('、')}，其余按剩余预算给</p>}
+        {view === 'day' && hasEaten && <p className="tiny muted" style={{ marginTop: 2 }}>已吃{plan.eatenSlots.map((s) => SLOT_LABEL[s]).join('、')}；推荐只覆盖其余餐次，按剩余预算给</p>}
         {view === 'day' && <SignalChips notes={withoutSodiumNotes(plan.notes, showSodium)} />}
       </div>
 
