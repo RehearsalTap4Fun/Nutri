@@ -7,11 +7,11 @@ import { MEAL_SLOTS } from '../core/types'
 import type { DayStat } from '../core/analysis'
 import { todayStr } from '../core/dates'
 import { budgetFocus, remainOf, type BudgetPick } from '../core/budget'
-import { entryName, entryNutrients } from '../core/nutrition'
+import { entryName, entryNutrients, servingGrams } from '../core/nutrition'
 import { Meter } from './charts'
 import { useCountUp } from './hooks'
 import { IconBowl, IconClose, IconPlus } from './icons'
-import { SLOT_LABEL, portionLabel, r0, showsSodium, withoutSodiumNotes } from './format'
+import { SLOT_LABEL, entryPortionText, portionText, r0, showsSodium, withoutSodiumNotes } from './format'
 import { CONDITION_LABEL } from '../core/conditions'
 import { SignalChips } from './bits'
 import { CanIEat } from './CanIEat'
@@ -155,7 +155,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
             {budgetPicks.map((p) => (
               <div key={p.dish.id} className="list-item">
                 <div className="grow">
-                  <div className="ellipsis">{p.dish.name} <span className="muted small">× {portionLabel(p.portion)}</span></div>
+                  <div className="ellipsis">{p.dish.name} <span className="muted small">× {portionText(p.portion, servingGrams(p.dish))}</span></div>
                   <div className="tiny muted">{p.why}{/蛋白/.test(p.why) ? '' : ` · 蛋白 ${r0(p.n.protein)} g`}</div>
                 </div>
                 <div className="num ink2">{r0(p.n.kcal)}</div>
@@ -212,7 +212,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
                       <div className="list-item tap" style={{ ['--i' as string]: i }} onClick={() => (swiped ? setSwiped(null) : onEdit(e))}
                         onTouchStart={(ev) => onSwipeStart(e.id, ev)} onTouchMove={onSwipeMove} onTouchEnd={onSwipeEnd} onTouchCancel={onSwipeEnd}>
                       <div className="grow">
-                        <div className="ellipsis">{entryName(e, dishMap)} <span className="muted small">× {portionLabel(e.portion)}</span>{e.lowSalt && <span className="pill" style={{ marginLeft: 6 }}>少盐</span>}{e.lowOil && <span className="pill" style={{ marginLeft: 4 }}>少油</span>}</div>
+                        <div className="ellipsis">{entryName(e, dishMap)} <span className="muted small">× {entryPortionText(e, dishMap)}</span>{e.lowSalt && <span className="pill" style={{ marginLeft: 6 }}>少盐</span>}{e.lowOil && <span className="pill" style={{ marginLeft: 4 }}>少油</span>}</div>
                         <div className="tiny muted num">{e.time || ''} · 蛋白 {r0(en.protein)} · 脂肪 {r0(en.fat)} · 碳水 {r0(en.carbs)} g</div>
                       </div>
                       <div className="num ink2" style={{ fontWeight: 600 }}>{r0(en.kcal)}</div>

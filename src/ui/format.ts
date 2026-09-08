@@ -1,4 +1,5 @@
-import type { ActivityLevel, Allergen, Condition, Cuisine, DietStyle, DishCategory, Goal, MealSlot, Sex } from '../core/types'
+import type { ActivityLevel, Allergen, Condition, Cuisine, DietStyle, Dish, DishCategory, Goal, LogEntry, MealSlot, Sex } from '../core/types'
+import { servingGrams } from '../core/nutrition'
 
 export const SEX_LABEL: Record<Sex, string> = { male: '男', female: '女' }
 export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
@@ -38,6 +39,24 @@ export function portionLabel(p: number): string {
   const fracStr = frac === 0.25 ? '¼' : frac === 0.5 ? '½' : frac === 0.75 ? '¾' : frac ? frac.toFixed(2).slice(1) : ''
   if (whole === 0) return fracStr + '份'
   return whole + fracStr + '份'
+}
+/** 「约 N g」的取整：≥30 g 取到 5 的倍数，读起来像估算而不是秤出来的 */
+export function roundGrams(g: number): number {
+  return g >= 30 ? Math.round(g / 5) * 5 : Math.round(g)
+}
+/**
+ * 份量的文案：整份写「N份」，非整份换算成克写「约 N g」（半份、¾份这类分数不直观）；
+ * 不知道一份多重时才退回分数写法。
+ */
+export function portionText(p: number, grams?: number): string {
+  if (Number.isInteger(p)) return `${p}份`
+  if (grams && grams > 0) return `约 ${roundGrams(p * grams)} g`
+  return portionLabel(p)
+}
+/** 记录条目的份量文案：目录菜按成品重量换算，自定义条目不知道重量、保留分数写法 */
+export function entryPortionText(e: LogEntry, dishMap: Map<string, Dish>): string {
+  const d = e.dishId ? dishMap.get(e.dishId) : undefined
+  return portionText(e.portion, d ? servingGrams(d) : undefined)
 }
 export function defaultTimeForSlot(slot: MealSlot): string {
   return { breakfast: '08:00', lunch: '12:30', dinner: '18:30', snack: '15:30' }[slot]

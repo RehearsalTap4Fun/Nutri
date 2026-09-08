@@ -2,11 +2,11 @@ import { useMemo, useState } from 'react'
 import type { Condition, Dish, MealSlot, Nutrients, Targets } from '../core/types'
 import type { CustomFood } from '../store/storage'
 import { searchFoods, type FoodPick } from './foodSearch'
-import { dishNutrients, dishWeight, scale } from '../core/nutrition'
+import { dishNutrients, scale, servingGrams } from '../core/nutrition'
 import { foodVerdictForDish, foodVerdictForNutrients, type Verdict } from '../core/verdict'
 import { Stats, Bullets } from './bits'
 import { IconAlert, IconClose, IconPlus } from './icons'
-import { portionLabel, r0 } from './format'
+import { portionText, r0 } from './format'
 
 const VERDICT_LABEL: Record<Verdict, string> = { avoid: '不建议', caution: '少吃点', ok: '可以吃' }
 const VERDICT_PILL: Record<Verdict, string> = { avoid: 'pill bad', caution: 'pill warn', ok: 'pill good' }
@@ -36,7 +36,7 @@ export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds
   const reset = () => { setPick(null); setQ('') }
 
   const perServing = pick ? (pick.kind === 'dish' ? dishNutrients(pick.dish) : pick.food.nutrients) : null
-  const weight = pick?.kind === 'dish' ? dishWeight(pick.dish) : 0
+  const weight = pick?.kind === 'dish' ? servingGrams(pick.dish) : 0
   const scaled = perServing ? scale(perServing, portion) : null
   const result = pick
     ? pick.kind === 'dish'
@@ -76,7 +76,7 @@ export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds
           {weight > 0 && (
             <div className="stepper" style={{ marginTop: 10 }}>
               <button onClick={() => setPortion(Math.max(0.25, portion - 0.25))}>−</button>
-              <span className="val num">{portionLabel(portion)}</span>
+              <span className="val num">{portionText(portion, weight)}</span>
               <button onClick={() => setPortion(Math.min(6, portion + 0.25))}>+</button>
             </div>
           )}

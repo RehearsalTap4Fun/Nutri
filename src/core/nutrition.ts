@@ -115,6 +115,26 @@ export function dishWeight(dish: Dish): number {
   return dish.parts.reduce((s, p) => s + p.g, 0)
 }
 
+/** 从份量描述里读成品重量：「可食(部)约 N g」>「约 N g/ml」> 描述里唯一的重量数字；读不出返回 undefined */
+export function servingGramsFromText(serving?: string): number | undefined {
+  const t = serving || ''
+  const m1 = t.match(/可食部?约?\s*(\d+)\s*g/)
+  if (m1) return +m1[1]
+  const m2 = t.match(/约\s*(\d+)\s*(?:g|ml)/)
+  if (m2) return +m2[1]
+  const all = [...t.matchAll(/(\d+)\s*(?:g|ml)/g)]
+  if (all.length === 1) return +all[0][1]
+  return undefined
+}
+
+/**
+ * 一份成品的重量（g）。优先用份量描述里写的成品重量（粽子、汤圆这类用生米干粉拼的菜，食材合计远小于成品），
+ * 描述里没有时退回食材合计。界面上的「约 N g」与「按克」都用它，保证看到的克数和输进去的克数是同一套。
+ */
+export function servingGrams(dish: Dish): number {
+  return servingGramsFromText(dish.serving) ?? dishWeight(dish)
+}
+
 export function dishAllergens(dish: Dish, ingMap: Map<string, Ingredient> = INGREDIENT_MAP): Allergen[] {
   const set = new Set<Allergen>()
   for (const p of dish.parts) {

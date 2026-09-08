@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import type { Dish, LogEntry, MealSlot } from '../core/types'
 import { MEAL_SLOTS } from '../core/types'
-import { scale, sum } from '../core/nutrition'
+import { scale, sum, servingGrams } from '../core/nutrition'
 import { parseMealText, MealParseError, PROVIDER_LABEL } from '../llm/mealParser'
 import type { LlmConfig, ParseResult, ParsedItem } from '../llm/mealParser'
 import type { CustomFood } from '../store/storage'
 import { uid } from '../store/storage'
-import { SLOT_LABEL, portionLabel, r0 } from './format'
+import { SLOT_LABEL, portionText, r0 } from './format'
 import { Bullets } from './bits'
 import { IconClose, IconCoin, IconLock, IconSparkle } from './icons'
 
@@ -120,7 +120,7 @@ export function SpeakPanel({ llm, date, isToday, now, defaultSlot, dishes, dishM
                     </div>
                     <div className="stepper" style={{ transform: 'scale(.85)' }}>
                       <button onClick={() => setPortion(i, it.portion - 0.25)}>−</button>
-                      <span className="val num">{portionLabel(it.portion)}</span>
+                      <span className="val num">{portionText(it.portion, it.dishId ? servingGrams(dishMap.get(it.dishId)!) : undefined)}</span>
                       <button onClick={() => setPortion(i, it.portion + 0.25)}>+</button>
                     </div>
                     <button className="btn ghost sm" onClick={() => remove(i)} aria-label="删除"><IconClose /></button>

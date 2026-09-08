@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Dish, DishCategory, LogEntry, MealSlot, Nutrients } from '../core/types'
 import { MEAL_SLOTS } from '../core/types'
-import { canLowOil, canLowSalt, dishNutrients, dishNutrientsFor, dishWeight, scale, vegGrams } from '../core/nutrition'
+import { canLowOil, canLowSalt, dishNutrients, dishNutrientsFor, scale, vegGrams, servingGrams } from '../core/nutrition'
 import { INGREDIENTS, INGREDIENT_MAP } from '../data/ingredients'
 import type { Ingredient } from '../core/types'
 import type { CustomFood } from '../store/storage'
 import { uid } from '../store/storage'
 import { nowTimeStr } from '../core/dates'
-import { CAT_LABEL, COOK_LABEL, CUISINE_LABEL, SLOT_LABEL, defaultTimeForSlot, portionLabel, r0 } from './format'
+import { CAT_LABEL, COOK_LABEL, CUISINE_LABEL, SLOT_LABEL, defaultTimeForSlot, portionText, r0 } from './format'
 import { SpeakPanel } from './SpeakPanel'
 import { ScanPanel } from './ScanPanel'
 import { IconScan, IconSparkle, IconStar, IconClose } from './icons'
@@ -105,7 +105,8 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
   const lowSaltable = pick?.kind === 'dish' && canLowSalt(pick.dish)
   const lowOilable = pick?.kind === 'dish' && canLowOil(pick.dish)
   const perServing: Nutrients | null = pick ? (pick.kind === 'dish' ? dishNutrientsFor(pick.dish, { lowSalt: lowSaltable && lowSalt, lowOil: lowOilable && lowOil }) : pick.food.nutrients) : null
-  const weight = pick?.kind === 'dish' ? dishWeight(pick.dish) : 0
+  // 成品重量：显示的「约 N g」与「按克」输入用同一个数
+  const weight = pick?.kind === 'dish' ? servingGrams(pick.dish) : 0
   const now = perServing ? scale(perServing, portion) : null
 
   const save = () => {
@@ -201,17 +202,17 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
                 <div className="row wrap">
                   <div className="stepper">
                     <button onClick={() => setPortion(Math.max(0.25, portion - 0.25))}>−</button>
-                    <span className="val num">{portionLabel(portion)}</span>
+                    <span className="val num">{portionText(portion, weight)}</span>
                     <button onClick={() => setPortion(Math.min(6, portion + 0.25))}>+</button>
                   </div>
                   <div className="row wrap" style={{ gap: 4 }}>
-                    {[0.5, 1, 1.5, 2].map((v) => <button key={v} className={`chip${portion === v && !byGram ? ' on' : ''}`} onClick={() => { setByGram(false); setPortion(v) }}>{portionLabel(v)}</button>)}
+                    {[0.5, 1, 1.5, 2].map((v) => <button key={v} className={`chip${portion === v && !byGram ? ' on' : ''}`} onClick={() => { setByGram(false); setPortion(v) }}>{portionText(v, weight)}</button>)}
                     {weight > 0 && <button className={`chip${byGram ? ' on' : ''}`} aria-pressed={byGram} onClick={() => setByGram(!byGram)}>按克</button>}
                   </div>
                 </div>
                 {weight > 0 && (
                   <div className="row small muted" style={{ marginTop: 4 }}>
-                    <span>≈ {r0(weight * portion)} g</span>
+                    {Number.isInteger(portion) && <span>≈ {r0(weight * portion)} g</span>}
                     {byGram && (
                       <input className="input" type="number" inputMode="numeric" autoFocus style={{ width: 100, padding: '6px 12px' }} placeholder="克"
                         onChange={(e) => { const g = Number(e.target.value); if (g > 0) setPortion(Math.max(0.25, Math.round((g / weight) * 4) / 4)) }} />

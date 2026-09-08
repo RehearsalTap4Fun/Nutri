@@ -24,8 +24,8 @@ import { MeView } from './ui/Me'
 import { Toast } from './ui/Toast'
 import { useToast } from './ui/hooks'
 import { IconBowl, IconChart, IconLeaf, IconPerson, IconPlus } from './ui/icons'
-import { SLOT_LABEL, defaultTimeForSlot, guessSlot, portionLabel, showsSodium } from './ui/format'
-import { entryName } from './core/nutrition'
+import { SLOT_LABEL, defaultTimeForSlot, entryPortionText, guessSlot, portionText, showsSodium } from './ui/format'
+import { entryName, servingGrams } from './core/nutrition'
 import { captureInstallPrompt, isIOS, isStandalone, isWeChat, registerSW } from './pwa'
 import { deleteRemote, syncOnce, SyncError } from './sync/client'
 import { applySyncState, fingerprint, mergeSync, toSyncState } from './sync/merge'
@@ -224,7 +224,7 @@ export default function App() {
       const isEdit = !!r.entry.id && state.entries.some((e) => e.id === r.entry.id)
       const entry = { ...r.entry, id: r.entry.id || uid(), updatedAt: Date.now() }
       update((s) => ({ ...s, entries: isEdit ? s.entries.map((e) => (e.id === entry.id ? entry : e)) : [...s.entries, entry] }))
-      if (!isEdit) show(`已记录 · ${entryName(entry, dishMap)} × ${portionLabel(entry.portion)}`, { label: '撤销', run: () => removeEntries([entry.id]) })
+      if (!isEdit) show(`已记录 · ${entryName(entry, dishMap)} × ${entryPortionText(entry, dishMap)}`, { label: '撤销', run: () => removeEntries([entry.id]) })
       else show('已保存修改')
     } else if (r.kind === 'saveMany') {
       update((s) => ({ ...s, entries: [...s.entries, ...r.entries], customFoods: [...r.customFoods, ...s.customFoods].slice(0, 200) }))
@@ -264,13 +264,13 @@ export default function App() {
     const time = date === today ? nowTimeStr() : defaultTimeForSlot(slot)
     const entry: LogEntry = { id: uid(), updatedAt: Date.now(), date, slot, time, dishId, portion }
     restoreEntries([entry])
-    show(`已记录 · ${dishMap.get(dishId)?.name || dishId} × ${portionLabel(portion)}`, { label: '撤销', run: () => removeEntries([entry.id]) })
+    show(`已记录 · ${dishMap.get(dishId)?.name || dishId} × ${portionText(portion, dishMap.get(dishId) ? servingGrams(dishMap.get(dishId)!) : undefined)}`, { label: '撤销', run: () => removeEntries([entry.id]) })
   }
 
   // 记录条目直接删除（今日页的叉与左滑），toast 可撤销
   const removeEntry = (e: LogEntry) => {
     removeEntries([e.id])
-    show(`已删除 · ${entryName(e, dishMap)} × ${portionLabel(e.portion)}`, { label: '撤销', run: () => restoreEntries([e]) })
+    show(`已删除 · ${entryName(e, dishMap)} × ${entryPortionText(e, dishMap)}`, { label: '撤销', run: () => restoreEntries([e]) })
   }
 
   const rerollWeek = (dates: string[]) => update((s) => {

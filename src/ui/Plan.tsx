@@ -4,8 +4,8 @@ import { MEAL_SLOTS } from '../core/types'
 import type { DayPlan, MealPlan } from '../core/planner'
 import { shoppingList } from '../core/planner'
 import { addDays, shortDate, todayStr, weekdayLabel } from '../core/dates'
-import { dishNutrientsFor, entryName, scale } from '../core/nutrition'
-import { COOK_LABEL, SLOT_LABEL, portionLabel, r0, withoutSodiumNotes } from './format'
+import { dishNutrientsFor, entryName, scale, servingGrams } from '../core/nutrition'
+import { COOK_LABEL, SLOT_LABEL, entryPortionText, portionText, r0, withoutSodiumNotes } from './format'
 import { IconClose } from './icons'
 import { Fold, SignalChips, Stats } from './bits'
 
@@ -104,7 +104,7 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
           return (
             <div key={slot} className="card lobe lobe-eaten">
               <div className="section-title"><h2>{SLOT_LABEL[slot]} <span className="pill good">已吃</span></h2></div>
-              <p className="small muted">{list.map((e) => `${entryName(e, dishMap)} × ${portionLabel(e.portion)}`).join('、')}</p>
+              <p className="small muted">{list.map((e) => `${entryName(e, dishMap)} × ${entryPortionText(e, dishMap)}`).join('、')}</p>
             </div>
           )
         }
@@ -146,7 +146,7 @@ function MealCard({ meal, dishMap, onReroll, onLog, onDislike, showSodium }: { m
           return (
             <div key={it.dishId} className="list-item">
               <div className="grow">
-                <div className="ellipsis">{d.name} <span className="muted small">× {portionLabel(it.portion)}</span>{it.reason && <span className="pill accent" title={it.reason} style={{ marginLeft: 6 }}>{reasonTag(it.reason)}</span>}{it.lowSalt && <span className="pill" style={{ marginLeft: 6 }}>少盐</span>}{it.lowOil && <span className="pill" style={{ marginLeft: 4 }}>少油</span>}</div>
+                <div className="ellipsis">{d.name} <span className="muted small">× {portionText(it.portion, servingGrams(d))}</span>{it.reason && <span className="pill accent" title={it.reason} style={{ marginLeft: 6 }}>{reasonTag(it.reason)}</span>}{it.lowSalt && <span className="pill" style={{ marginLeft: 6 }}>少盐</span>}{it.lowOil && <span className="pill" style={{ marginLeft: 4 }}>少油</span>}</div>
                 <div className="tiny muted">{d.serving} · {COOK_LABEL[d.cook]} · 蛋白 {r0(n.protein)} g</div>
               </div>
               <div className="num ink2">{r0(n.kcal)}</div>
