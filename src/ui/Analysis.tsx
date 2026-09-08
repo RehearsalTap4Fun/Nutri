@@ -6,7 +6,7 @@ import type { Analysis, Finding } from '../core/analysis'
 import { windowStats } from '../core/analysis'
 import { macroKcalShare } from '../core/nutrition'
 import { addDays, lastNDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from '../core/dates'
-import { BarChart, LineChart, Meter } from './charts'
+import { BarChart, LineChart, Variance, VarianceAxis, type VarianceTone } from './charts'
 import { r0, showsSodium } from './format'
 import { IconAlert, IconCheck, IconChevron, IconClose, IconInfo } from './icons'
 import { Fold, Legend, ProgressRow, ShareBar, Stats } from './bits'
@@ -115,15 +115,18 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
         <div className="section-title"><h2>日均 vs 目标</h2><span className="small muted">{k === 0 ? '' : warn.length ? `${warn.length} 项要改 · 点右侧标记看建议` : '都在范围内'}</span></div>
         {k === 0 ? <div className="empty small">还没有完整记录的日子</div> : (
           <>
-            <MetricRow findings={byMetric.m.kcal}><Meter label="热量" value={w.avg.kcal} target={targets.kcal} unit="kcal" color="var(--ring)" soft="var(--ring-track)" /></MetricRow>
-            <MetricRow findings={byMetric.m.protein}><Meter label="蛋白" value={w.avg.protein} target={targets.protein} unit="g" color="var(--protein)" soft="var(--protein-soft)" /></MetricRow>
-            <MetricRow findings={byMetric.m.fat}><Meter label="脂肪" value={w.avg.fat} target={targets.fat} unit="g" color="var(--fat)" soft="var(--fat-soft)" /></MetricRow>
-            <MetricRow findings={[]}><Meter label="碳水" value={w.avg.carbs} target={targets.carbs} unit="g" color="var(--carbs)" soft="var(--carbs-soft)" /></MetricRow>
-            <MetricRow findings={byMetric.m.fiber}><Meter label="纤维" value={w.avg.fiber} target={targets.fiber} unit="g" color="var(--fiber)" soft="var(--fiber-soft)" /></MetricRow>
-            <MetricRow findings={byMetric.m.veg}><Meter label="蔬菜" value={w.avgVegServings} target={targets.vegServings} unit="份" color="var(--accent)" soft="var(--accent-soft)" /></MetricRow>
-            <MetricRow findings={byMetric.m.fruit}><Meter label="水果" value={w.avgFruitG} target={targets.fruitG} unit="g" color="var(--ink-2)" soft="var(--surface-2)" /></MetricRow>
-            {showNa && <MetricRow findings={byMetric.m.sodium}><Meter label="钠" value={w.avg.sodium} target={targets.sodiumMax} unit="mg" color="var(--ink-2)" soft="var(--surface-2)" /></MetricRow>}
-            {waterAvg.days > 0 && <MetricRow findings={byMetric.m.water}><Meter label="饮水" value={waterAvg.avg} target={targets.waterMl} unit="ml" color="var(--land)" soft="var(--land-2)" /></MetricRow>}
+            {/* 合适区间的宽度与 core/analysis 的判定阈值一致（热量 −20%/+10%，孕产期 −15%），柱色与右侧标记才不会自相矛盾 */}
+            <VarianceAxis />
+            <MetricRow findings={byMetric.m.kcal}><Variance label="热量" value={w.avg.kcal} target={targets.kcal} unit="kcal" color="var(--ring)" mode="near" tol={[(profile.conditions || []).some((c) => c === 'pregnancy' || c === 'lactation') ? 0.15 : 0.2, 0.1]} tone={sevOf(byMetric.m.kcal)} /></MetricRow>
+            <MetricRow findings={byMetric.m.protein}><Variance label="蛋白" value={w.avg.protein} target={targets.protein} unit="g" color="var(--protein)" mode="atLeast" tol={0.15} tone={sevOf(byMetric.m.protein)} /></MetricRow>
+            <MetricRow findings={byMetric.m.fat}><Variance label="脂肪" value={w.avg.fat} target={targets.fat} unit="g" color="var(--fat)" mode="atMost" tol={0.25} tone={sevOf(byMetric.m.fat)} /></MetricRow>
+            <MetricRow findings={[]}><Variance label="碳水" value={w.avg.carbs} target={targets.carbs} unit="g" color="var(--carbs)" mode="atMost" tol={0.1} /></MetricRow>
+            <MetricRow findings={byMetric.m.fiber}><Variance label="纤维" value={w.avg.fiber} target={targets.fiber} unit="g" color="var(--fiber)" mode="atLeast" tol={0.3} tone={sevOf(byMetric.m.fiber)} /></MetricRow>
+            <MetricRow findings={byMetric.m.veg}><Variance label="蔬菜" value={w.avgVegServings} target={targets.vegServings} unit="份" color="var(--accent)" mode="atLeast" tol={0.4} tone={sevOf(byMetric.m.veg)} /></MetricRow>
+            <MetricRow findings={byMetric.m.fruit}><Variance label="水果" value={w.avgFruitG} target={targets.fruitG} unit="g" color="var(--ink-2)" mode="atLeast" tol={Math.max(0.1, 1 - 100 / Math.max(1, targets.fruitG))} tone={sevOf(byMetric.m.fruit)} /></MetricRow>
+            {showNa && <MetricRow findings={byMetric.m.sodium}><Variance label="钠" value={w.avg.sodium} target={targets.sodiumMax} unit="mg" color="var(--ink-2)" mode="atMost" tol={0.2} tone={sevOf(byMetric.m.sodium)} /></MetricRow>}
+            {waterAvg.days > 0 && <MetricRow findings={byMetric.m.water}><Variance label="饮水" value={waterAvg.avg} target={targets.waterMl} unit="ml" color="var(--pond)" mode="atLeast" tol={0.3} tone={sevOf(byMetric.m.water)} /></MetricRow>}
+            <Legend items={[{ swatch: 'land2', label: '合适区间' }, { swatch: 'land', label: '达标' }, { swatch: 'sun', label: '要改' }, { swatch: 'line', label: '目标线' }]} />
             <ShareBar protein={share.protein} fat={share.fat} carbs={share.carbs} />
             <Fold summary="供能比参考范围">蛋白 15~25%、脂肪 25~35%、碳水 45~60%（中国居民膳食营养素参考摄入量 2023 版）。</Fold>
             <TargetBasis profile={profile} targets={targets} adaptive={useAdaptive} />
@@ -176,9 +179,14 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
 }
 
 /** 一条宏量条 + 右侧结论标记；点标记展开对应建议 */
+/** 一组结论里最重的级别：要改 > 提示 > 良好；没有结论则 none */
+function sevOf(findings: Finding[]): VarianceTone {
+  return findings.length === 0 ? 'none' : findings.some((f) => f.severity === 'warn') ? 'warn' : findings.some((f) => f.severity === 'info') ? 'info' : 'good'
+}
+
 function MetricRow({ findings, children }: { findings: Finding[]; children: ReactNode }) {
   const [open, setOpen] = useState(false)
-  const sev = findings.length === 0 ? 'none' : findings.some((f) => f.severity === 'warn') ? 'warn' : findings.some((f) => f.severity === 'info') ? 'info' : 'good'
+  const sev = sevOf(findings)
   return (
     <div className={`metric${open ? ' open' : ''}`}>
       {children}

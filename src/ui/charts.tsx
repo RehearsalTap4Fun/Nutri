@@ -1,3 +1,4 @@
+import { devLabel, varX, varianceOf, type Tol, type VarianceMode } from '../core/variance'
 import React, { useEffect, useRef, useState } from 'react'
 
 /** 测量容器宽度，让 viewBox 与像素 1:1，文字不随缩放变大 */
@@ -194,4 +195,50 @@ function niceTicks(max: number, n: number, min = 0): number[] {
 
 function fmtTick(v: number): string {
   return v >= 1000 ? v.toLocaleString('en-US') : String(Math.round(v))
+}
+
+export type VarianceTone = 'good' | 'warn' | 'info' | 'none'
+
+/**
+ * 「日均 vs 目标」的一行：围绕正中目标线的偏差柱。向左不足、向右超出，浅陆地色的带是合适区间，
+ * 柱端标偏差百分比；柱色按结论（达标绿 / 要改黄 / 提示灰），标签上的圆点保留营养素识别色。
+ * 超出 ±60% 的夹在刻度边缘并加三角箭头，标签仍写真实偏差。
+ */
+export function Variance({ label, value, target, unit, color, mode, tol, tone = 'none' }: {
+  label: string; value: number; target: number; unit: string; color: string; mode: VarianceMode; tol?: Tol; tone?: VarianceTone
+}) {
+  const v = varianceOf(value, target, mode, tol)
+  const t: VarianceTone = tone === 'none' ? (v.within ? 'good' : 'none') : tone
+  const x = varX(v.shown)
+  const neg = v.shown < 0
+  const barStyle = neg ? { left: `${x}%`, width: `${50 - x}%` } : { left: '50%', width: `${x - 50}%` }
+  // 柱子够长时把百分比放进柱子里，免得顶到边
+  const inside = Math.abs(v.shown) > 0.42
+  const lblStyle = inside
+    ? (neg ? { left: `calc(${x}% + ${v.capped ? 12 : 5}px)` } : { right: `calc(${100 - x}% + ${v.capped ? 12 : 5}px)` })
+    : (neg ? { right: `calc(${100 - x}% + 5px)` } : { left: `calc(${x}% + 5px)` })
+  const aria = `${label} 日均 ${Math.round(value)} ${unit}，目标 ${Math.round(target)}，${devLabel(v.dev)}${v.within ? '，在合适区间' : ''}`
+  return (
+    <div className="variance">
+      <span className="lbl"><span className="legend-dot" style={{ background: color }} />{label}</span>
+      <div className="var-track" role="img" aria-label={aria}>
+        <div className="var-band" style={{ left: `${varX(v.band[0])}%`, width: `${varX(v.band[1]) - varX(v.band[0])}%` }} />
+        <div className="var-zero" />
+        <div className={`var-bar ${t}${v.capped ? ' capped' : ''}${neg ? ' neg' : ' pos'}`} style={barStyle} />
+        <span className={`var-val${inside ? ' in' : ''}${inside && (t === 'none' || t === 'info') ? ' on-dark' : ''}`} style={lblStyle}>{devLabel(v.dev)}</span>
+      </div>
+      <span className="val num"><b>{Math.round(value)}</b><span className="muted"> / {Math.round(target)} {unit}</span></span>
+    </div>
+  )
+}
+
+/** 偏差图的刻度头：−60% · 目标 · +60%，与各行同一套栅格，目标字样正对目标线 */
+export function VarianceAxis() {
+  return (
+    <div className="variance axis" aria-hidden>
+      <span className="lbl" />
+      <div className="var-track"><span className="tick l">−60%</span><span className="tick c">目标</span><span className="tick r">+60%</span></div>
+      <span className="val" />
+    </div>
+  )
 }

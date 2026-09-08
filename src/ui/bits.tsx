@@ -68,7 +68,7 @@ export function SignalChips({ notes, max = 3 }: { notes: string[]; max?: number 
   )
 }
 
-export type Swatch = 'land' | 'sun' | 'ink' | 'hollow' | 'dim' | 'target'
+export type Swatch = 'land' | 'land2' | 'sun' | 'ink' | 'hollow' | 'dim' | 'target' | 'line'
 
 /** 图例：小色样 + 一个词，替代解释图形含义的整句 */
 export function Legend({ items }: { items: Array<{ swatch: Swatch; label: string }> }) {
