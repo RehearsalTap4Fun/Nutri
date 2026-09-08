@@ -126,7 +126,7 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
             <MetricRow findings={byMetric.m.fruit}><Variance label="水果" value={w.avgFruitG} target={targets.fruitG} unit="g" color="var(--ink-2)" mode="atLeast" tol={Math.max(0.1, 1 - 100 / Math.max(1, targets.fruitG))} tone={sevOf(byMetric.m.fruit)} /></MetricRow>
             {showNa && <MetricRow findings={byMetric.m.sodium}><Variance label="钠" value={w.avg.sodium} target={targets.sodiumMax} unit="mg" color="var(--ink-2)" mode="atMost" tol={0.2} tone={sevOf(byMetric.m.sodium)} /></MetricRow>}
             {waterAvg.days > 0 && <MetricRow findings={byMetric.m.water}><Variance label="饮水" value={waterAvg.avg} target={targets.waterMl} unit="ml" color="var(--pond)" mode="atLeast" tol={0.3} tone={sevOf(byMetric.m.water)} /></MetricRow>}
-            <Legend items={[{ swatch: 'land2', label: '合适区间' }, { swatch: 'land', label: '达标' }, { swatch: 'sun', label: '要改' }, { swatch: 'line', label: '目标线' }]} />
+            <Legend items={[{ swatch: 'shoal', label: '合适区间' }, { swatch: 'land', label: '达标' }, { swatch: 'sun', label: '要改' }]} />
             <ShareBar protein={share.protein} fat={share.fat} carbs={share.carbs} />
             <Fold summary="供能比参考范围">蛋白 15~25%、脂肪 25~35%、碳水 45~60%（中国居民膳食营养素参考摄入量 2023 版）。</Fold>
             <TargetBasis profile={profile} targets={targets} adaptive={useAdaptive} />
@@ -190,7 +190,8 @@ function MetricRow({ findings, children }: { findings: Finding[]; children: Reac
   return (
     <div className={`metric${open ? ' open' : ''}`}>
       {children}
-      <button className={`metric-flag ${sev}`} disabled={sev === 'none'} aria-expanded={open} aria-label={findings[0] ? `${findings[0].title}，点开看建议` : undefined} onClick={() => setOpen(!open)}>
+      {/* 达标不放图标：绿柱已经说明了，右侧只留要改 / 提示两种需要点开看的 */}
+      <button className={`metric-flag ${sev}`} disabled={sev === 'none' || sev === 'good'} aria-expanded={open} aria-label={findings[0] ? `${findings[0].title}，点开看建议` : undefined} onClick={() => setOpen(!open)}>
         {sev === 'good' ? <IconCheck size={12} /> : sev === 'warn' ? <IconAlert size={12} /> : sev === 'info' ? <IconInfo size={12} /> : null}
       </button>
       {open && findings.map((f) => (

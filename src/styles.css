@@ -406,27 +406,26 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
 .chip svg { vertical-align: -2px; margin-right: 2px; }
 /* 日均 vs 目标：每条宏量条右侧挂一个结论标记，点开看建议 */
 /* ---- 日均 vs 目标：围绕目标线的偏差图。所有行共用 −60%…+60% 刻度，目标线居中，
-   柱子向左不足、向右超出，浅陆地色的带是合适区间，柱端标偏差百分比 ---- */
-.variance { display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 10px; font-size: 13px; }
+   柱子向左不足、向右超出；中性浅滩色的带是合适区间；百分比在右栏，图里不放文字 ---- */
+.variance { display: grid; grid-template-columns: 54px 1fr 84px; align-items: center; gap: 12px; font-size: 13px; }
 .variance .lbl { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
-.variance .val { font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; min-width: 92px; text-align: right; font-size: 12px; }
-.variance .val b { color: var(--ink); font-size: 14px; font-weight: 700; }
-.var-track { position: relative; height: 24px; }
-.var-track::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px; background: var(--hair); }
-.var-band { position: absolute; top: 5px; height: 14px; background: var(--land-2); border-radius: var(--r-bar); }
-.var-zero { position: absolute; left: 50%; top: 1px; bottom: 1px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; z-index: 2; }
-.var-bar { position: absolute; top: 8px; height: 8px; border-radius: var(--r-bar); background: var(--faint); color: var(--faint); z-index: 1; min-width: 2px; }
+.variance .val { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.15; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.variance .val b { color: var(--ink); font-size: 15px; font-weight: 700; }
+.variance .val b.warn { color: var(--warn-text); }
+.variance .val .sub { font-size: 11px; color: var(--ink-2); font-weight: 600; }
+.variance .val .sub .muted { font-weight: 500; }
+.var-track { position: relative; height: 22px; }
+.var-band { position: absolute; top: 6px; height: 10px; background: var(--surface-2); border-radius: var(--r-bar); }
+.var-zero { position: absolute; left: 50%; top: 2px; bottom: 2px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; z-index: 2; }
+.var-bar { position: absolute; top: 8px; height: 6px; border-radius: var(--r-bar); background: var(--faint); color: var(--faint); z-index: 1; min-width: 2px; }
 .var-bar.good { background: var(--land); color: var(--land); }
 .var-bar.warn { background: var(--sun); color: var(--sun); }
 .var-bar.info { background: var(--axis); color: var(--axis); }
-.var-bar.capped::after { content: ''; position: absolute; top: -1px; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.var-bar.capped::after { content: ''; position: absolute; top: -2px; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
 .var-bar.capped.pos::after { right: -6px; border-left: 6px solid currentColor; }
 .var-bar.capped.neg::after { left: -6px; border-right: 6px solid currentColor; }
-.var-val { position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; z-index: 3; line-height: 1; }
-.var-val.on-dark { color: var(--surface); }
-.variance.axis { margin-bottom: -2px; }
+.variance.axis { margin-bottom: -4px; }
 .variance.axis .var-track { height: 14px; }
-.variance.axis .var-track::before { display: none; }
 .variance.axis .tick { position: absolute; top: 0; font-size: 10px; font-weight: 600; color: var(--faint); line-height: 1.4; }
 .variance.axis .tick.l { left: 0; }
 .variance.axis .tick.r { right: 0; }
@@ -438,7 +437,7 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
 .metric .meter + .meter { margin-top: 0; }
 .metric-flag { width: 24px; height: 24px; border-radius: 50%; border: none; padding: 0; display: grid; place-items: center; color: var(--ink); background: transparent; cursor: pointer; }
 .metric-flag.warn { background: var(--sun); }
-.metric-flag.good { background: var(--land); }
+.metric-flag.good { visibility: hidden; } /* 达标不放图标，绿柱已说明；占位保持对齐 */
 .metric-flag.info { box-shadow: inset 0 0 0 1.5px var(--stroke); }
 .metric-flag.none { visibility: hidden; }
 .metric-flag svg { display: block; }
@@ -473,6 +472,7 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
 .legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; box-sizing: border-box; }
 .sw-land { background: var(--land); }
 .sw-land2 { background: var(--land-2); }
+.sw-shoal { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--hair); }
 .sw-line { width: 2px !important; border-radius: 1px; background: var(--ink); margin: 0 4px; }
 .sw-sun { background: var(--sun); }
 .sw-ink { background: var(--ink); }
