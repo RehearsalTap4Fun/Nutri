@@ -157,6 +157,10 @@ LLM_PROVIDER=deepseek DEEPSEEK_API_KEY=sk-... npx tsx scripts/tryParse.ts "早�
 
 在 `src/data/dishes/` 对应分组里用 `D(id, 名称, 类别, 菜系, 做法, 餐次, 份量描述, [[食材id, 克], ...], {aliases, tags})` 追加，然后 `npm run validate`。新食材加到 `ingredients.ts`，注明来源。
 
+## 贡献食物给食品库
+
+个人本地数据样本有限，食品库要健康地变大得靠用户逐步贡献，而不是单个人闭门造车。「我的」页「帮食品库变大」卡收集库里没有的自建菜（`customDishes`）与自定义食物（`customFoods`），逐条生成可读 JSON 草稿（名称、营养值、自建菜带食材构成、条码若有）——纯本地生成，不联网、不经过任何服务器，和现有加密云同步是两回事。用户复制后粘贴成 GitHub Issue 或发给作者，作者人工审核数值合理后再手动整理进 `dishes/*.ts`；标记「已贡献」只是本地状态，避免重复提示，随云同步的 `settings` 一起走 LWW。逻辑在 `src/core/contribute.ts`，界面在 `src/ui/Contribute.tsx`。
+
 ## 边界
 
 数值为估算，不构成医疗建议。孕期、哺乳期、糖尿病、肾病、进食障碍、未成年人请咨询医生或注册营养师。

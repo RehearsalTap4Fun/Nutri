@@ -39,13 +39,17 @@ export interface AppState {
   meta: { profileAt: number; settingsAt: number }
   /** 血压 / 血糖记录 */
   vitals: VitalEntry[]
-  settings: { useAdaptiveTdee: boolean; provider: 'anthropic' | 'deepseek'; anthropicKey: string; deepseekKey: string ; sync: { code: string; enabled: boolean }}
+  settings: {
+    useAdaptiveTdee: boolean; provider: 'anthropic' | 'deepseek'; anthropicKey: string; deepseekKey: string; sync: { code: string; enabled: boolean }
+    /** 已经贡献给食品库的自定义食物/自建菜 id，贡献面板用来避免重复提示 */
+    contributedFoodIds: string[]
+  }
 }
 
 export const STORAGE_KEY = 'nutri.v1'
 
 export function defaultState(): AppState {
-  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false } } }
+  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false }, contributedFoodIds: [] } }
 }
 
 export function uid(): string {
@@ -84,6 +88,7 @@ export function normalizeState(raw: unknown): AppState {
       anthropicKey: typeof st.anthropicKey === 'string' ? st.anthropicKey : '',
       deepseekKey: typeof st.deepseekKey === 'string' ? st.deepseekKey : '',
       sync: isObj(st.sync) ? { code: typeof st.sync.code === 'string' ? st.sync.code : '', enabled: !!st.sync.enabled && typeof st.sync.code === 'string' && st.sync.code.length > 0 } : { code: '', enabled: false },
+      contributedFoodIds: Array.isArray(st.contributedFoodIds) ? st.contributedFoodIds.filter((x): x is string => typeof x === 'string') : [],
     }
   }
   if (s.profile) {

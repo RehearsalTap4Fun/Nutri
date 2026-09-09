@@ -321,6 +321,7 @@ export default function App() {
   const toggleTrainingDay = () => update((s) => ({ ...s, trainingDays: s.trainingDays.includes(date) ? s.trainingDays.filter((d) => d !== date) : [...s.trainingDays, date] }))
   const setAdaptive = (v: boolean) => update((s) => ({ ...s, settings: { ...s.settings, useAdaptiveTdee: v }, meta: { ...s.meta, settingsAt: Date.now() } }))
   const setProvider = (p: Provider) => update((s) => ({ ...s, settings: { ...s.settings, provider: p }, meta: { ...s.meta, settingsAt: Date.now() } }))
+  const markContributed = (id: string) => update((s) => ({ ...s, settings: { ...s.settings, contributedFoodIds: [...new Set([...s.settings.contributedFoodIds, id])] }, meta: { ...s.meta, settingsAt: Date.now() } }))
   const setKey = (p: Provider, k: string) => update((s) => ({ ...s, settings: { ...s.settings, [p === 'deepseek' ? 'deepseekKey' : 'anthropicKey']: k.trim() } }))
   // 导入的数据不带 key，保留本机已填的
   const importState = (ns: AppState) => setState((s) => ({ ...ns, settings: { ...ns.settings, anthropicKey: s.settings.anthropicKey, deepseekKey: s.settings.deepseekKey, sync: s.settings.sync } }))
@@ -371,7 +372,7 @@ export default function App() {
           <AnalysisView vitals={state.vitals} onAddVital={addVital} onRemoveVital={removeVital} analysis={analysis} targets={targets} weights={state.weights} entries={state.entries} water={state.water} onAddWeight={addWeight} useAdaptive={state.settings.useAdaptiveTdee} onToggleAdaptive={setAdaptive} date={date} profile={profile} dishMap={dishMap} />
         )}
         {tab === 'me' && targets && (
-          <MeView profile={profile} targets={targets} state={state} onEdit={() => setEditingProfile(true)} onUndislike={undislikeDish} onImport={importState} onReset={resetAll} dishMap={dishMap} onSetProvider={setProvider} onSetKey={setKey} onSetConditions={setConditions} sync={{ code: state.settings.sync.code, enabled: state.settings.sync.enabled, status: syncStatus }} onSyncEnable={enableSync} onSyncDisable={disableSync} onSyncNow={() => runSync(false)} canInstall={!!installEvt} onInstall={promptInstall} />
+          <MeView profile={profile} targets={targets} state={state} onEdit={() => setEditingProfile(true)} onUndislike={undislikeDish} onImport={importState} onReset={resetAll} dishMap={dishMap} onSetProvider={setProvider} onSetKey={setKey} onSetConditions={setConditions} onMarkContributed={markContributed} sync={{ code: state.settings.sync.code, enabled: state.settings.sync.enabled, status: syncStatus }} onSyncEnable={enableSync} onSyncDisable={disableSync} onSyncNow={() => runSync(false)} canInstall={!!installEvt} onInstall={promptInstall} />
         )}
       </div>
 

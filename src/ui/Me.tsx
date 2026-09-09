@@ -14,6 +14,7 @@ import { isIOS, isStandalone } from '../pwa'
 import { ConditionSources, SourceList, TargetBasis } from './Sources'
 import { CloudSyncCard } from './CloudSync'
 import type { SyncStatus } from './CloudSync'
+import { ContributeCard } from './Contribute'
 import { VERSION_LABEL, checkRemoteVersion, formatBuildId } from '../version'
 
 const PROVIDER_NOTE: Record<Provider, string> = {
@@ -21,10 +22,11 @@ const PROVIDER_NOTE: Record<Provider, string> = {
   deepseek: 'JSON 模式，单次约 $0.002（高峰价，闲时减半）。key 在 platform.deepseek.com 生成，支持国内支付。',
 }
 
-export function MeView({ profile, targets, state, onEdit, onUndislike, onImport, onReset, dishMap, onSetProvider, onSetKey, onSetConditions, sync, onSyncEnable, onSyncDisable, onSyncNow, canInstall = false, onInstall }: {
+export function MeView({ profile, targets, state, onEdit, onUndislike, onImport, onReset, dishMap, onSetProvider, onSetKey, onSetConditions, onMarkContributed, sync, onSyncEnable, onSyncDisable, onSyncNow, canInstall = false, onInstall }: {
   canInstall?: boolean
   onInstall?: () => void
   onSetConditions: (c: Condition[], trimester?: 1 | 2 | 3) => void
+  onMarkContributed: (id: string) => void
   sync: { code: string; enabled: boolean; status: SyncStatus }
   onSyncEnable: (code: string, mode: 'new' | 'join') => void
   onSyncDisable: (deleteRemote: boolean) => void
@@ -162,6 +164,8 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
       )}
 
       <CloudSyncCard code={sync.code} enabled={sync.enabled} status={sync.status} onEnable={onSyncEnable} onDisable={onSyncDisable} onSyncNow={onSyncNow} />
+
+      <ContributeCard customFoods={state.customFoods} customDishes={state.customDishes} contributedIds={state.settings.contributedFoodIds} onMarkContributed={onMarkContributed} />
 
       <div className="card">
         <h2>数据</h2>
