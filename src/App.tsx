@@ -12,7 +12,8 @@ import { DISHES, DISH_MAP } from './data/dishes/index'
 import { addDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from './core/dates'
 import { defaultState, loadState, saveState, uid } from './store/storage'
 import type { AppState, CustomFood } from './store/storage'
-import type { LlmConfig, Provider } from './llm/mealParser'
+import type { LlmConfig, Provider, SpeakJob } from './llm/mealParser'
+import { MealParseError, parseMealText } from './llm/mealParser'
 import type { Condition } from './core/types'
 import { ProfileForm } from './ui/ProfileForm'
 import { Today } from './ui/Today'
@@ -22,6 +23,7 @@ import { PlanView } from './ui/Plan'
 import { AnalysisView } from './ui/Analysis'
 import { MeView } from './ui/Me'
 import { Toast } from './ui/Toast'
+import { SpeakJobBanner } from './ui/SpeakJobBanner'
 import { useToast } from './ui/hooks'
 import { IconBowl, IconChart, IconLeaf, IconPerson, IconPlus } from './ui/icons'
 import { SLOT_LABEL, defaultTimeForSlot, entryPortionText, guessSlot, portionText, showsSodium } from './ui/format'
@@ -46,6 +48,8 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('today')
   const [date, setDate] = useState<string>(() => todayStr())
   const [sheet, setSheet] = useState<{ slot: MealSlot; editing?: LogEntry } | null>(null)
+  // 说一句话录餐的后台任务：跑在这里而不是弹窗组件里，弹窗关掉、切页面都不会丢，跑完了下面的提示条随时能打开看结果
+  const [speakJob, setSpeakJob] = useState<SpeakJob | null>(null)
   const [editingProfile, setEditingProfile] = useState(false)
   const { toast, show, dismiss } = useToast()
   const [installEvt, setInstallEvt] = useState<InstallPromptEvent | null>(null)
@@ -215,6 +219,17 @@ export default function App() {
     setSheet({ slot: slotGuess })
   }
 
+  // 说一句话录餐：跑在这里，不在弹窗组件里，所以关掉弹窗、切到别的页面都不影响结果送达
+  const runSpeakJob = (text: string, slot: MealSlot, time: string) => {
+    const jobDate = date
+    setSpeakJob({ status: 'running', text, slot, time, date: jobDate })
+    parseMealText(llm, text, allDishes, dishMap, { date: jobDate, now: nowTimeStr() })
+      .then((r) => setSpeakJob({ status: 'done', text, slot: r.slot || slot, time: r.time || time, date: jobDate, result: r }))
+      .catch((e) => setSpeakJob({ status: 'error', text, slot, time, date: jobDate, error: e instanceof MealParseError ? e.message : String(e) }))
+  }
+  const consumeSpeakJob = () => setSpeakJob(null)
+  const openSpeakJob = () => { if (speakJob) { setDate(speakJob.date); setSheet({ slot: speakJob.slot }) } }
+
   const tomb = (coll: AppState['tombstones'][number]['coll'], ids: string[]) => ids.map((id) => ({ coll, id, at: Date.now() }))
   const removeEntries = (ids: string[]) => update((s) => ({ ...s, entries: s.entries.filter((e) => !ids.includes(e.id)), tombstones: [...s.tombstones, ...tomb('entries', ids)] }))
   const restoreEntries = (list: LogEntry[]) => update((s) => ({ ...s, entries: [...s.entries, ...list.map((e) => ({ ...e, updatedAt: Date.now() }))], tombstones: s.tombstones.filter((t) => !(t.coll === 'entries' && list.some((e) => e.id === t.id))) }))
@@ -351,6 +366,7 @@ export default function App() {
     <>
       <div className={`app${sheet ? ' dimmed' : ''}`}>
         {wxBanner}
+        {speakJob && <SpeakJobBanner job={speakJob} onOpen={openSpeakJob} onDismiss={consumeSpeakJob} />}
         <div className="topbar">
           <h1>{TABS.find((t) => t.key === tab)?.label}</h1>
           {(tab === 'today' || tab === 'plan') && (
@@ -392,7 +408,8 @@ export default function App() {
 
       {sheet && (
         <LogSheet showSodium={showNa} date={date} isToday={date === today} slot={sheet.slot} editing={sheet.editing} dishes={allDishes} dishMap={dishMap} customFoods={state.customFoods}
-          favorites={state.favorites} recentBySlot={recentBySlot} onResult={onSheetResult} onAddCustomFood={addCustomFood} onAddCustomDish={addCustomDish} onToggleFavorite={toggleFavorite} llm={llm} defaultLowSalt={profile.conditions.includes('hypertension')} />
+          favorites={state.favorites} recentBySlot={recentBySlot} onResult={onSheetResult} onAddCustomFood={addCustomFood} onAddCustomDish={addCustomDish} onToggleFavorite={toggleFavorite} llm={llm} defaultLowSalt={profile.conditions.includes('hypertension')}
+          speakJob={speakJob} onSpeakStart={runSpeakJob} onConsumeSpeakJob={consumeSpeakJob} />
       )}
       <Toast toast={toast} onDismiss={dismiss} />
     </>

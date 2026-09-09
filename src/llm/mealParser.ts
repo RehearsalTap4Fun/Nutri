@@ -78,6 +78,16 @@ export interface ParseResult {
   model: string
 }
 
+/**
+ * 「说一句话录餐」的后台任务：解析可能耗时几秒到十几秒，让用户能关掉弹窗去别的页面，
+ * 回来时（或从任意页面的提示条）还能看到结果并记为已吃。任一时刻最多一个任务。
+ * date 是发起解析时正在看的那一天，跟后来切换到别的日期无关——保存时按这天记。
+ */
+export type SpeakJob =
+  | { status: 'running'; text: string; slot: MealSlot; time: string; date: string }
+  | { status: 'done'; text: string; slot: MealSlot; time: string; date: string; result: ParseResult }
+  | { status: 'error'; text: string; slot: MealSlot; time: string; date: string; error: string }
+
 export function buildCatalog(dishes: Dish[]): string {
   return dishes
     .map((d) => `${d.id}|${d.name}|${d.serving}${d.aliases?.length ? '|' + d.aliases.join('/') : ''}`)

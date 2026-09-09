@@ -76,6 +76,7 @@ tests/         energy · nutrition · analysis · planner
 - **Anthropic**：`claude-opus-5`，`effort: low`，结构化输出按 zod schema 强约束 `{slot, time, items[{dish_id, name, portion, note, estimate}]}`；系统提示带完整菜品目录（约 4K token）并打 `cache_control`；默认开启服务端 `fallbacks: "default"`（beta `server-side-fallback-2026-07-01`），并检查 `stop_reason === "refusal"`。单次约 $0.02。
 - **DeepSeek**：`deepseek-v4-flash`，OpenAI 兼容 `chat/completions` + `response_format: json_object`，系统提示里附 JSON 示例，返回文本经 `parseLooseJson` 宽松解析（去围栏、数字字符串转数）后再过同一 schema。单次约 $0.002（高峰价，闲时减半）。
 - 匹配到目录的条目用库值；匹配不到的落为「估算」自定义条目并标注。界面显示本次 token 与费用。
+- 解析跑在后台任务里（`App.tsx` 的 `speakJob`，类型见 `src/llm/mealParser.ts` 的 `SpeakJob`），不挂在弹窗组件上：关掉弹窗、切到别的页签都不影响结果送达，跑完/出错会在所有页签顶部出现常驻提示条（`src/ui/SpeakJobBanner.tsx`），点一下回到结果（自动切回发起解析时看的那一天）继续编辑或记为已吃；同一时刻只跑一个任务。
 
 真机验证脚本：
 

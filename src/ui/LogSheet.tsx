@@ -12,7 +12,7 @@ import { SpeakPanel } from './SpeakPanel'
 import { ScanPanel } from './ScanPanel'
 import { IconScan, IconSparkle, IconStar, IconClose } from './icons'
 import { Stats } from './bits'
-import type { LlmConfig } from '../llm/mealParser'
+import type { LlmConfig, SpeakJob } from '../llm/mealParser'
 import { searchFoods, type FoodPick } from './foodSearch'
 
 export type LogSheetResult =
@@ -26,7 +26,7 @@ type Pick = FoodPick
 
 const CAT_CHIPS: Array<DishCategory | 'all'> = ['all', 'staple', 'protein', 'veg', 'soup', 'breakfast', 'combo', 'snack', 'fruit', 'drink']
 
-export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot, editing, dishes, dishMap, customFoods, favorites, recentBySlot, onResult, onAddCustomFood, onAddCustomDish, onToggleFavorite, llm, defaultLowSalt = false }: {
+export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot, editing, dishes, dishMap, customFoods, favorites, recentBySlot, onResult, onAddCustomFood, onAddCustomDish, onToggleFavorite, llm, defaultLowSalt = false, speakJob, onSpeakStart, onConsumeSpeakJob }: {
   defaultLowSalt?: boolean
   /** 只有高血压模式显示钠 */
   showSodium?: boolean
@@ -45,6 +45,10 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
   onAddCustomFood: (f: CustomFood) => void
   onAddCustomDish: (d: Dish) => void
   onToggleFavorite: (id: string) => void
+  /** 说一句话录餐的后台任务：跑在 App 里，弹窗关了也不丢 */
+  speakJob: SpeakJob | null
+  onSpeakStart: (text: string, slot: MealSlot, time: string) => void
+  onConsumeSpeakJob: () => void
 }) {
   const [q, setQ] = useState('')
   const [cat, setCat] = useState<DishCategory | 'all'>('all')
@@ -59,7 +63,7 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
   const [slot, setSlot] = useState<MealSlot>(editing?.slot ?? initialSlot)
   const [time, setTime] = useState(editing?.time ?? (isToday ? nowTimeStr() : defaultTimeForSlot(initialSlot)))
   const [showCustom, setShowCustom] = useState(false)
-  const [speak, setSpeak] = useState(false)
+  const [speak, setSpeak] = useState(() => !!speakJob)
   const [scan, setScan] = useState(false)
   const [customBarcode, setCustomBarcode] = useState<string | undefined>(undefined)
   const [lowSalt, setLowSalt] = useState<boolean>(editing ? !!editing.lowSalt : defaultLowSalt)
@@ -140,7 +144,8 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
 
         {speak && !scan && !pick && !showCustom && (
           <SpeakPanel llm={llm} date={date} isToday={isToday} now={isToday ? nowTimeStr() : defaultTimeForSlot(initialSlot)} defaultSlot={initialSlot}
-            dishes={dishes} dishMap={dishMap} onSave={(entries, foods) => onResult({ kind: 'saveMany', entries, customFoods: foods })}
+            dishes={dishes} dishMap={dishMap} job={speakJob} onStart={onSpeakStart} onConsume={onConsumeSpeakJob}
+            onSave={(entries, foods) => onResult({ kind: 'saveMany', entries, customFoods: foods })}
             onNeedKey={() => onResult({ kind: 'needKey' })} onBack={() => onResult({ kind: 'close' })} />
         )}
 
