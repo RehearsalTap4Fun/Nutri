@@ -24,7 +24,7 @@ export const TRIMESTER_LABEL: Record<1 | 2 | 3, string> = { 1: '孕早期(1~13�
 export const CONDITION_DISCLAIMER =
   '特殊人群模式基于《中国居民膳食指南(2022)》、DRIs(2023)、高血压与糖尿病防治指南中的一般性膳食建议，只做日常饮食的辅助参考，不能替代产检医生、内分泌科或临床营养科的个体化方案。用药、血糖血压监测请遵医嘱；出现任何不适以就医为先。'
 
-const PICKLED_OR_CURED = new Set(['pickled_mustard', 'sauerkraut', 'kimchi', 'preserved_veg', 'salted_duck_egg', 'century_egg', 'chinese_sausage', 'bacon', 'luncheon_meat', 'ham_deli', 'hot_dog', 'dried_shrimp', 'fermented_bean_curd', 'sour_bamboo', 'beef_jerky', 'duck_neck_braised'])
+const PICKLED_OR_CURED = new Set(['pickled_mustard', 'sauerkraut', 'kimchi', 'pickled_chili', 'preserved_veg', 'salted_duck_egg', 'century_egg', 'chinese_sausage', 'bacon', 'luncheon_meat', 'ham_deli', 'hot_dog', 'dried_shrimp', 'fermented_bean_curd', 'sour_bamboo', 'beef_jerky', 'duck_neck_braised'])
 const REFINED_STAPLE = new Set(['congee', 'glutinous_rice_raw', 'rice_cake', 'youtiao', 'bread_white', 'cereal_flakes', 'tapioca_pearls', 'glass_noodles_dry', 'rice_noodles_cooked'])
 const WHOLE_GRAIN = new Set(['brown_rice_cooked', 'oats', 'bread_whole', 'corn', 'sweet_potato', 'quinoa_cooked', 'yam', 'millet_porridge', 'red_beans_dry', 'mung_beans_dry', 'chickpeas_cooked', 'lentils_cooked', 'soybeans_dry'])
 const SUGARY = new Set(['sugar', 'brown_sugar', 'honey', 'syrup', 'cola', 'orange_juice', 'creamer', 'tapioca_pearls', 'yakult', 'sweet_soy_milk', 'ice_cream', 'chocolate', 'cake', 'candy', 'jelly', 'biscuits', 'mooncake', 'egg_tart', 'sports_drink', 'yogurt', 'raisins', 'red_dates'])

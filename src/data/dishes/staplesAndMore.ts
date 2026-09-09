@@ -222,6 +222,7 @@ export const DISHES_STAPLES_MORE: Dish[] = [
   D('sn_ice_cream', '冰淇淋', 'snack', 'convenience', 'light', 'S', '1个(约80g)', [['ice_cream', 80]], { tags: ['sweet', 'cold'] }),
   D('sn_egg_tart', '蛋挞', 'snack', 'convenience', 'normal', 'S', '1个(约60g)', [['egg_tart', 60]], { tags: ['sweet'] }),
   D('sn_cake_slice', '奶油蛋糕', 'snack', 'convenience', 'normal', 'S', '1块(约80g)', [['cake', 80]], { tags: ['sweet'] }),
+  D('sn_liuxin_yuebing', '蛋黄流心月饼', 'snack', 'cn', 'normal', 'S', '1个(约60g)', [['mooncake', 50], ['butter', 10]], { tags: ['sweet'], aliases: ['流心月饼', '奶黄流心月饼'] }),
 
   // ===================== 饮品 dr_ =====================
   D('dr_milk', '牛奶', 'drink', 'cn', 'light', 'BLDS', '1杯(250ml)', [['milk', 250]], { aliases: ['纯牛奶', '全脂牛奶'], tags: ['quick'] }),
@@ -229,6 +230,7 @@ export const DISHES_STAPLES_MORE: Dish[] = [
   D('dr_soy_milk', '无糖豆浆', 'drink', 'cn', 'light', 'BS', '1杯(300ml)', [['soy_milk', 300]], { aliases: ['豆浆'] }),
   D('dr_sweet_soy_milk', '甜豆浆', 'drink', 'cn', 'light', 'BS', '1杯(300ml)', [['sweet_soy_milk', 300]], { tags: ['sweet'] }),
   D('dr_americano', '美式咖啡', 'drink', 'west', 'light', 'BLDS', '1杯(300ml)', [['black_coffee', 300]], { aliases: ['黑咖啡'], tags: ['caffeine', 'quick'] }),
+  D('dr_butter_americano', '黄油美式', 'drink', 'west', 'light', 'BLDS', '1杯(约310ml)', [['black_coffee', 300], ['butter', 10]], { aliases: ['防弹咖啡', '黄油咖啡'], tags: ['caffeine'] }),
   D('dr_latte', '拿铁', 'drink', 'west', 'light', 'BLDS', '1杯(250ml)', [['milk', 200], ['black_coffee', 50]], { aliases: ['牛奶咖啡'], tags: ['caffeine'] }),
   D('dr_oat_latte', '燕麦拿铁', 'drink', 'west', 'light', 'BLDS', '1杯(250ml)', [['oat_milk', 200], ['black_coffee', 50]], { tags: ['caffeine'] }),
   D('dr_tea', '无糖茶', 'drink', 'cn', 'light', 'BLDS', '1杯(300ml)', [['tea', 300]], { aliases: ['绿茶', '红茶', '乌龙茶'], tags: ['caffeine', 'quick'] }),

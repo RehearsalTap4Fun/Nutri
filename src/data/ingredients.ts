@@ -105,6 +105,7 @@ export const INGREDIENTS: Ingredient[] = [
   I('pickled_mustard', '榨菜', 'vegetable', [29, 2.2, 0.3, 6.1, 2.1, 4250]),
   I('sauerkraut', '酸菜', 'vegetable', [14, 1.1, 0.2, 2.3, 1.1, 800]),
   I('kimchi', '辣白菜', 'vegetable', [20, 1.5, 0.3, 3.5, 1.5, 700]),
+  I('pickled_chili', '泡椒/野山椒', 'vegetable', [20, 1, 0.3, 3, 1.5, 1500]),
   S('preserved_veg', '梅干菜', 'vegetable', 'tfda:E07101', [105, 5.5, 1.1, 20.8, 12.8, 2500]), // 钠取泡洗后的常见值，原始干品钠极高,
   I('coriander', '香菜', 'vegetable', [33, 1.8, 0.4, 6.2, 3.2, 49]), // 纤维: 台湾食药署 芫荽,
   I('sweet_corn_kernels', '玉米粒(甜)', 'vegetable', [86, 3.2, 1.2, 19, 2.7, 15]),

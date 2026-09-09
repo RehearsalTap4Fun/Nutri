@@ -38,6 +38,12 @@ export const DISHES_CN_MORE: Dish[] = [
   D('cn2_muer_chaorou', '木耳炒肉', 'protein', 'cn', 'normal', 'LD', '1盘(约220g)', [
     ['pork_lean', 80], ['wood_ear', 100], ['red_pepper', 30], ['oil', 8], ['soy_sauce', 7], ['salt', 0.5], ['cooking_wine', 5],
   ]),
+  D('cn2_sijidou_chaorou', '四季豆炒肉', 'protein', 'cn', 'normal', 'LD', '1盘(约330g)', [
+    ['green_beans', 200], ['pork_lean', 100], ['oil', 15], ['soy_sauce', 12], ['garlic', 5],
+  ], { aliases: ['四季豆炒肉末', '豆角炒肉'] }),
+  D('cn2_jiangdou_chaorou', '豇豆炒肉', 'protein', 'cn', 'normal', 'LD', '1盘(约260g)', [
+    ['long_beans', 180], ['pork_lean', 50], ['oil', 15], ['soy_sauce', 10], ['ginger', 3],
+  ], { aliases: ['长豆角炒肉'] }),
   D('cn2_suanxiang_paigu', '蒜香排骨', 'protein', 'cn', 'fried', 'LD', '1盘(约200g)', [
     ['pork_ribs', 160], ['garlic', 15], ['starch', 10], ['oil', 15], ['soy_sauce', 8], ['sugar', 3], ['cooking_wine', 6],
   ], { tags: ['fried'] }),
@@ -308,6 +314,9 @@ export const DISHES_CN_MORE: Dish[] = [
   D('cn2_dandanmian', '担担面', 'staple', 'cn', 'heavy', 'LD', '1碗(约350g)', [
     ['noodles_cooked', 200], ['pork_ground', 50], ['sesame_paste', 12], ['chili_oil', 10], ['soy_sauce', 8], ['peanut', 8], ['scallion', 5],
   ], { tags: ['spicy'] }),
+  D('cn2_paojiao_yaohua_mian', '泡椒腰花面', 'staple', 'cn', 'heavy', 'LD', '1碗(约500g)', [
+    ['noodles_cooked', 200], ['pork_kidney', 80], ['oil', 15], ['pickled_chili', 50], ['soy_sauce', 3], ['garlic', 5], ['ginger', 3], ['scallion', 5],
+  ], { tags: ['spicy'], aliases: ['泡椒腰花'] }),
   D('cn2_congyou_banmian', '葱油拌面', 'staple', 'cn', 'normal', 'BLD', '1碗(约300g)', [
     ['noodles_cooked', 230], ['scallion', 20], ['oil', 12], ['soy_sauce', 10], ['sugar', 3],
   ]),
