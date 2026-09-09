@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { contributionText, draftForCustomDish, draftForCustomFood } from '../src/core/contribute'
+import { ContributeError, submitContribution } from '../src/sync/contribute'
 import type { Dish } from '../src/core/types'
 import type { CustomFood } from '../src/store/storage'
 import { dishNutrients } from '../src/core/nutrition'
@@ -60,5 +61,28 @@ describe('contributionText：生成可读 JSON', () => {
     const draft = draftForCustomFood(customFood)
     const text = contributionText(draft)
     expect(JSON.parse(text)).toEqual(draft)
+  })
+})
+
+describe('submitContribution：直接提交给 /contribute', () => {
+  it('成功时不抛错，请求体是草稿本身', async () => {
+    const draft = draftForCustomFood(customFood)
+    const calls: Array<{ url: string; init: RequestInit }> = []
+    const fetchMock = async (url: string, init: RequestInit) => {
+      calls.push({ url, init })
+      return { ok: true, status: 200 } as Response
+    }
+    await submitContribution(draft, { fetchImpl: fetchMock as typeof fetch, apiBase: '/api' })
+    expect(calls).toHaveLength(1)
+    expect(calls[0].url).toBe('/api/contribute')
+    expect(JSON.parse(calls[0].init.body as string)).toEqual(draft)
+  })
+  it('服务器返回非 2xx 时抛 ContributeError', async () => {
+    const fetchMock = async () => ({ ok: false, status: 413 } as Response)
+    await expect(submitContribution(draftForCustomFood(customFood), { fetchImpl: fetchMock as typeof fetch })).rejects.toThrow(ContributeError)
+  })
+  it('网络异常时抛 ContributeError', async () => {
+    const fetchMock = async () => { throw new Error('offline') }
+    await expect(submitContribution(draftForCustomFood(customFood), { fetchImpl: fetchMock as typeof fetch })).rejects.toThrow('提交失败')
   })
 })

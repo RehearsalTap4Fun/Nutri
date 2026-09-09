@@ -159,7 +159,12 @@ LLM_PROVIDER=deepseek DEEPSEEK_API_KEY=sk-... npx tsx scripts/tryParse.ts "早�
 
 ## 贡献食物给食品库
 
-个人本地数据样本有限，食品库要健康地变大得靠用户逐步贡献，而不是单个人闭门造车。「我的」页「帮食品库变大」卡收集库里没有的自建菜（`customDishes`）与自定义食物（`customFoods`），逐条生成可读 JSON 草稿（名称、营养值、自建菜带食材构成、条码若有）——纯本地生成，不联网、不经过任何服务器，和现有加密云同步是两回事。用户复制后粘贴成 GitHub Issue 或发给作者，作者人工审核数值合理后再手动整理进 `dishes/*.ts`；标记「已贡献」只是本地状态，避免重复提示，随云同步的 `settings` 一起走 LWW。逻辑在 `src/core/contribute.ts`，界面在 `src/ui/Contribute.tsx`。
+个人本地数据样本有限，食品库要健康地变大得靠用户逐步贡献，而不是单个人闭门造车。「我的」页「帮食品库变大」卡收集库里没有的自建菜（`customDishes`）与自定义食物（`customFoods`），逐条生成可读 JSON 草稿（名称、营养值、自建菜带食材构成、条码若有）。两条路都不碰加密云同步、不共享任何密钥：
+
+- **直接提交**：`POST /nutri/api/contribute`（`src/sync/contribute.ts`），明文、匿名（不带 ip、不带任何用户标识），服务器只管追加进 `CONTRIB_DIR/contributions.jsonl`（默认 `/var/lib/nutri/sync` 同级的 `contrib/` 目录），跟 `/sync` 的密文存储是完全独立的文件与端点，见 `server/sync-server.mjs`。
+- **手动复制**：复制生成的 JSON 粘贴成 GitHub Issue 或发给作者，纯本地生成，不联网。
+
+两条路作者收到后都是人工审核数值合理再手动整理进 `dishes/*.ts`。标记「已贡献」只是本地状态，避免重复提示，随云同步的 `settings` 一起走 LWW。核心逻辑在 `src/core/contribute.ts`，界面在 `src/ui/Contribute.tsx`。
 
 ## 边界
 

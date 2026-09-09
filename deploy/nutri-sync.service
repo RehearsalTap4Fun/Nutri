@@ -6,6 +6,7 @@ After=network.target
 User=admin
 Environment=PORT=18790
 Environment=DATA_DIR=/var/lib/nutri/sync
+Environment=CONTRIB_DIR=/var/lib/nutri/contrib
 ExecStart=__NODE__ /opt/nutri/sync-server.mjs
 Restart=always
 RestartSec=3

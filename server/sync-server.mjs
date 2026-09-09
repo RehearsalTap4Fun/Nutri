@@ -1,18 +1,24 @@
 // 饮食日记 · 云同步服务。零依赖，Node ≥ 18。
 // 只存密文：客户端用同步码派生密钥加密整包数据后上传，存储键是同步码派生的 64 位十六进制 id。
+// 「贡献食物」是单独一路、故意不加密的匿名收集，跟上面这份私密日记完全分开、互不共用任何密钥。
 // API（经 nginx 反代到 /nutri/api/）：
 //   GET  /health                → { ok, time }
 //   GET  /sync/:id              → { version, blob, updatedAt }（不存在时 version 0）
 //   PUT  /sync/:id  { blob, baseVersion } → 200 { version, updatedAt }；版本不一致 409 并返回当前记录
 //   DELETE /sync/:id            → 删除
+//   POST /contribute { name, serving, perServing, parts?, vegG?, fruitG?, barcode?, source } → 200 { ok: true }
+//        明文追加进 CONTRIB_DIR/contributions.jsonl，供作者定期人工审核、合入食品库；不与 /sync 共享存储或密钥
 import http from 'node:http'
 import fs from 'node:fs'
 import path from 'node:path'
 
 const PORT = Number(process.env.PORT || 18790)
 const DATA = process.env.DATA_DIR || '/var/lib/nutri/sync'
+const CONTRIB_DIR = process.env.CONTRIB_DIR || path.join(path.dirname(DATA), 'contrib')
 const MAX_BLOB = 2 * 1024 * 1024
+const MAX_CONTRIB = 8 * 1024
 fs.mkdirSync(DATA, { recursive: true })
+fs.mkdirSync(CONTRIB_DIR, { recursive: true })
 
 const rate = new Map()
 function limited(ip) {
@@ -39,11 +45,38 @@ function writeRec(id, rec) {
 }
 const EMPTY = { version: 0, blob: null, updatedAt: 0 }
 
+/** 贡献草稿粗校验：必须有名字和一份的营养值，其余字段随意（作者审核时自己判断） */
+function looksLikeDraft(j) {
+  return j && typeof j === 'object' && typeof j.name === 'string' && j.name.trim().length > 0
+    && j.perServing && typeof j.perServing === 'object' && typeof j.perServing.kcal === 'number'
+}
+
 const server = http.createServer((req, res) => {
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || '?'
   if (limited(ip)) return send(res, 429, { error: 'too many requests' })
   const url = new URL(req.url || '/', 'http://local')
   if (url.pathname === '/health') return send(res, 200, { ok: true, time: Date.now() })
+  if (url.pathname === '/contribute') {
+    if (req.method !== 'POST') return send(res, 405, { error: 'method not allowed' })
+    let body = ''
+    let size = 0
+    let aborted = false
+    req.on('data', (c) => {
+      size += c.length
+      if (size > MAX_CONTRIB) { aborted = true; send(res, 413, { error: 'too large' }); req.destroy(); return }
+      body += c
+    })
+    req.on('end', () => {
+      if (aborted) return
+      let j
+      try { j = JSON.parse(body) } catch { return send(res, 400, { error: 'bad json' }) }
+      if (!looksLikeDraft(j)) return send(res, 400, { error: 'bad draft' })
+      // 明文追加，不记录 ip / 任何用户标识，与 /sync 的密文存储完全分开
+      fs.appendFileSync(path.join(CONTRIB_DIR, 'contributions.jsonl'), JSON.stringify({ ...j, receivedAt: Date.now() }) + '\n')
+      return send(res, 200, { ok: true })
+    })
+    return
+  }
   const m = url.pathname.match(/^\/sync\/([a-f0-9]{64})$/)
   if (!m) return send(res, 404, { error: 'not found' })
   const id = m[1]
