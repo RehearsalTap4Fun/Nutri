@@ -31,6 +31,7 @@ import { entryName, servingGrams } from './core/nutrition'
 import { captureInstallPrompt, isIOS, isStandalone, isWeChat, registerSW } from './pwa'
 import { deleteRemote, syncOnce, SyncError } from './sync/client'
 import { applySyncState, fingerprint, mergeSync, toSyncState } from './sync/merge'
+import { generateSyncCode } from './sync/crypto'
 import type { SyncStatus } from './ui/CloudSync'
 import type { InstallPromptEvent } from './pwa'
 
@@ -207,6 +208,15 @@ export default function App() {
     if (removeRemote && code) { try { await deleteRemote(code) } catch { /* 网络问题也不阻塞关闭 */ } }
     show(removeRemote ? '已关闭同步并删除云端副本' : '已在本机关闭同步，云端副本保留')
   }
+  /** 记一笔的提示：第一次记录、这台设备还没配过同步码时，顺手自动开起来（可在「我的」手动关闭） */
+  const noticeAfterLog = (text: string, undo: () => void) => {
+    if (state.entries.length === 0 && !state.settings.sync.code) {
+      enableSync(generateSyncCode(), 'new')
+      show(`${text} · 已自动开启云同步，同步码在「我的」页可查看`, { label: '撤销', run: undo })
+    } else {
+      show(text, { label: '撤销', run: undo })
+    }
+  }
 
   // ---- actions ----
   const saveProfile = (p: Profile) => {
@@ -239,11 +249,11 @@ export default function App() {
       const isEdit = !!r.entry.id && state.entries.some((e) => e.id === r.entry.id)
       const entry = { ...r.entry, id: r.entry.id || uid(), updatedAt: Date.now() }
       update((s) => ({ ...s, entries: isEdit ? s.entries.map((e) => (e.id === entry.id ? entry : e)) : [...s.entries, entry] }))
-      if (!isEdit) show(`已记录 · ${entryName(entry, dishMap)} × ${entryPortionText(entry, dishMap)}`, { label: '撤销', run: () => removeEntries([entry.id]) })
+      if (!isEdit) noticeAfterLog(`已记录 · ${entryName(entry, dishMap)} × ${entryPortionText(entry, dishMap)}`, () => removeEntries([entry.id]))
       else show('已保存修改')
     } else if (r.kind === 'saveMany') {
       update((s) => ({ ...s, entries: [...s.entries, ...r.entries], customFoods: [...r.customFoods, ...s.customFoods].slice(0, 200) }))
-      show(`已记录 ${r.entries.length} 条`, { label: '撤销', run: () => removeEntries(r.entries.map((e) => e.id)) })
+      noticeAfterLog(`已记录 ${r.entries.length} 条`, () => removeEntries(r.entries.map((e) => e.id)))
     } else if (r.kind === 'delete') {
       const removed = state.entries.find((e) => e.id === r.id)
       removeEntries([r.id])
@@ -279,7 +289,7 @@ export default function App() {
     const time = date === today ? nowTimeStr() : defaultTimeForSlot(slot)
     const entry: LogEntry = { id: uid(), updatedAt: Date.now(), date, slot, time, dishId, portion }
     restoreEntries([entry])
-    show(`已记录 · ${dishMap.get(dishId)?.name || dishId} × ${portionText(portion, dishMap.get(dishId) ? servingGrams(dishMap.get(dishId)!) : undefined)}`, { label: '撤销', run: () => removeEntries([entry.id]) })
+    noticeAfterLog(`已记录 · ${dishMap.get(dishId)?.name || dishId} × ${portionText(portion, dishMap.get(dishId) ? servingGrams(dishMap.get(dishId)!) : undefined)}`, () => removeEntries([entry.id]))
   }
 
   // 记录条目直接删除（今日页的叉与左滑），toast 可撤销
