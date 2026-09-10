@@ -506,8 +506,8 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
     while (x.kcal < budget.kcal * lo && g++ < 8) {
       // 糖尿病模式下主食受单餐碳水上限约束，先加蛋白再加主食
       const withinCap = (m: MealPlan) => !t.evenCarbs || m.totals.carbs + 12 <= t.carbs * t.slotShare[m.slot] * 1.15
-      const staples = meals.flatMap((m) => m.items.filter((it) => it.role === 'staple' && it.portion < 2 && withinCap(m))).sort((a, b) => a.portion - b.portion)
-      const prots = staplesOnly ? [] : allItems().filter((it) => it.role === 'protein' && it.portion < 1.5)
+      const staples = meals.flatMap((m) => m.items.filter((it) => it.role === 'staple' && it.portion < 2.25 && withinCap(m))).sort((a, b) => a.portion - b.portion)
+      const prots = staplesOnly ? [] : allItems().filter((it) => it.role === 'protein' && it.portion < 1.75)
       const target = t.evenCarbs && prots.length ? prots[0] : staples[0] || prots[0]
       if (!target) break
       target.portion = round4(target.portion + 0.25)

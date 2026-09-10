@@ -11,10 +11,10 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
     ['beef_steak', 200], ['fries', 120], ['butter', 10], ['black_pepper_sauce', 23.5], ['broccoli', 60], ['salt', 1],
   ], { aliases: ['牛排套餐', '牛排'] }),
   D('we_chicken_roast_veg', '香煎鸡胸配烤蔬菜', 'protein', 'west', 'light', 'LD', '1份(约430g)', [
-    ['chicken_breast', 180], ['broccoli', 100], ['zucchini', 80], ['cherry_tomato', 60], ['olive_oil', 12], ['salt', 1.5],
+    ['chicken_breast', 180], ['broccoli', 100], ['zucchini', 80], ['cherry_tomato', 60], ['olive_oil', 8], ['salt', 1.5],
   ], { aliases: ['煎鸡胸', '鸡胸肉'] }),
   D('we_salmon_quinoa', '香煎三文鱼配藜麦', 'combo', 'west', 'light', 'LD', '1份(约400g)', [
-    ['salmon', 150], ['quinoa_cooked', 150], ['asparagus', 80], ['olive_oil', 8], ['lemon', 10], ['salt', 1.5],
+    ['salmon', 150], ['quinoa_cooked', 150], ['asparagus', 80], ['olive_oil', 6], ['lemon', 10], ['salt', 1.5],
   ], { aliases: ['煎三文鱼', '三文鱼'] }),
   D('we_spaghetti_bolognese', '番茄肉酱意面', 'combo', 'west', 'normal', 'LD', '1盘(约520g)', [
     ['pasta_cooked', 250], ['beef_ground', 80], ['tomato', 120], ['onion', 30], ['ketchup', 20], ['olive_oil', 10], ['cheese', 10], ['garlic', 5], ['salt', 1.5],
@@ -38,7 +38,7 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
     ['tuna_canned', 100], ['lettuce', 100], ['cherry_tomato', 50], ['cucumber', 50], ['onion', 20], ['sweet_corn_kernels', 30], ['egg', 50], ['vinaigrette', 15],
   ], { aliases: ['吞拿鱼沙拉'] }),
   D('we_chickpea_avocado_salad', '鹰嘴豆牛油果沙拉', 'combo', 'west', 'light', 'LD', '1份(约420g)', [
-    ['chickpeas_cooked', 120], ['avocado', 70], ['cherry_tomato', 80], ['lettuce', 80], ['cucumber', 50], ['lemon', 10], ['olive_oil', 8], ['salt', 1],
+    ['chickpeas_cooked', 120], ['avocado', 70], ['cherry_tomato', 80], ['lettuce', 80], ['cucumber', 50], ['lemon', 10], ['olive_oil', 5], ['salt', 1],
   ], { aliases: ['素食沙拉'] }),
   D('we_salmon_avocado_toast', '烟熏三文鱼牛油果吐司', 'breakfast', 'west', 'normal', 'BL', '1份(约200g)', [
     ['bread_whole', 70], ['avocado', 60], ['salmon', 60], ['lemon', 5], ['salt', 0.5],
@@ -95,7 +95,7 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
     ['greek_yogurt', 150], ['granola', 40], ['blueberry', 40], ['strawberry', 40], ['honey', 8],
   ], { aliases: ['酸奶麦片', '酸奶碗'] }),
   D('we_roast_veg', '烤蔬菜拼盘', 'veg', 'west', 'light', 'LD', '1盘(约390g)', [
-    ['zucchini', 80], ['eggplant', 80], ['green_pepper', 60], ['onion', 50], ['cherry_tomato', 60], ['button_mushroom', 50], ['olive_oil', 12], ['salt', 1.5],
+    ['zucchini', 80], ['eggplant', 80], ['green_pepper', 60], ['onion', 50], ['cherry_tomato', 60], ['button_mushroom', 50], ['olive_oil', 8], ['salt', 1.5],
   ], { aliases: ['烤蔬菜'] }),
   D('we_mashed_potato', '土豆泥', 'staple', 'west', 'normal', 'LD', '1份(约255g)', [
     ['potato', 200], ['milk', 40], ['butter', 15], ['salt', 1],

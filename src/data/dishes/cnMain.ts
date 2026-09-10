@@ -126,7 +126,7 @@ export const DISHES_CN_MAIN: Dish[] = [
 
   // ===== 荤菜 · 水产 =====
   D('cn_qingzheng_luyu', '清蒸鲈鱼', 'protein', 'cn', 'light', 'LD', '1条(约250g)', [
-    ['fish_bass', 200], ['soy_sauce', 12], ['oil', 8], ['ginger', 10], ['scallion', 10], ['cooking_wine', 5],
+    ['fish_bass', 200], ['soy_sauce', 12], ['oil', 6], ['ginger', 10], ['scallion', 10], ['cooking_wine', 5],
   ], { aliases: ['清蒸鱼'] }),
   D('cn_hongshao_yu', '红烧鱼', 'protein', 'cn', 'normal', 'LD', '1份(约260g)', [
     ['fish_freshwater', 200], ['oil', 15], ['soy_sauce', 12], ['sugar', 5], ['cooking_wine', 8], ['ginger', 8], ['scallion', 8], ['garlic', 5], ['starch', 3],
@@ -150,7 +150,7 @@ export const DISHES_CN_MAIN: Dish[] = [
     ['squid', 150], ['green_pepper', 50], ['onion', 40], ['oil', 15], ['doubanjiang', 7], ['soy_sauce', 5], ['cooking_wine', 5], ['garlic', 5], ['ginger', 5],
   ], { tags: ['spicy', 'quick'] }),
   D('cn_qingchao_xiaren', '清炒虾仁', 'protein', 'cn', 'light', 'LD', '1盘(约200g)', [
-    ['shrimp', 120], ['cucumber', 60], ['oil', 6], ['salt', 1], ['cooking_wine', 5], ['starch', 2], ['ginger', 3],
+    ['shrimp', 120], ['cucumber', 60], ['oil', 5], ['salt', 1], ['cooking_wine', 5], ['starch', 2], ['ginger', 3],
   ], { tags: ['quick'], aliases: ['黄瓜炒虾仁'] }),
   D('cn_ganjian_daiyu', '干煎带鱼', 'protein', 'cn', 'fried', 'LD', '1盘(约180g)', [
     ['fish_sea', 150], ['oil', 15], ['starch', 8], ['salt', 1.5], ['cooking_wine', 5], ['ginger', 5],
@@ -223,13 +223,13 @@ export const DISHES_CN_MAIN: Dish[] = [
     ['youmaicai', 250], ['oil', 5], ['salt', 1.5], ['garlic', 5],
   ], { tags: ['quick'], aliases: ['蒜蓉油麦菜'] }),
   D('cn_liangban_huanggua', '凉拌黄瓜', 'veg', 'cn', 'light', 'LDS', '1盘(约290g)', [
-    ['cucumber', 250], ['garlic', 10], ['vinegar', 10], ['soy_sauce', 8], ['sesame_oil', 4], ['sugar', 2], ['chili_oil', 3], ['salt', 0.5],
+    ['cucumber', 250], ['garlic', 10], ['vinegar', 10], ['soy_sauce', 8], ['sesame_oil', 4], ['sugar', 2], ['chili_oil', 1], ['salt', 0.5],
   ], { tags: ['cold', 'quick'], aliases: ['拍黄瓜', '蒜泥黄瓜'] }),
   D('cn_liangban_muer', '凉拌木耳', 'veg', 'cn', 'light', 'LD', '1盘(约195g)', [
     ['wood_ear', 150], ['garlic', 8], ['vinegar', 12], ['soy_sauce', 8], ['sesame_oil', 4], ['chili_fresh', 5], ['sugar', 2], ['coriander', 5], ['salt', 0.3],
   ], { tags: ['cold', 'quick'] }),
   D('cn_xiqin_baihe', '西芹百合', 'veg', 'cn', 'light', 'LD', '1盘(约245g)', [
-    ['celery', 150], ['lily_bulb', 60], ['oil', 6], ['salt', 1.5], ['starch', 2], ['garlic', 3],
+    ['celery', 150], ['lily_bulb', 60], ['oil', 4], ['salt', 1.5], ['starch', 2], ['garlic', 3],
   ], { tags: ['quick'], aliases: ['芹菜百合'] }),
   D('cn_yuxiang_qiezi', '鱼香茄子', 'veg', 'cn', 'heavy', 'LD', '1盘(约320g)', [
     ['eggplant', 250], ['oil', 18], ['doubanjiang', 6.5], ['sugar', 8], ['vinegar', 8], ['soy_sauce', 4.5], ['starch', 4], ['garlic', 8], ['ginger', 3], ['scallion', 5],
@@ -244,37 +244,37 @@ export const DISHES_CN_MAIN: Dish[] = [
     ['potato', 100], ['carrot', 60], ['cucumber', 60], ['sweet_corn_kernels', 40], ['oil', 8], ['salt', 1.5], ['garlic', 3],
   ], { tags: ['quick'], aliases: ['土豆胡萝卜丁', '素炒三丁'] }),
   D('cn_xianggu_qingcai', '香菇青菜', 'veg', 'cn', 'light', 'LD', '1盘(约275g)', [
-    ['bok_choy', 200], ['shiitake', 60], ['oil', 6], ['oyster_sauce', 6], ['salt', 0.8], ['garlic', 5],
+    ['bok_choy', 200], ['shiitake', 60], ['oil', 4], ['oyster_sauce', 6], ['salt', 0.8], ['garlic', 5],
   ], { tags: ['quick'], aliases: ['香菇油菜', '香菇小白菜'] }),
   D('cn_suanrong_tonghao', '蒜蓉茼蒿', 'veg', 'cn', 'light', 'LD', '1盘(约270g)', [
-    ['garland_chrysanthemum', 250], ['garlic', 12], ['oil', 6], ['salt', 1.5],
+    ['garland_chrysanthemum', 250], ['garlic', 12], ['oil', 4], ['salt', 1.5],
   ], { tags: ['quick'], aliases: ['清炒茼蒿'] }),
   D('cn_jiucai_chao_douya', '韭菜炒豆芽', 'veg', 'cn', 'light', 'LD', '1盘(约270g)', [
-    ['bean_sprouts', 200], ['garlic_chives', 60], ['oil', 6], ['salt', 1.5], ['vinegar', 3],
+    ['bean_sprouts', 200], ['garlic_chives', 60], ['oil', 4], ['salt', 1.5], ['vinegar', 3],
   ], { tags: ['quick'], aliases: ['炒豆芽'] }),
   D('cn_chao_oupian', '清炒藕片', 'veg', 'cn', 'normal', 'LD', '1盘(约240g)', [
     ['lotus_root', 200], ['oil', 8], ['vinegar', 5], ['salt', 1.5], ['garlic', 5], ['green_pepper', 20], ['scallion', 5],
   ], { tags: ['quick'], aliases: ['炒藕片', '醋溜藕片'] }),
   D('cn_qingchao_sigua', '清炒丝瓜', 'veg', 'cn', 'light', 'LD', '1盘(约265g)', [
-    ['luffa', 250], ['oil', 6], ['salt', 1.5], ['garlic', 5], ['starch', 2],
+    ['luffa', 250], ['oil', 4], ['salt', 1.5], ['garlic', 5], ['starch', 2],
   ], { tags: ['quick'], aliases: ['蒜蓉丝瓜'] }),
   D('cn_suanrong_jinzhengu', '蒜蓉金针菇', 'veg', 'cn', 'light', 'LD', '1盘(约240g)', [
-    ['enoki', 200], ['garlic', 15], ['soy_sauce', 10], ['oil', 6], ['chili_fresh', 5], ['scallion', 5], ['sugar', 1],
+    ['enoki', 200], ['garlic', 15], ['soy_sauce', 10], ['oil', 4], ['chili_fresh', 5], ['scallion', 5], ['sugar', 1],
   ], { tags: ['quick'], aliases: ['蒜蓉蒸金针菇'] }),
   D('cn_hongshao_donggua', '红烧冬瓜', 'veg', 'cn', 'light', 'LD', '1盘(约330g)', [
-    ['winter_melon', 300], ['oil', 6], ['soy_sauce', 8.5], ['oyster_sauce', 4.5], ['sugar', 2], ['garlic', 5], ['scallion', 5],
+    ['winter_melon', 300], ['oil', 4], ['soy_sauce', 8.5], ['oyster_sauce', 4.5], ['sugar', 2], ['garlic', 5], ['scallion', 5],
   ], { tags: ['quick'], aliases: ['烧冬瓜', '蚝油冬瓜'] }),
   D('cn_liangban_haidai', '凉拌海带丝', 'veg', 'cn', 'light', 'LDS', '1盘(约235g)', [
-    ['kelp', 200], ['garlic', 8], ['vinegar', 10], ['soy_sauce', 8], ['sesame_oil', 4], ['chili_oil', 3], ['sugar', 2], ['sesame', 2],
+    ['kelp', 200], ['garlic', 8], ['vinegar', 10], ['soy_sauce', 8], ['sesame_oil', 4], ['chili_oil', 1], ['sugar', 2], ['sesame', 2],
   ], { tags: ['cold', 'quick'] }),
   D('cn_suanla_baicai', '酸辣白菜', 'veg', 'cn', 'normal', 'LD', '1盘(约290g)', [
     ['chinese_cabbage', 250], ['oil', 8], ['vinegar', 12], ['chili_fresh', 10], ['sugar', 3], ['soy_sauce', 5], ['salt', 1], ['starch', 3], ['sichuan_pepper', 1],
   ], { tags: ['quick', 'spicy'], aliases: ['醋溜白菜'] }),
   D('cn_qingchao_nangua', '清炒南瓜', 'veg', 'cn', 'light', 'LD', '1盘(约265g)', [
-    ['pumpkin', 250], ['oil', 6], ['salt', 1.5], ['garlic', 5], ['scallion', 3],
+    ['pumpkin', 250], ['oil', 4], ['salt', 1.5], ['garlic', 5], ['scallion', 3],
   ], { tags: ['quick'], aliases: ['炒南瓜', '蒸南瓜'] }),
   D('cn_qingchao_lusun', '清炒芦笋', 'veg', 'cn', 'light', 'LD', '1盘(约210g)', [
-    ['asparagus', 200], ['oil', 6], ['salt', 1.2], ['garlic', 5],
+    ['asparagus', 200], ['oil', 4], ['salt', 1.2], ['garlic', 5],
   ], { tags: ['quick'], aliases: ['蒜蓉芦笋'] }),
   D('cn_ganguo_huacai', '干锅花菜', 'veg', 'cn', 'heavy', 'LD', '1盘(约310g)', [
     ['cauliflower', 250], ['pork_belly', 20], ['oil', 12], ['doubanjiang', 7], ['soy_sauce', 4], ['garlic', 8], ['chili_fresh', 8], ['sugar', 2],
@@ -283,7 +283,7 @@ export const DISHES_CN_MAIN: Dish[] = [
     ['spinach', 200], ['peanut', 10], ['garlic', 8], ['vinegar', 10], ['soy_sauce', 8], ['sesame_oil', 4], ['sugar', 1],
   ], { tags: ['cold', 'quick'], aliases: ['花生拌菠菜'] }),
   D('cn_qingchao_helandou', '清炒荷兰豆', 'veg', 'cn', 'light', 'LD', '1盘(约210g)', [
-    ['snow_peas', 200], ['oil', 6], ['salt', 1.5], ['garlic', 5],
+    ['snow_peas', 200], ['oil', 4], ['salt', 1.5], ['garlic', 5],
   ], { tags: ['quick'], aliases: ['蒜蓉荷兰豆'] }),
 
   // ===== 汤 =====

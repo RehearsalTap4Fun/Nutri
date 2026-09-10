@@ -33,7 +33,7 @@ export const DISHES_CN_MORE: Dish[] = [
     ['pork_lean', 80], ['lotus_root', 150], ['oil', 8], ['soy_sauce', 6], ['salt', 1], ['starch', 3], ['scallion', 5],
   ]),
   D('cn2_qingsun_roupian', '青笋炒肉片', 'protein', 'cn', 'light', 'LD', '1盘(约240g)', [
-    ['pork_lean', 80], ['celtuce', 150], ['oil', 7], ['salt', 1.5], ['starch', 3], ['garlic', 4],
+    ['pork_lean', 80], ['celtuce', 150], ['oil', 6], ['salt', 1.5], ['starch', 3], ['garlic', 4],
   ]),
   D('cn2_muer_chaorou', '木耳炒肉', 'protein', 'cn', 'normal', 'LD', '1盘(约220g)', [
     ['pork_lean', 80], ['wood_ear', 100], ['red_pepper', 30], ['oil', 8], ['soy_sauce', 7], ['salt', 0.5], ['cooking_wine', 5],
@@ -146,13 +146,13 @@ export const DISHES_CN_MORE: Dish[] = [
     ['quail_egg', 60], ['soy_sauce', 3], ['sugar', 1], ['star_anise', 0.3],
   ]),
   D('cn2_qiukui_chaodan', '秋葵炒蛋', 'protein', 'cn', 'light', 'BLD', '1盘(约200g)', [
-    ['egg', 100], ['okra', 100], ['oil', 7], ['salt', 1.2],
+    ['egg', 100], ['okra', 100], ['oil', 6], ['salt', 1.2],
   ]),
   D('cn2_caijiao_chaodan', '彩椒炒蛋', 'protein', 'cn', 'light', 'BLD', '1盘(约200g)', [
-    ['egg', 100], ['red_pepper', 100], ['oil', 7], ['salt', 1.2],
+    ['egg', 100], ['red_pepper', 100], ['oil', 6], ['salt', 1.2],
   ]),
   D('cn2_dacong_chaodan', '大葱炒蛋', 'protein', 'cn', 'light', 'BLD', '1盘(约180g)', [
-    ['egg', 100], ['leek', 80], ['oil', 7], ['salt', 1.2],
+    ['egg', 100], ['leek', 80], ['oil', 6], ['salt', 1.2],
   ]),
   // ===== 水产 =====
   D('cn2_qingzheng_xueyu', '清蒸鳕鱼', 'protein', 'cn', 'light', 'LD', '1块(约180g)', [
@@ -189,7 +189,7 @@ export const DISHES_CN_MORE: Dish[] = [
     ['crab', 120], ['ginger', 8], ['vinegar', 10], ['soy_sauce', 3],
   ]),
   D('cn2_huage_chao_sigua', '花蛤炒丝瓜', 'protein', 'cn', 'light', 'LD', '1盘(约280g)', [
-    ['clam', 120], ['luffa', 150], ['oil', 7], ['garlic', 5], ['salt', 0.6],
+    ['clam', 120], ['luffa', 150], ['oil', 6], ['garlic', 5], ['salt', 0.6],
   ]),
   D('cn2_donggua_xiami_tang', '冬瓜虾米汤', 'soup', 'cn', 'light', 'LD', '1碗(约400g)', [
     ['winter_melon', 150], ['dried_shrimp', 6], ['broth', 250], ['salt', 0.8], ['sesame_oil', 2],
@@ -223,25 +223,25 @@ export const DISHES_CN_MORE: Dish[] = [
     ['gai_lan', 200], ['oyster_sauce', 8], ['oil', 5], ['garlic', 4],
   ]),
   D('cn2_qingchao_tonghao', '清炒茼蒿', 'veg', 'cn', 'light', 'LD', '1盘(约220g)', [
-    ['garland_chrysanthemum', 200], ['oil', 7], ['garlic', 5], ['salt', 1.2],
+    ['garland_chrysanthemum', 200], ['oil', 5], ['garlic', 5], ['salt', 1.2],
   ]),
   D('cn2_liangban_qiukui', '凉拌秋葵', 'veg', 'cn', 'light', 'LD', '1盘(约180g)', [
     ['okra', 160], ['soy_sauce', 6], ['vinegar', 4], ['sesame_oil', 3], ['garlic', 5],
   ]),
   D('cn2_qingchao_wosun', '清炒莴笋', 'veg', 'cn', 'light', 'LD', '1盘(约220g)', [
-    ['celtuce', 200], ['oil', 7], ['garlic', 4], ['salt', 1.2],
+    ['celtuce', 200], ['oil', 5], ['garlic', 4], ['salt', 1.2],
   ]),
   D('cn2_chao_jiecai', '炒芥菜', 'veg', 'cn', 'light', 'LD', '1盘(约220g)', [
-    ['mustard_greens', 200], ['oil', 7], ['garlic', 5], ['salt', 1.2],
+    ['mustard_greens', 200], ['oil', 5], ['garlic', 5], ['salt', 1.2],
   ]),
   D('cn2_suanrong_xiancai', '蒜蓉苋菜', 'veg', 'cn', 'light', 'LD', '1盘(约220g)', [
-    ['amaranth_leaves', 200], ['oil', 7], ['garlic', 8], ['salt', 1.2],
+    ['amaranth_leaves', 200], ['oil', 5], ['garlic', 8], ['salt', 1.2],
   ]),
   D('cn2_chao_hongshuye', '炒红薯叶', 'veg', 'cn', 'light', 'LD', '1盘(约220g)', [
-    ['sweet_potato_leaves', 200], ['oil', 7], ['garlic', 5], ['salt', 1.2],
+    ['sweet_potato_leaves', 200], ['oil', 5], ['garlic', 5], ['salt', 1.2],
   ]),
   D('cn2_biqi_chao_muer', '荸荠炒木耳', 'veg', 'cn', 'light', 'LD', '1盘(约200g)', [
-    ['water_chestnut', 100], ['wood_ear', 80], ['snow_peas', 30], ['oil', 7], ['salt', 1], ['starch', 3],
+    ['water_chestnut', 100], ['wood_ear', 80], ['snow_peas', 30], ['oil', 5], ['salt', 1], ['starch', 3],
   ]),
   D('cn2_pinggu_chaorou', '平菇炒肉', 'protein', 'cn', 'normal', 'LD', '1盘(约240g)', [
     ['oyster_mushroom', 150], ['pork_lean', 70], ['oil', 8], ['soy_sauce', 7], ['salt', 0.5], ['garlic', 4],
@@ -253,7 +253,7 @@ export const DISHES_CN_MORE: Dish[] = [
     ['wakame', 30], ['tofu_soft', 60], ['broth', 260], ['salt', 1], ['sesame_oil', 2],
   ]),
   D('cn2_candou_chaodan', '蚕豆炒蛋', 'protein', 'cn', 'light', 'LD', '1盘(约210g)', [
-    ['fava_beans_fresh', 100], ['egg', 100], ['oil', 8], ['salt', 1.2], ['scallion', 5],
+    ['fava_beans_fresh', 100], ['egg', 100], ['oil', 6], ['salt', 1.2], ['scallion', 5],
   ]),
   D('cn2_ziganlan_shala', '手撕紫甘蓝', 'veg', 'cn', 'light', 'LD', '1盘(约200g)', [
     ['red_cabbage', 180], ['vinegar', 8], ['soy_sauce', 4], ['sugar', 3], ['sesame_oil', 4], ['garlic', 4],
@@ -306,7 +306,7 @@ export const DISHES_CN_MORE: Dish[] = [
     ['flour', 50], ['tomato', 120], ['egg', 50], ['oil', 5], ['salt', 1.5], ['water', 200],
   ]),
   D('cn2_fanqie_jidan_mian', '番茄鸡蛋面', 'staple', 'cn', 'light', 'BLD', '1碗(约450g)', [
-    ['noodles_cooked', 220], ['tomato', 120], ['egg', 50], ['oil', 6], ['salt', 1.5], ['broth', 100],
+    ['noodles_cooked', 220], ['tomato', 120], ['egg', 50], ['oil', 4], ['salt', 1.5], ['broth', 100],
   ]),
   D('cn2_zhajiangmian', '炸酱面', 'staple', 'cn', 'heavy', 'LD', '1碗(约400g)', [
     ['noodles_cooked', 220], ['pork_ground', 60], ['sweet_bean_sauce', 20], ['cucumber', 60], ['soy_sprouts', 30], ['oil', 8],
@@ -327,6 +327,6 @@ export const DISHES_CN_MORE: Dish[] = [
     ['rice_cooked', 230], ['lamb', 80], ['carrot', 60], ['onion', 30], ['oil', 10], ['salt', 1.8], ['cumin', 1],
   ]),
   D('cn2_jidan_bocai_bing', '鸡蛋菠菜饼', 'breakfast', 'cn', 'light', 'BS', '2张(约180g)', [
-    ['flour', 50], ['egg', 50], ['spinach', 60], ['oil', 6], ['salt', 1],
+    ['flour', 50], ['egg', 50], ['spinach', 60], ['oil', 4], ['salt', 1],
   ]),
 ]
