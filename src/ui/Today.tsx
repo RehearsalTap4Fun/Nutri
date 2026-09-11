@@ -7,7 +7,7 @@ import { MEAL_SLOTS } from '../core/types'
 import type { DayStat, Finding } from '../core/analysis'
 import { isHabitFinding } from '../core/analysis'
 import { nowTimeStr, todayStr } from '../core/dates'
-import { creatureLine } from '../core/creatureTalk'
+import { creatureLine, creatureMood } from '../core/creatureTalk'
 import { budgetFocus, remainOf, type BudgetPick } from '../core/budget'
 import { entryName, entryNutrients, servingGrams } from '../core/nutrition'
 import { Meter } from './charts'
@@ -76,13 +76,15 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   const isToday = date === todayStr()
   const waterMlToday = useMemo(() => water.reduce((s, w) => s + w.ml, 0), [water])
   const habitFinding = useMemo(() => findings.find((f) => f.severity === 'warn' && isHabitFinding(f)), [findings])
-  const talk = useMemo(
-    () => creatureLine({
+  const talkInput = useMemo(
+    () => ({
       isToday, now: nowTimeStr(), date, entries, n, targets, waterMl: waterMlToday, showSodium: showNa, focus,
       justHatched: creature ? creature.mutations === 0 : false, fruitG: stat.fruitG, habitFinding, personality: creature?.personality,
     }),
     [isToday, date, entries, n, targets, waterMlToday, showNa, focus, creature, stat.fruitG, habitFinding],
   )
+  const talk = useMemo(() => creatureLine(talkInput), [talkInput])
+  const mood = useMemo(() => creatureMood(talkInput), [talkInput])
   // 展开时把列表滚进视野，让人看见它出现在哪、也看见右上角的「收起」
   useEffect(() => { if (showBudget) budgetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [showBudget])
   const touch = useRef<{ id: string; x: number; y: number; dx: number; el: HTMLElement } | null>(null)
@@ -165,7 +167,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
 
       <div className="card creature-card">
         <div className="row" style={{ gap: 12, alignItems: 'center' }}>
-          {creature ? <CreatureView traits={creature.traits} size={64} /> : <EggView size={64} />}
+          {creature ? <CreatureView traits={creature.traits} size={64} mood={mood} /> : <EggView size={64} />}
           <div className="grow">
             {creature ? <SpeechBubble text={talk} /> : <div className="tiny muted">记第一笔，孵化你的健康小管家</div>}
           </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { creatureLine } from '../src/core/creatureTalk'
+import { creatureLine, creatureMood } from '../src/core/creatureTalk'
 import { ZERO } from '../src/core/types'
 import type { Targets } from '../src/core/types'
 
@@ -152,5 +152,44 @@ describe('creatureLine：性格只改语气，不改要提醒的内容', () => {
       const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: true, n: { ...ZERO, sodium: 2500 }, fruitG: 200, personality })
       expect(line).toContain('钠')
     }
+  })
+})
+
+describe('creatureMood：表情/待机动画用的心情档位，跟 creatureLine 走同一条优先级链', () => {
+  it('蛋刚孵化完是兴奋', () => {
+    expect(creatureMood({ ...base, now: '15:00', waterMl: 0, justHatched: true })).toBe('excited')
+  })
+
+  it('看别的日期或什么都正常，是开心', () => {
+    expect(creatureMood({ ...base, isToday: false, now: '23:00' })).toBe('happy')
+    expect(creatureMood({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200 })).toBe('happy')
+  })
+
+  it('喝水落后 / 餐次未记 / 水果未吃 / 只有缺口信号，是中性提醒', () => {
+    expect(creatureMood({ ...base, now: '15:00', waterMl: 0 })).toBe('neutral')
+    expect(creatureMood({ ...base, now: '14:00', waterMl: 2000, entries: [meal('breakfast')] })).toBe('neutral')
+    expect(creatureMood({ ...base, now: '16:00', waterMl: 2000, entries: allMealsLogged, fruitG: 0 })).toBe('neutral')
+    expect(creatureMood({
+      ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200,
+      focus: [{ key: 'fiber', kind: 'gap', amount: 5, label: '还差纤维 5 g' }],
+    })).toBe('neutral')
+  })
+
+  it('钠超标 / 饮食习惯提醒 / 营养超额，是担心', () => {
+    expect(creatureMood({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200, showSodium: true, n: { ...ZERO, sodium: 2500 } })).toBe('concerned')
+    const habitFinding = { key: 'skip_breakfast', severity: 'warn' as const, title: '常漏早餐', detail: '近 7 天有 3 天没吃早餐。', action: '试着早起十分钟。' }
+    expect(creatureMood({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200, habitFinding })).toBe('concerned')
+    expect(creatureMood({
+      ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200,
+      focus: [{ key: 'fat', kind: 'over', amount: 12, label: '脂肪已超 12 g' }],
+    })).toBe('concerned')
+  })
+
+  it('心情跟台词共用同一条优先级链，不会各判各的', () => {
+    const input = { ...base, now: '15:00', waterMl: 0 }
+    const line = creatureLine(input)
+    const mood = creatureMood(input)
+    expect(line).toContain('喝')
+    expect(mood).toBe('neutral')
   })
 })

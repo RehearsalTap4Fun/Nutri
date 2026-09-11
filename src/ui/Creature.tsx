@@ -1,6 +1,8 @@
-import { useId } from 'react'
+import { useId, useMemo } from 'react'
 import type { Creature, CreatureTraits } from '../core/creature'
 import { PERSONALITY_LABEL } from '../core/creature'
+import type { Mood } from '../core/creatureTalk'
+import { hashString } from '../core/rng'
 
 const BODY_PATH: Record<CreatureTraits['body'], string> = {
   round: 'M50 15 C 72 15 85 32 85 55 C 85 76 70 90 50 90 C 30 90 15 76 15 55 C 15 32 28 15 50 15 Z',
@@ -113,36 +115,94 @@ function Extra({ extra }: { extra: CreatureTraits['extra'] }) {
   )
 }
 
-/** 一只健康小管家：body 决定轮廓与主色，其余特征叠在上面。size 传数字（px），默认铺满容器。 */
-export function CreatureView({ traits, size = 96, className }: { traits: CreatureTraits; size?: number; className?: string }) {
+/** 待机动画 + 表情用的关键帧；用内联 <style> 而不是 styles.css，SVG 各处随渲染自带，不用改共享样式表 */
+const CREATURE_KEYFRAMES = `
+@keyframes creature-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
+@keyframes creature-blink { 0%, 88%, 100% { transform: scaleY(1); } 93% { transform: scaleY(.15); } }
+@keyframes creature-twinkle { 0%, 100% { opacity: .5; transform: scale(.82); } 50% { opacity: 1; transform: scale(1.06); } }
+@keyframes egg-wobble { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .creature-bob, .creature-blink, .creature-mood-accent, .egg-wobble { animation: none !important; }
+}
+`
+
+/** 心情用的小星芒（四角圆润的星形），用于开心/兴奋时头顶的闪烁点缀 */
+function sparklePath(cx: number, cy: number, r: number): string {
+  const k = r * 0.34
+  return `M${cx} ${cy - r} Q${cx + k} ${cy - k} ${cx + r} ${cy} Q${cx + k} ${cy + k} ${cx} ${cy + r} Q${cx - k} ${cy + k} ${cx - r} ${cy} Q${cx - k} ${cy - k} ${cx} ${cy - r} Z`
+}
+
+/** 心情表情：只加小幅点缀，不碰 trait 决定的眼嘴造型，避免和生物固定长相打架 */
+function MoodAccent({ mood }: { mood: Mood }) {
+  if (mood === 'concerned') {
+    return (
+      <g className="creature-mood-accent" style={{ transformOrigin: '78px 16px' }} transform="translate(78,10)">
+        <path d="M0 0 C 4.5 5.5 4.5 11 0 13 C -4.5 11 -4.5 5.5 0 0 Z" fill="#8FCBEA" stroke="rgba(0,0,0,.15)" strokeWidth={1} />
+      </g>
+    )
+  }
+  if (mood === 'happy' || mood === 'excited') {
+    const spots: Array<[number, number, number]> = mood === 'excited'
+      ? [[80, 6, 5.5], [93, 18, 3.6], [86, 31, 2.8]]
+      : [[80, 8, 4.6], [91, 20, 3]]
+    return (
+      <g className="creature-mood-accent" style={{ transformOrigin: '86px 18px' }} fill="#FFD66B">
+        {spots.map(([cx, cy, r], i) => <path key={i} d={sparklePath(cx, cy, r)} />)}
+      </g>
+    )
+  }
+  return null
+}
+
+/** 一只健康小管家：body 决定轮廓与主色，其余特征叠在上面。size 传数字（px），默认铺满容器。
+ *  mood 只加轻量表情点缀（不改变 trait 决定的长相），不传就是中性、只有待机呼吸/眨眼动画。 */
+export function CreatureView({ traits, size = 96, className, mood = 'neutral' }: { traits: CreatureTraits; size?: number; className?: string; mood?: Mood }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '')
   const color = BODY_COLOR[traits.color] ?? BODY_COLOR.sage
   const body = BODY_PATH[traits.body] ?? BODY_PATH.round
+  // 用长相特征算一个稳定的种子，让不同生物的呼吸/眨眼节奏错开，历史图鉴里一排不会齐刷刷同步
+  const seed = useMemo(() => hashString(JSON.stringify(traits)), [traits])
+  const bobDelay = `${-((seed % 320) / 100)}s`
+  const blinkDelay = `${-((seed % 470) / 100)}s`
   return (
     <svg viewBox="-10 -14 120 120" width={size} height={size} className={className} role="img" aria-label="健康小管家">
       <defs>
         <clipPath id={`creature-clip-${uid}`}><path d={body} /></clipPath>
       </defs>
-      <g fill={color}>
+      <style>{CREATURE_KEYFRAMES}</style>
+      <g
+        className="creature-bob"
+        fill={color}
+        style={{ transformOrigin: '50px 55px', animation: 'creature-bob 3.2s ease-in-out infinite', animationDelay: bobDelay }}
+      >
         <path d={body} stroke="rgba(0,0,0,.12)" strokeWidth={1.5} />
         <Pattern pattern={traits.pattern} uid={uid} />
         <Extra extra={traits.extra} />
-        <Eyes eyes={traits.eyes} />
+        <g
+          className="creature-blink"
+          style={{ transformOrigin: '50px 48px', animation: 'creature-blink 4.6s ease-in-out infinite', animationDelay: blinkDelay }}
+        >
+          <Eyes eyes={traits.eyes} />
+        </g>
         <Mouth mouth={traits.mouth} />
+        <MoodAccent mood={mood} />
       </g>
     </svg>
   )
 }
 
-/** 蛋：还没孵化出来时占位，几道纹理营造质感 */
+/** 蛋：还没孵化出来时占位，几道纹理营造质感，轻轻摇晃暗示里面有东西 */
 export function EggView({ size = 96, className }: { size?: number; className?: string }) {
   return (
     <svg viewBox="-10 -14 120 120" width={size} height={size} className={className} role="img" aria-label="还没孵化的蛋">
-      <path d="M50 6 C 66 6 78 30 78 58 C 78 82 66 94 50 94 C 34 94 22 82 22 58 C 22 30 34 6 50 6 Z" fill="#EDE6D6" stroke="rgba(0,0,0,.12)" strokeWidth={1.5} />
-      <g fill="none" stroke="rgba(0,0,0,.1)" strokeWidth={2} strokeLinecap="round">
-        <path d="M34 26 Q30 40 36 50" />
-        <path d="M64 34 Q70 46 62 58" />
-        <path d="M40 62 Q46 72 40 82" />
+      <style>{CREATURE_KEYFRAMES}</style>
+      <g className="egg-wobble" style={{ transformOrigin: '50px 58px', animation: 'egg-wobble 2.8s ease-in-out infinite' }}>
+        <path d="M50 6 C 66 6 78 30 78 58 C 78 82 66 94 50 94 C 34 94 22 82 22 58 C 22 30 34 6 50 6 Z" fill="#EDE6D6" stroke="rgba(0,0,0,.12)" strokeWidth={1.5} />
+        <g fill="none" stroke="rgba(0,0,0,.1)" strokeWidth={2} strokeLinecap="round">
+          <path d="M34 26 Q30 40 36 50" />
+          <path d="M64 34 Q70 46 62 58" />
+          <path d="M40 62 Q46 72 40 82" />
+        </g>
       </g>
     </svg>
   )

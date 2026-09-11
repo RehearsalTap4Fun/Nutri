@@ -118,13 +118,22 @@ function pickIdle(date: string, tone: Tone): string {
   return tone.idle[hashString(date) % tone.idle.length]
 }
 
-export function creatureLine(input: CreatureTalkInput): string {
+/** 小管家当下的心情：跟气泡讲的是同一个信号，只是给表情/待机动画一个简化的档位用，不单独判断一遍。 */
+export type Mood = 'excited' | 'happy' | 'neutral' | 'concerned'
+
+interface LineAndMood {
+  text: string
+  mood: Mood
+}
+
+// 说什么和什么心情共用同一条优先级链，避免两处各判断一遍、结果对不上。
+function pick(input: CreatureTalkInput): LineAndMood {
   const { isToday, now, date, entries, n, targets, waterMl, showSodium, focus, justHatched, fruitG, habitFinding, personality } = input
   const tone = TONE[personality ?? 'gentle']
-  if (!isToday) return pickIdle(date, tone)
+  if (!isToday) return { text: pickIdle(date, tone), mood: 'happy' }
 
   // 0. 蛋刚孵化出来，先打个招呼（直到下次记录触发异变，mutations 才会变成 1）
-  if (justHatched) return tone.hatched
+  if (justHatched) return { text: tone.hatched, mood: 'excited' }
 
   // 1. 喝水明显落后（差 2 杯以上才提，免得天天念叨）
   const nowHour = Number(now.slice(0, 2)) + Number(now.slice(3, 5)) / 60
@@ -132,29 +141,38 @@ export function creatureLine(input: CreatureTalkInput): string {
   const shouldHave = cupsDueAt(nowHour, cupsN)
   const lit = Math.floor(waterMl / CUP_ML)
   const behindCups = shouldHave - lit
-  if (behindCups >= 2) return tone.water(shouldHave, behindCups)
+  if (behindCups >= 2) return { text: tone.water(shouldHave, behindCups), mood: 'neutral' }
 
   // 2. 到点了但这一餐还没记（按早中晚顺序，第一个中招的说）
   for (const slot of ['breakfast', 'lunch', 'dinner'] as const) {
-    if (now >= SLOT_DUE_TIME[slot] && !entries.some((e) => e.slot === slot)) return tone.slot[slot]
+    if (now >= SLOT_DUE_TIME[slot] && !entries.some((e) => e.slot === slot)) return { text: tone.slot[slot], mood: 'neutral' }
   }
 
   // 3. 下午了还没吃水果
-  if (nowHour >= FRUIT_DUE_HOUR && (fruitG ?? 0) <= 0) return tone.fruit
+  if (nowHour >= FRUIT_DUE_HOUR && (fruitG ?? 0) <= 0) return { text: tone.fruit, mood: 'neutral' }
 
   // 4. 钠超标（只有高血压模式看得到这个指标）
-  if (showSodium && n.sodium > targets.sodiumMax) return tone.sodium(Math.round(n.sodium), targets.sodiumMax)
+  if (showSodium && n.sodium > targets.sodiumMax) return { text: tone.sodium(Math.round(n.sodium), targets.sodiumMax), mood: 'concerned' }
 
   // 5. 近期饮食习惯类提醒（分析页里归不进宏量指标的那些）
-  if (habitFinding) return tone.habit(habitFinding)
+  if (habitFinding) return { text: tone.habit(habitFinding), mood: 'concerned' }
 
   // 6. 今天已经超额的（budgetFocus 按重要性排过序，取最靠前的）
   const over = focus.find((f) => f.kind === 'over')
-  if (over) return tone.over(over.label)
+  if (over) return { text: tone.over(over.label), mood: 'concerned' }
 
   // 7. 明显还差得多的
   const gap = focus.find((f) => f.kind === 'gap')
-  if (gap) return tone.gap(gap.label)
+  if (gap) return { text: tone.gap(gap.label), mood: 'neutral' }
 
-  return pickIdle(date, tone)
+  return { text: pickIdle(date, tone), mood: 'happy' }
+}
+
+export function creatureLine(input: CreatureTalkInput): string {
+  return pick(input).text
+}
+
+/** 表情/待机动画用的简化心情档位，跟 creatureLine 走同一条优先级链 */
+export function creatureMood(input: CreatureTalkInput): Mood {
+  return pick(input).mood
 }
