@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { Creature, CreatureTraits } from '../core/creature'
 import { PERSONALITY_LABEL } from '../core/creature'
 import type { Mood } from '../core/creatureTalk'
@@ -121,10 +121,44 @@ const CREATURE_KEYFRAMES = `
 @keyframes creature-blink { 0%, 88%, 100% { transform: scaleY(1); } 93% { transform: scaleY(.15); } }
 @keyframes creature-twinkle { 0%, 100% { opacity: .5; transform: scale(.82); } 50% { opacity: 1; transform: scale(1.06); } }
 @keyframes egg-wobble { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+@keyframes creature-poof {
+  0% { opacity: 0; transform: scale(.35); }
+  20% { opacity: 1; transform: scale(1.05); }
+  45% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.75); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .creature-bob, .creature-blink, .creature-mood-accent, .egg-wobble { animation: none !important; }
+  .creature-bob, .creature-blink, .creature-mood-accent, .egg-wobble, .creature-poof { animation: none !important; }
 }
 `
+
+/** 异变时长相在烟雾里"换脸"：多长出现全遮住、多久后散尽，跟 CSS 关键帧的百分比对应上 */
+const POOF_TOTAL_MS = 700
+const POOF_SWAP_AT_MS = 260
+
+function prefersReducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  } catch {
+    return false
+  }
+}
+
+/** 一团遮挡用的烟雾：几个软圆叠出云团感，交给 CSS 关键帧一次性播放（不遮 mood/呼吸，单独盖在最上层） */
+function SmokePoof({ onDone }: { onDone: () => void }) {
+  return (
+    <g
+      className="creature-poof"
+      style={{ transformOrigin: '50px 52px', animation: `creature-poof ${POOF_TOTAL_MS}ms ease-out 1` }}
+      onAnimationEnd={onDone}
+    >
+      <circle cx={50} cy={54} r={34} fill="rgba(250,247,240,.94)" />
+      <circle cx={28} cy={44} r={16} fill="rgba(250,247,240,.82)" />
+      <circle cx={73} cy={47} r={14.5} fill="rgba(250,247,240,.82)" />
+      <circle cx={50} cy={26} r={13} fill="rgba(250,247,240,.78)" />
+    </g>
+  )
+}
 
 /** 心情用的小星芒（四角圆润的星形），用于开心/兴奋时头顶的闪烁点缀 */
 function sparklePath(cx: number, cy: number, r: number): string {
@@ -155,13 +189,38 @@ function MoodAccent({ mood }: { mood: Mood }) {
 }
 
 /** 一只健康小管家：body 决定轮廓与主色，其余特征叠在上面。size 传数字（px），默认铺满容器。
- *  mood 只加轻量表情点缀（不改变 trait 决定的长相），不传就是中性、只有待机呼吸/眨眼动画。 */
+ *  mood 只加轻量表情点缀（不改变 trait 决定的长相），不传就是中性、只有待机呼吸/眨眼动画。
+ *  异变时（traits 变了但组件没卸载重挂载）会先冒一团烟盖住旧长相，散开时已经是新长相——而不是瞬间跳变。 */
 export function CreatureView({ traits, size = 96, className, mood = 'neutral' }: { traits: CreatureTraits; size?: number; className?: string; mood?: Mood }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '')
-  const color = BODY_COLOR[traits.color] ?? BODY_COLOR.sage
-  const body = BODY_PATH[traits.body] ?? BODY_PATH.round
+  // 实际画出来的长相：异变时不会立刻跳到新 traits，等烟雾盖住那一刻再换，散尽时刚好露出新样子
+  const [displayed, setDisplayed] = useState(traits)
+  const [poofKey, setPoofKey] = useState(0)
+  const [poofing, setPoofing] = useState(false)
+  const prevTraits = useRef(traits)
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  useEffect(() => {
+    if (JSON.stringify(prevTraits.current) === JSON.stringify(traits)) return
+    prevTraits.current = traits
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+    if (prefersReducedMotion()) {
+      setDisplayed(traits)
+      return
+    }
+    setPoofing(true)
+    setPoofKey((k) => k + 1)
+    timers.current.push(setTimeout(() => setDisplayed(traits), POOF_SWAP_AT_MS))
+    // 兜底：不指望 onAnimationEnd 一定能触发（浏览器/自动化环境下观察到并不总可靠），到点强制收起烟雾
+    timers.current.push(setTimeout(() => setPoofing(false), POOF_TOTAL_MS))
+    return () => { timers.current.forEach(clearTimeout) }
+  }, [traits])
+
+  const color = BODY_COLOR[displayed.color] ?? BODY_COLOR.sage
+  const body = BODY_PATH[displayed.body] ?? BODY_PATH.round
   // 用长相特征算一个稳定的种子，让不同生物的呼吸/眨眼节奏错开，历史图鉴里一排不会齐刷刷同步
-  const seed = useMemo(() => hashString(JSON.stringify(traits)), [traits])
+  const seed = useMemo(() => hashString(JSON.stringify(displayed)), [displayed])
   const bobDelay = `${-((seed % 320) / 100)}s`
   const blinkDelay = `${-((seed % 470) / 100)}s`
   return (
@@ -176,17 +235,18 @@ export function CreatureView({ traits, size = 96, className, mood = 'neutral' }:
         style={{ transformOrigin: '50px 55px', animation: 'creature-bob 3.2s ease-in-out infinite', animationDelay: bobDelay }}
       >
         <path d={body} stroke="rgba(0,0,0,.12)" strokeWidth={1.5} />
-        <Pattern pattern={traits.pattern} uid={uid} />
-        <Extra extra={traits.extra} />
+        <Pattern pattern={displayed.pattern} uid={uid} />
+        <Extra extra={displayed.extra} />
         <g
           className="creature-blink"
           style={{ transformOrigin: '50px 48px', animation: 'creature-blink 4.6s ease-in-out infinite', animationDelay: blinkDelay }}
         >
-          <Eyes eyes={traits.eyes} />
+          <Eyes eyes={displayed.eyes} />
         </g>
-        <Mouth mouth={traits.mouth} />
+        <Mouth mouth={displayed.mouth} />
         <MoodAccent mood={mood} />
       </g>
+      {poofing && <SmokePoof key={poofKey} onDone={() => setPoofing(false)} />}
     </svg>
   )
 }
