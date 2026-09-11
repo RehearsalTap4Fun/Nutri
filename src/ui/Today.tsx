@@ -4,7 +4,8 @@ import type { Dish, LogEntry, MealSlot, Targets, WaterEntry } from '../core/type
 import type { CustomFood } from '../store/storage'
 import { WaterCard } from './Water'
 import { MEAL_SLOTS } from '../core/types'
-import type { DayStat } from '../core/analysis'
+import type { DayStat, Finding } from '../core/analysis'
+import { isHabitFinding } from '../core/analysis'
 import { nowTimeStr, todayStr } from '../core/dates'
 import { creatureLine } from '../core/creatureTalk'
 import { budgetFocus, remainOf, type BudgetPick } from '../core/budget'
@@ -22,9 +23,11 @@ import type { Creature } from '../core/creature'
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
 
-export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, dishes, customFoods, favorites, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickBySlot = {}, recentDishIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike, creature }: {
+export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, dishes, customFoods, favorites, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickBySlot = {}, recentDishIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike, creature, findings = [] }: {
   /** 健康小管家：null 是还没孵化的蛋 */
   creature: Creature | null
+  /** 近 7 天分析的结论，只用来挑「饮食习惯」类的讲给小管家听 */
+  findings?: Finding[]
   water: WaterEntry[]
   fluidMl: number
   /** 把这一天的饮水总量设为 ml */
@@ -72,9 +75,13 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   // 小管家的气泡台词：只在「今天」念叨到点没到点、喝水落后、某项超标或不足
   const isToday = date === todayStr()
   const waterMlToday = useMemo(() => water.reduce((s, w) => s + w.ml, 0), [water])
+  const habitFinding = useMemo(() => findings.find((f) => f.severity === 'warn' && isHabitFinding(f)), [findings])
   const talk = useMemo(
-    () => creatureLine({ isToday, now: nowTimeStr(), date, entries, n, targets, waterMl: waterMlToday, showSodium: showNa, focus }),
-    [isToday, date, entries, n, targets, waterMlToday, showNa, focus],
+    () => creatureLine({
+      isToday, now: nowTimeStr(), date, entries, n, targets, waterMl: waterMlToday, showSodium: showNa, focus,
+      justHatched: creature ? creature.mutations === 0 : false, fruitG: stat.fruitG, habitFinding, personality: creature?.personality,
+    }),
+    [isToday, date, entries, n, targets, waterMlToday, showNa, focus, creature, stat.fruitG, habitFinding],
   )
   // 展开时把列表滚进视野，让人看见它出现在哪、也看见右上角的「收起」
   useEffect(() => { if (showBudget) budgetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [showBudget])

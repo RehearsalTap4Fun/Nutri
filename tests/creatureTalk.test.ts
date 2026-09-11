@@ -42,18 +42,18 @@ describe('creatureLine：按优先级挑一句最要紧的话', () => {
   })
 
   it('高血压模式钠超标会提醒', () => {
-    const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: true, n: { ...ZERO, sodium: 2500 } })
+    const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: true, n: { ...ZERO, sodium: 2500 }, fruitG: 200 })
     expect(line).toContain('钠')
   })
 
   it('没开高血压模式时钠超标不提（看不到这个指标）', () => {
-    const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: false, n: { ...ZERO, sodium: 2500 } })
+    const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: false, n: { ...ZERO, sodium: 2500 }, fruitG: 200 })
     expect(line).not.toContain('钠')
   })
 
   it('营养超额比缺口优先提', () => {
     const line = creatureLine({
-      ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged,
+      ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200,
       focus: [{ key: 'fat', kind: 'over', amount: 12, label: '脂肪已超 12 g' }, { key: 'fiber', kind: 'gap', amount: 5, label: '还差纤维 5 g' }],
     })
     expect(line).toContain('脂肪已超 12 g')
@@ -61,7 +61,7 @@ describe('creatureLine：按优先级挑一句最要紧的话', () => {
 
   it('只有缺口信号时提缺口', () => {
     const line = creatureLine({
-      ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged,
+      ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200,
       focus: [{ key: 'fiber', kind: 'gap', amount: 5, label: '还差纤维 5 g' }],
     })
     expect(line).toContain('还差纤维 5 g')
@@ -72,5 +72,85 @@ describe('creatureLine：按优先级挑一句最要紧的话', () => {
     const b = creatureLine({ ...base, now: '21:05', waterMl: 2000, entries: allMealsLogged })
     expect(a).toBe(b)
     expect(a.length).toBeGreaterThan(0)
+  })
+
+  it('蛋刚孵化完，优先打招呼，盖过其他所有提醒', () => {
+    const line = creatureLine({ ...base, now: '15:00', waterMl: 0, justHatched: true })
+    expect(line).toContain('孵出来')
+  })
+
+  it('异变过至少一次后就不再打招呼，回到正常提醒', () => {
+    const line = creatureLine({ ...base, now: '15:00', waterMl: 0, justHatched: false })
+    expect(line).not.toContain('孵出来')
+    expect(line).toContain('喝')
+  })
+
+  it('下午了还没吃水果会提醒', () => {
+    const line = creatureLine({ ...base, now: '16:00', waterMl: 2000, entries: allMealsLogged, fruitG: 0 })
+    expect(line).toContain('水果')
+  })
+
+  it('上午还没吃水果不提醒，太早念叨没意义', () => {
+    const line = creatureLine({ ...base, now: '10:00', waterMl: 1000, fruitG: 0 })
+    expect(line).not.toContain('水果')
+  })
+
+  it('已经吃过水果就不提醒', () => {
+    const line = creatureLine({ ...base, now: '16:00', waterMl: 2000, entries: allMealsLogged, fruitG: 150 })
+    expect(line).not.toContain('水果')
+  })
+
+  it('存在饮食习惯类提醒时讲出来，优先于超额/缺口', () => {
+    const habitFinding = { key: 'skip_breakfast', severity: 'warn' as const, title: '常漏早餐', detail: '近 7 天有 3 天没吃早餐。', action: '试着早起十分钟。' }
+    const line = creatureLine({
+      ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 150, habitFinding,
+      focus: [{ key: 'fat', kind: 'over', amount: 12, label: '脂肪已超 12 g' }],
+    })
+    expect(line).toContain('常漏早餐')
+  })
+})
+
+describe('creatureLine：性格只改语气，不改要提醒的内容', () => {
+  it('不传性格时按温柔处理', () => {
+    const line = creatureLine({ ...base, now: '15:00', waterMl: 0 })
+    expect(line).toContain('喝一口呗')
+  })
+
+  it('四种性格喝水提醒的杯数信息都在，只是措辞不同', () => {
+    const lines = (['energetic', 'gentle', 'bossy', 'cool'] as const).map((personality) =>
+      creatureLine({ ...base, now: '15:00', waterMl: 0, personality }),
+    )
+    for (const line of lines) { expect(line).toContain('3'); expect(line).toContain('杯') }
+    expect(new Set(lines).size).toBe(4) // 四句话应该互不相同
+  })
+
+  it('元气性格喝水提醒语气热烈', () => {
+    const line = creatureLine({ ...base, now: '15:00', waterMl: 0, personality: 'energetic' })
+    expect(line).toContain('冲')
+  })
+
+  it('傲娇性格提醒带刺但仍传达信息', () => {
+    const line = creatureLine({ ...base, now: '15:00', waterMl: 0, personality: 'bossy' })
+    expect(line).toContain('磨蹭')
+  })
+
+  it('高冷性格说话简短', () => {
+    const line = creatureLine({ ...base, now: '15:00', waterMl: 0, personality: 'cool' })
+    expect(line.length).toBeLessThan(20)
+  })
+
+  it('孵化招呼语也跟着性格变', () => {
+    const gentle = creatureLine({ ...base, now: '15:00', waterMl: 0, justHatched: true, personality: 'gentle' })
+    const cool = creatureLine({ ...base, now: '15:00', waterMl: 0, justHatched: true, personality: 'cool' })
+    expect(gentle).not.toBe(cool)
+    expect(gentle).toContain('孵出来')
+    expect(cool).toContain('孵化完成')
+  })
+
+  it('性格不影响优先级链，只影响措辞：钠超标该提醒时四种性格都会提', () => {
+    for (const personality of ['energetic', 'gentle', 'bossy', 'cool'] as const) {
+      const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: true, n: { ...ZERO, sodium: 2500 }, fruitG: 200, personality })
+      expect(line).toContain('钠')
+    }
   })
 })

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, hatch, mutate, retire } from '../src/core/creature'
+import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES, hatch, mutate, retire } from '../src/core/creature'
 import { makeRng } from '../src/core/rng'
 
 describe('hatch：一次随机定型', () => {
@@ -14,6 +14,7 @@ describe('hatch：一次随机定型', () => {
     expect(c.mutations).toBe(0)
     expect(c.bornAt).toBe(1000)
     expect(c.lastMutatedAt).toBe(1000)
+    expect(PERSONALITIES).toContain(c.personality)
   })
   it('不同种子孵化出不同的样子（跑几次总有不一样的）', () => {
     const all = Array.from({ length: 20 }, (_, i) => JSON.stringify(hatch('a', 0, makeRng(i)).traits))
@@ -46,6 +47,12 @@ describe('mutate：每次只换一个特征槽，且换成不同的值', () => {
     let c = hatch('a', 0, makeRng(3))
     for (let i = 0; i < 5; i++) c = mutate(c, i + 1, makeRng(i))
     expect(c.mutations).toBe(5)
+  })
+  it('异变不会改变性格，性格孵化时就定型了', () => {
+    let c = hatch('a', 0, makeRng(3))
+    const personality = c.personality
+    for (let i = 0; i < 5; i++) c = mutate(c, i + 1, makeRng(i))
+    expect(c.personality).toBe(personality)
   })
 })
 

@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import type { Creature, CreatureTraits } from '../core/creature'
+import { PERSONALITY_LABEL } from '../core/creature'
 
 const BODY_PATH: Record<CreatureTraits['body'], string> = {
   round: 'M50 15 C 72 15 85 32 85 55 C 85 76 70 90 50 90 C 30 90 15 76 15 55 C 15 32 28 15 50 15 Z',
@@ -148,7 +149,7 @@ export function EggView({ size = 96, className }: { size?: number; className?: s
 }
 
 export function creatureSummary(c: Creature): string {
-  return `${c.traits.color} · ${c.traits.body} · ${c.mutations} 次异变`
+  return `${c.traits.color} · ${c.traits.body} · ${PERSONALITY_LABEL[c.personality]} · ${c.mutations} 次异变`
 }
 
 /** 小管家的对话气泡：左边一个小尖角指向它 */

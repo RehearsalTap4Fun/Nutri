@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { Dish, LogEntry, Profile, Targets, VitalEntry, WaterEntry, WeightEntry } from '../core/types'
 import { avgWater } from '../core/water'
 import type { Analysis, Finding } from '../core/analysis'
-import { windowStats } from '../core/analysis'
+import { isHabitFinding, windowStats } from '../core/analysis'
 import { macroKcalShare } from '../core/nutrition'
 import { addDays, lastNDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from '../core/dates'
 import { BarChart, LineChart, Variance, VarianceAxis, type VarianceTone } from './charts'
@@ -66,7 +66,7 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
       else if (k === 'fiber_low') m.fiber.push(f)
       else if (k === 'fruit_low') m.fruit.push(f)
       else if (k.startsWith('water_')) m.water.push(f)
-      else habits.push(f)
+      else if (isHabitFinding(f)) habits.push(f)
     }
     return { m, habits }
   }, [analysis.findings])

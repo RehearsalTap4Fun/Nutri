@@ -104,3 +104,19 @@ describe('血压血糖记录存储', () => {
     expect(normalizeState({ profile: null }).vitals).toEqual([])
   })
 })
+
+describe('健康小管家存储：性格字段是后加的，老数据要能兼容', () => {
+  const traits = { body: 'round', color: 'sage', pattern: 'none', eyes: 'dot', mouth: 'smile', extra: 'none' }
+  it('老数据没有 personality，读出来会稳定补一个合法值', () => {
+    const old = { id: 'pet-1', traits, bornAt: 1, lastMutatedAt: 1, mutations: 0 }
+    const s1 = normalizeState({ profile: base, entries: [], creature: old })
+    const s2 = normalizeState({ profile: base, entries: [], creature: old })
+    expect(['energetic', 'gentle', 'bossy', 'cool']).toContain(s1.creature?.personality)
+    expect(s1.creature?.personality).toBe(s2.creature?.personality)
+  })
+  it('新数据自带合法 personality 就原样保留', () => {
+    const c = { id: 'pet-2', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 0 }
+    const s = normalizeState({ profile: base, entries: [], creature: c })
+    expect(s.creature?.personality).toBe('bossy')
+  })
+})

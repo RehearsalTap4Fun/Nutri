@@ -1,7 +1,8 @@
 import { INGREDIENT_MAP } from '../data/ingredients'
 import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry, WaterEntry, Dish } from '../core/types'
 import type { Creature, CreatureTraits, RetiredCreature } from '../core/creature'
-import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS } from '../core/creature'
+import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES } from '../core/creature'
+import { hashString } from '../core/rng'
 
 export interface CustomFood {
   id: string
@@ -92,8 +93,15 @@ export function normalizeState(raw: unknown): AppState {
     && (MOUTHS as readonly string[]).includes(t.mouth as string) && (EXTRAS as readonly string[]).includes(t.extra as string)
   const isCreature = (c: unknown): c is Creature => isObj(c) && typeof c.id === 'string' && isTraits(c.traits)
     && typeof c.bornAt === 'number' && typeof c.lastMutatedAt === 'number' && typeof c.mutations === 'number'
-  if (isCreature(raw.creature)) s.creature = raw.creature
-  if (Array.isArray(raw.creatureHistory)) s.creatureHistory = raw.creatureHistory.filter((c): c is RetiredCreature => isCreature(c) && typeof (c as { retiredAt?: unknown }).retiredAt === 'number')
+  // 老数据没有 personality 字段（这个属性是后加的），按 id 哈希稳定补一个，不会每次刷新都变
+  const withPersonality = <T extends Creature>(c: T): T =>
+    (PERSONALITIES as readonly string[]).includes(c.personality as string) ? c : { ...c, personality: PERSONALITIES[hashString(c.id) % PERSONALITIES.length] }
+  if (isCreature(raw.creature)) s.creature = withPersonality(raw.creature)
+  if (Array.isArray(raw.creatureHistory)) {
+    s.creatureHistory = raw.creatureHistory
+      .filter((c): c is RetiredCreature => isCreature(c) && typeof (c as { retiredAt?: unknown }).retiredAt === 'number')
+      .map(withPersonality)
+  }
   if (isObj(raw.settings)) {
     const st = raw.settings
     s.settings = {

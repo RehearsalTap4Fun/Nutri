@@ -278,6 +278,20 @@ export interface Analysis {
   adaptive: AdaptiveTdee | null
 }
 
+/** 归不进任何宏量/饮水指标的结论，算作「饮食习惯」类提醒（如 Analysis 页的单列分组，也供小管家对话复用） */
+export function isHabitFinding(f: Finding): boolean {
+  const k = f.key
+  if (k.startsWith('kcal_')) return false
+  if (k === 'protein_low' || k === 'protein_ok') return false
+  if (k === 'fat_high') return false
+  if (k.startsWith('sodium_')) return false
+  if (k.startsWith('veg_')) return false
+  if (k === 'fiber_low') return false
+  if (k === 'fruit_low') return false
+  if (k.startsWith('water_')) return false
+  return true
+}
+
 export function analyze(profile: Profile, targets: Targets, entries: LogEntry[], weights: WeightEntry[], dishMap: Map<string, Dish>, endDate: string, water: WaterEntry[] = []): Analysis {
   const window = windowStats(entries, dishMap, endDate, 7, targets.kcal)
   const adjustments = deriveAdjustments(window, targets, profile)
