@@ -173,6 +173,8 @@ LLM_PROVIDER=deepseek DEEPSEEK_API_KEY=sk-... npx tsx scripts/tryParse.ts "早�
 
 一颗蛋（`src/ui/Creature.tsx` 的 `EggView`）：还没记过东西时在「今日」页占位。第一次记录（三餐或喝水，任一入口）孵化成一只生物——一次随机定型六个特征（体型/主色/花纹/眼睛/嘴巴/配饰），不做多阶段孵化进度；之后每记一笔，随机挑一个特征槽换成不同的值，肉眼看得出变了样但不叠加进度条。逻辑在 `src/core/creature.ts`（`hatch` / `mutate` / `retire`，纯函数、可单测），落地由 `App.tsx` 的 `bumpCreature`（挂在跟 `noticeAfterLog` 相同的记录入口上，以及 `setWater` 里真的加水那一支）触发。「我的」页「健康小管家」卡可以「回炉重造」：当前这只存进 `AppState.creatureHistory`（历史里看得到最终形象与异变次数），当前生物变回一颗新蛋。全部形象都是内联 SVG 现画的，不依赖外部图片资源。
 
+孵化后小管家会在「今日」页冒对话气泡（`src/ui/Creature.tsx` 的 `SpeechBubble`），只在看「今天」时才念叨；不是随机瞎聊，而是复用现成的信号按优先级选一句最要紧的：喝水明显落后 → 到点了但那一餐没记（按早中晚顺序）→ 高血压模式下钠已超上限 → `budgetFocus` 里最靠前的超额 → 最靠前的缺口 → 都没有就说一句轻松话（按日期取一句，同一天稳定不换）。判断逻辑在 `src/core/creatureTalk.ts` 的纯函数 `creatureLine`，不重新发明喝水节奏或营养缺口的算法，只是换一副对话口吻讲出来；看别的日期只给轻松话，不提醒任何进度。
+
 ## 边界
 
 数值为估算，不构成医疗建议。孕期、哺乳期、糖尿病、肾病、进食障碍、未成年人请咨询医生或注册营养师。

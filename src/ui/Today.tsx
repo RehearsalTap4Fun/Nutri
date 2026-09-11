@@ -5,7 +5,8 @@ import type { CustomFood } from '../store/storage'
 import { WaterCard } from './Water'
 import { MEAL_SLOTS } from '../core/types'
 import type { DayStat } from '../core/analysis'
-import { todayStr } from '../core/dates'
+import { nowTimeStr, todayStr } from '../core/dates'
+import { creatureLine } from '../core/creatureTalk'
 import { budgetFocus, remainOf, type BudgetPick } from '../core/budget'
 import { entryName, entryNutrients, servingGrams } from '../core/nutrition'
 import { Meter } from './charts'
@@ -15,7 +16,7 @@ import { SLOT_LABEL, entryPortionText, portionText, r0, showsSodium, withoutSodi
 import { CONDITION_LABEL } from '../core/conditions'
 import { SignalChips } from './bits'
 import { CanIEat } from './CanIEat'
-import { CreatureView, EggView } from './Creature'
+import { CreatureView, EggView, SpeechBubble } from './Creature'
 import type { Creature } from '../core/creature'
 
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
@@ -68,6 +69,13 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   const budgetRef = useRef<HTMLDivElement>(null)
   // 四个主要参数里还差得多 / 已超的，作为挑菜依据显示在面板上
   const focus = useMemo(() => budgetFocus(remainOf(targets, stat.n), targets).slice(0, 3), [targets, stat])
+  // 小管家的气泡台词：只在「今天」念叨到点没到点、喝水落后、某项超标或不足
+  const isToday = date === todayStr()
+  const waterMlToday = useMemo(() => water.reduce((s, w) => s + w.ml, 0), [water])
+  const talk = useMemo(
+    () => creatureLine({ isToday, now: nowTimeStr(), date, entries, n, targets, waterMl: waterMlToday, showSodium: showNa, focus }),
+    [isToday, date, entries, n, targets, waterMlToday, showNa, focus],
+  )
   // 展开时把列表滚进视野，让人看见它出现在哪、也看见右上角的「收起」
   useEffect(() => { if (showBudget) budgetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [showBudget])
   const touch = useRef<{ id: string; x: number; y: number; dx: number; el: HTMLElement } | null>(null)
@@ -152,8 +160,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
         <div className="row" style={{ gap: 12, alignItems: 'center' }}>
           {creature ? <CreatureView traits={creature.traits} size={64} /> : <EggView size={64} />}
           <div className="grow">
-            <div style={{ fontWeight: 700 }}>健康小管家</div>
-            <div className="tiny muted">{creature ? '每记一笔，它都会长出点新样子' : '记第一笔，孵化你的健康小管家'}</div>
+            {creature ? <SpeechBubble text={talk} /> : <div className="tiny muted">记第一笔，孵化你的健康小管家</div>}
           </div>
         </div>
       </div>

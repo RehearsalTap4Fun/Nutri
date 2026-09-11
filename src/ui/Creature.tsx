@@ -150,3 +150,16 @@ export function EggView({ size = 96, className }: { size?: number; className?: s
 export function creatureSummary(c: Creature): string {
   return `${c.traits.color} · ${c.traits.body} · ${c.mutations} 次异变`
 }
+
+/** 小管家的对话气泡：左边一个小尖角指向它 */
+export function SpeechBubble({ text }: { text: string }) {
+  return (
+    <div style={{ position: 'relative', background: 'var(--surface)', boxShadow: 'inset 0 0 0 1.5px var(--hair)', borderRadius: 14, padding: '8px 12px', fontSize: 13, lineHeight: 1.45, color: 'var(--ink)' }}>
+      <span
+        aria-hidden
+        style={{ position: 'absolute', left: -6, top: 13, width: 11, height: 11, background: 'var(--surface)', borderLeft: '1.5px solid var(--hair)', borderBottom: '1.5px solid var(--hair)', transform: 'rotate(45deg)' }}
+      />
+      {text}
+    </div>
+  )
+}
