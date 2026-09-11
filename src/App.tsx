@@ -32,6 +32,8 @@ import { captureInstallPrompt, isIOS, isStandalone, isWeChat, registerSW } from 
 import { deleteRemote, syncOnce, SyncError } from './sync/client'
 import { applySyncState, fingerprint, mergeSync, toSyncState } from './sync/merge'
 import { generateSyncCode } from './sync/crypto'
+import { hatch, mutate, retire } from './core/creature'
+import { hashString, makeRng } from './core/rng'
 import type { SyncStatus } from './ui/CloudSync'
 import type { InstallPromptEvent } from './pwa'
 
@@ -208,8 +210,21 @@ export default function App() {
     if (removeRemote && code) { try { await deleteRemote(code) } catch { /* 网络问题也不阻塞关闭 */ } }
     show(removeRemote ? '已关闭同步并删除云端副本' : '已在本机关闭同步，云端副本保留')
   }
-  /** 记一笔的提示：第一次记录、这台设备还没配过同步码时，顺手自动开起来（可在「我的」手动关闭） */
+  // ---- 健康小管家：还没孵化时记一笔就孵化（一次随机定型），孵化后每记一笔异变一个特征 ----
+  const bumpCreature = () => {
+    const now = Date.now()
+    const rnd = makeRng(hashString(uid() + now))
+    update((s) => ({ ...s, creature: s.creature ? mutate(s.creature, now, rnd) : hatch(uid(), now, rnd) }))
+  }
+  const reforgeCreature = () => {
+    const now = Date.now()
+    update((s) => ({ ...s, creature: null, creatureHistory: s.creature ? [...s.creatureHistory, retire(s.creature, now)] : s.creatureHistory }))
+    show('已回炉重造，变回一颗蛋')
+  }
+
+  /** 记一笔的提示：第一次记录、这台设备还没配过同步码时，顺手自动开起来（可在「我的」手动关闭）；顺带喂一下小管家 */
   const noticeAfterLog = (text: string, undo: () => void) => {
+    bumpCreature()
     if (state.entries.length === 0 && !state.settings.sync.code) {
       enableSync(generateSyncCode(), 'new')
       show(`${text} · 已自动开启云同步，同步码在「我的」页可查看`, { label: '撤销', run: undo })
@@ -319,8 +334,10 @@ export default function App() {
   // 饮水按杯点亮：把这一天的总量设为 ml（旧记录打墓碑，新写一条），toast 可撤销
   const setWater = (ml: number) => {
     const prev = state.water.filter((w) => w.date === date)
+    const prevMl = prev.reduce((s, w) => s + w.ml, 0)
     const entry: WaterEntry = { id: uid(), updatedAt: Date.now(), date, time: date === today ? nowTimeStr() : undefined, ml: Math.round(ml) }
     update((s) => ({ ...s, water: [...s.water.filter((w) => w.date !== date), ...(ml > 0 ? [entry] : [])], tombstones: [...s.tombstones, ...tomb('water', prev.map((w) => w.id))] }))
+    if (ml > prevMl) bumpCreature()
     const cupsN = Math.round(ml / 250)
     show(ml > 0 ? `喝到第 ${cupsN} 杯 · ${Math.round(ml)} ml` : '今天的饮水清零了', {
       label: '撤销',
@@ -389,7 +406,7 @@ export default function App() {
         </div>
 
         {tab === 'today' && targets && stat && (
-          <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} dishes={allDishes} customFoods={state.customFoods} favorites={state.favorites} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickBySlot={quickBySlot} recentDishIds={recentDishIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} onDislike={dislikeDish} water={dayWater} fluidMl={fluidMl} onSetWater={setWater} />
+          <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} dishes={allDishes} customFoods={state.customFoods} favorites={state.favorites} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickBySlot={quickBySlot} recentDishIds={recentDishIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} onDislike={dislikeDish} water={dayWater} fluidMl={fluidMl} onSetWater={setWater} creature={state.creature} />
         )}
         {tab === 'plan' && plan && targets && (
           <PlanView showSodium={showNa} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} />
@@ -398,7 +415,7 @@ export default function App() {
           <AnalysisView vitals={state.vitals} onAddVital={addVital} onRemoveVital={removeVital} analysis={analysis} targets={targets} weights={state.weights} entries={state.entries} water={state.water} onAddWeight={addWeight} useAdaptive={state.settings.useAdaptiveTdee} onToggleAdaptive={setAdaptive} date={date} profile={profile} dishMap={dishMap} />
         )}
         {tab === 'me' && targets && (
-          <MeView profile={profile} targets={targets} state={state} onEdit={() => setEditingProfile(true)} onUndislike={undislikeDish} onImport={importState} onReset={resetAll} dishMap={dishMap} onSetProvider={setProvider} onSetKey={setKey} onSetConditions={setConditions} onMarkContributed={markContributed} sync={{ code: state.settings.sync.code, enabled: state.settings.sync.enabled, status: syncStatus }} onSyncEnable={enableSync} onSyncDisable={disableSync} onSyncNow={() => runSync(false)} canInstall={!!installEvt} onInstall={promptInstall} />
+          <MeView profile={profile} targets={targets} state={state} onEdit={() => setEditingProfile(true)} onUndislike={undislikeDish} onImport={importState} onReset={resetAll} dishMap={dishMap} onSetProvider={setProvider} onSetKey={setKey} onSetConditions={setConditions} onMarkContributed={markContributed} sync={{ code: state.settings.sync.code, enabled: state.settings.sync.enabled, status: syncStatus }} onSyncEnable={enableSync} onSyncDisable={disableSync} onSyncNow={() => runSync(false)} canInstall={!!installEvt} onInstall={promptInstall} onReforgeCreature={reforgeCreature} />
         )}
       </div>
 

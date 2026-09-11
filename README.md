@@ -169,6 +169,10 @@ LLM_PROVIDER=deepseek DEEPSEEK_API_KEY=sk-... npx tsx scripts/tryParse.ts "早�
 
 两条路作者收到后都是人工审核数值合理再手动整理进 `dishes/*.ts`。标记「已贡献」只是本地状态，避免重复提示，随云同步的 `settings` 一起走 LWW。核心逻辑在 `src/core/contribute.ts`，界面在 `src/ui/Contribute.tsx`。
 
+## 健康小管家
+
+一颗蛋（`src/ui/Creature.tsx` 的 `EggView`）：还没记过东西时在「今日」页占位。第一次记录（三餐或喝水，任一入口）孵化成一只生物——一次随机定型六个特征（体型/主色/花纹/眼睛/嘴巴/配饰），不做多阶段孵化进度；之后每记一笔，随机挑一个特征槽换成不同的值，肉眼看得出变了样但不叠加进度条。逻辑在 `src/core/creature.ts`（`hatch` / `mutate` / `retire`，纯函数、可单测），落地由 `App.tsx` 的 `bumpCreature`（挂在跟 `noticeAfterLog` 相同的记录入口上，以及 `setWater` 里真的加水那一支）触发。「我的」页「健康小管家」卡可以「回炉重造」：当前这只存进 `AppState.creatureHistory`（历史里看得到最终形象与异变次数），当前生物变回一颗新蛋。全部形象都是内联 SVG 现画的，不依赖外部图片资源。
+
 ## 边界
 
 数值为估算，不构成医疗建议。孕期、哺乳期、糖尿病、肾病、进食障碍、未成年人请咨询医生或注册营养师。

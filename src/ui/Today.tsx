@@ -15,11 +15,15 @@ import { SLOT_LABEL, entryPortionText, portionText, r0, showsSodium, withoutSodi
 import { CONDITION_LABEL } from '../core/conditions'
 import { SignalChips } from './bits'
 import { CanIEat } from './CanIEat'
+import { CreatureView, EggView } from './Creature'
+import type { Creature } from '../core/creature'
 
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
 
-export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, dishes, customFoods, favorites, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickBySlot = {}, recentDishIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike }: {
+export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat, dishMap, dishes, customFoods, favorites, onAdd, onEdit, planNotes, goPlan, goModes, conditions = [], trainingDay, onToggleTrainingDay, quickBySlot = {}, recentDishIds = [], onQuickLog, onRemove, budgetPicks = [], nextSlot = 'dinner', onDislike, creature }: {
+  /** 健康小管家：null 是还没孵化的蛋 */
+  creature: Creature | null
   water: WaterEntry[]
   fluidMl: number
   /** 把这一天的饮水总量设为 ml */
@@ -93,7 +97,9 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   const kcalShown = useCountUp(Math.round(n.kcal))
   const remain = targets.kcal - n.kcal
   // 湖 = 还能吃的份额：满湖是一天没吃，最小不低于三成好放得下数字；超标湖就没了
-  const lakeScale = remain > 0 ? Math.max(0.58, Math.min(1, 0.58 + 0.42 * (remain / targets.kcal))) : 0
+  // 前段下降更快、后段变缓（按已吃比例开平方根映射），让早餐、午餐这些正常进食阶段也能看出湖在变小，不只是临近超支时才有反应
+  const eatenRatio = remain > 0 ? Math.max(0, Math.min(1, 1 - remain / targets.kcal)) : 1
+  const lakeScale = remain > 0 ? Math.max(0.58, Math.min(1, 1 - 0.42 * Math.sqrt(eatenRatio))) : 0
   const slots = MEAL_SLOTS.filter((s) => targets.slotShare[s] > 0 || entries.some((e) => e.slot === s))
   return (
     <div>
@@ -142,9 +148,19 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
         </div>
       </div>
 
+      <div className="card creature-card">
+        <div className="row" style={{ gap: 12, alignItems: 'center' }}>
+          {creature ? <CreatureView traits={creature.traits} size={64} /> : <EggView size={64} />}
+          <div className="grow">
+            <div style={{ fontWeight: 700 }}>健康小管家</div>
+            <div className="tiny muted">{creature ? '每记一笔，它都会长出点新样子' : '记第一笔，孵化你的健康小管家'}</div>
+          </div>
+        </div>
+      </div>
+
       {showBudget && remain > 50 && budgetPicks.length > 0 && onQuickLog && (
-        <div className="card" ref={budgetRef}>
-          <div className="section-title"><h2>用剩下的 {r0(remain)} 千卡还能吃什么</h2><div className="row" style={{ gap: 4, flex: 'none', whiteSpace: 'nowrap' }}><span className="small muted">按{SLOT_LABEL[nextSlot]}挑</span><button className="btn ghost sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }} onClick={() => setShowBudget(false)} aria-label="收起还能吃什么">收起<IconClose size={12} /></button></div></div>
+        <div className="card budget-card" ref={budgetRef}>
+          <div className="section-title"><h2>用剩下的 {r0(remain)} 千卡还能吃什么</h2><div className="row" style={{ gap: 4, flex: 'none', whiteSpace: 'nowrap' }}><span className="small muted">按{SLOT_LABEL[nextSlot]}挑</span><button className="btn ghost sm with-icon" onClick={() => setShowBudget(false)} aria-label="收起还能吃什么">收起<IconClose size={12} /></button></div></div>
           {focus.length > 0 && (
             <div className="budget-focus tiny">
               <span className="muted">按缺口挑</span>

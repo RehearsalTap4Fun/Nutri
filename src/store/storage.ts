@@ -1,5 +1,7 @@
 import { INGREDIENT_MAP } from '../data/ingredients'
 import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry, WaterEntry, Dish } from '../core/types'
+import type { Creature, CreatureTraits, RetiredCreature } from '../core/creature'
+import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS } from '../core/creature'
 
 export interface CustomFood {
   id: string
@@ -39,6 +41,10 @@ export interface AppState {
   meta: { profileAt: number; settingsAt: number }
   /** 血压 / 血糖记录 */
   vitals: VitalEntry[]
+  /** 健康小管家：null 是还没孵化的蛋 */
+  creature: Creature | null
+  /** 回炉重造后存进来的历史生物 */
+  creatureHistory: RetiredCreature[]
   settings: {
     useAdaptiveTdee: boolean; provider: 'anthropic' | 'deepseek'; anthropicKey: string; deepseekKey: string; sync: { code: string; enabled: boolean }
     /** 已经贡献给食品库的自定义食物/自建菜 id，贡献面板用来避免重复提示 */
@@ -49,7 +55,7 @@ export interface AppState {
 export const STORAGE_KEY = 'nutri.v1'
 
 export function defaultState(): AppState {
-  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false }, contributedFoodIds: [] } }
+  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, creature: null, creatureHistory: [], settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false }, contributedFoodIds: [] } }
 }
 
 export function uid(): string {
@@ -80,6 +86,14 @@ export function normalizeState(raw: unknown): AppState {
   if (Array.isArray(raw.tombstones)) s.tombstones = raw.tombstones.filter((t) => isObj(t) && typeof t.coll === 'string' && typeof t.id === 'string' && typeof t.at === 'number') as AppState['tombstones']
   if (isObj(raw.meta)) s.meta = { profileAt: Number(raw.meta.profileAt) || 0, settingsAt: Number(raw.meta.settingsAt) || 0 }
   if (Array.isArray(raw.vitals)) s.vitals = raw.vitals.filter((v) => isObj(v) && typeof v.date === 'string' && (v.kind === 'bp' || v.kind === 'glucose')) as VitalEntry[]
+  const isTraits = (t: unknown): t is CreatureTraits => isObj(t)
+    && (BODIES as readonly string[]).includes(t.body as string) && (COLORS as readonly string[]).includes(t.color as string)
+    && (PATTERNS as readonly string[]).includes(t.pattern as string) && (EYES as readonly string[]).includes(t.eyes as string)
+    && (MOUTHS as readonly string[]).includes(t.mouth as string) && (EXTRAS as readonly string[]).includes(t.extra as string)
+  const isCreature = (c: unknown): c is Creature => isObj(c) && typeof c.id === 'string' && isTraits(c.traits)
+    && typeof c.bornAt === 'number' && typeof c.lastMutatedAt === 'number' && typeof c.mutations === 'number'
+  if (isCreature(raw.creature)) s.creature = raw.creature
+  if (Array.isArray(raw.creatureHistory)) s.creatureHistory = raw.creatureHistory.filter((c): c is RetiredCreature => isCreature(c) && typeof (c as { retiredAt?: unknown }).retiredAt === 'number')
   if (isObj(raw.settings)) {
     const st = raw.settings
     s.settings = {
