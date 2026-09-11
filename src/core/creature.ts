@@ -7,7 +7,7 @@ export const COLORS = ['coral', 'sage', 'periwinkle', 'amber', 'lilac', 'seafoam
 export const PATTERNS = ['none', 'spots', 'stripes', 'stars', 'patch'] as const
 export const EYES = ['dot', 'sleepy', 'round', 'wink', 'star'] as const
 export const MOUTHS = ['smile', 'o', 'cat', 'flat', 'fang'] as const
-export const EXTRAS = ['none', 'antenna', 'horn', 'ears', 'tail', 'bow'] as const
+export const EXTRAS = ['none', 'antenna', 'horn', 'ears', 'tail', 'bow', 'sprout'] as const
 /** 性格：孵化时定型，终生不变（回炉重造才会重新随机），只影响气泡台词的语气，不影响外观 */
 export const PERSONALITIES = ['energetic', 'gentle', 'bossy', 'cool'] as const
 

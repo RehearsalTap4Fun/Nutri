@@ -4,11 +4,12 @@ import { PERSONALITY_LABEL } from '../core/creature'
 import type { Mood } from '../core/creatureTalk'
 import { hashString } from '../core/rng'
 
+// "有机趣味"方向：轮廓比早期版本收得更利落，四种体型各有性格但同属一个手绘家族，不做正圆/正方的机械对称
 const BODY_PATH: Record<CreatureTraits['body'], string> = {
-  round: 'M50 15 C 72 15 85 32 85 55 C 85 76 70 90 50 90 C 30 90 15 76 15 55 C 15 32 28 15 50 15 Z',
-  egg: 'M50 6 C 66 6 78 30 78 58 C 78 82 66 94 50 94 C 34 94 22 82 22 58 C 22 30 34 6 50 6 Z',
-  blob: 'M46 8 C 66 4 90 20 88 44 C 96 64 78 92 52 90 C 26 96 6 74 10 50 C 4 26 26 12 46 8 Z',
-  droplet: 'M50 8 C 60 26 80 46 80 64 C 80 81 67 93 50 93 C 33 93 20 81 20 64 C 20 46 40 26 50 8 Z',
+  round: 'M50 14 C 70 12 84 28 85 50 C 86 72 72 90 50 92 C 28 90 14 72 15 50 C 16 28 30 12 50 14 Z',
+  egg: 'M50 6 C 64 6 76 26 77 54 C 78 78 66 94 50 95 C 34 94 22 78 23 54 C 24 26 36 6 50 6 Z',
+  blob: 'M46 10 C 68 6 88 22 86 46 C 92 66 76 92 50 94 C 28 98 6 78 10 52 C 4 28 24 12 46 10 Z',
+  droplet: 'M50 8 C 60 24 80 44 79 63 C 80 81 66 94 49 94 C 32 94 19 81 21 63 C 20 43 40 23 50 8 Z',
 }
 
 const BODY_COLOR: Record<CreatureTraits['color'], string> = {
@@ -105,12 +106,18 @@ function Extra({ extra }: { extra: CreatureTraits['extra'] }) {
     </g>
   )
   if (extra === 'tail') return <path d="M78 76 Q95 80 90 64 Q86 74 78 76 Z" stroke={ink} strokeWidth={1.2} />
-  // bow
-  return (
+  if (extra === 'bow') return (
     <g stroke={ink} strokeWidth={1}>
       <path d="M50 10 L38 3 L38 17 Z" fill="#E8607C" />
       <path d="M50 10 L62 3 L62 17 Z" fill="#E8607C" />
       <circle cx={50} cy={10} r={3} fill="#C94564" />
+    </g>
+  )
+  // sprout：呼应营养主题的小嫩芽，固定草绿色，不随体色变
+  return (
+    <g fill="none" stroke="#3E7A2E" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M50 10 Q46 -2 36 -4" />
+      <path d="M50 10 Q54 -2 64 -4" />
     </g>
   )
 }
