@@ -22,7 +22,7 @@ export function SpeakJobBanner({ job, onOpen, onDismiss }: { job: SpeakJob; onOp
       <button className="grow" style={{ background: 'none', border: 'none', textAlign: 'left', color: 'inherit', font: 'inherit', cursor: 'pointer', padding: 0 }} onClick={onOpen}>
         {isError ? `「${summary}」解析失败，点击查看` : `「${summary}」解析完成，点击查看或记为已吃`}
       </button>
-      <button className="btn ghost sm" onClick={onDismiss} aria-label="不看了">知道了 <IconClose size={12} /></button>
+      <button className="btn ghost sm with-icon" onClick={onDismiss} aria-label="不看了">知道了 <IconClose size={12} /></button>
     </div>
   )
 }

@@ -239,7 +239,7 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
                 <div className="field"><label>时间</label><input type="time" value={time} onChange={(e) => setTime(e.target.value)} /></div>
               </div>
               {isToday && (
-                <div className="row wrap" style={{ gap: 6 }}>
+                <div className="row wrap" style={{ gap: 6, justifyContent: 'flex-end' }}>
                   {[[0, '刚刚'], [15, '15分钟前'], [30, '30分钟前'], [60, '1小时前'], [120, '2小时前']].map(([mins, label]) => {
                     const t = minutesAgoTimeStr(mins as number)
                     return <button key={mins} className={`chip${time === t ? ' on' : ''}`} onClick={() => setTime(t)}>{label}</button>

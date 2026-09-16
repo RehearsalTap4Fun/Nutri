@@ -70,7 +70,7 @@ export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds
         <>
           <div className="row between">
             <h3>{pick.kind === 'dish' ? pick.dish.name : pick.food.name}</h3>
-            <button className="btn ghost sm" onClick={reset} aria-label="换一个">换一个 <IconClose size={12} /></button>
+            <button className="btn ghost sm with-icon" onClick={reset} aria-label="换一个">换一个 <IconClose size={12} /></button>
           </div>
           <span className={VERDICT_PILL[result.verdict]}>{VERDICT_LABEL[result.verdict]}</span>
           {weight > 0 && (
