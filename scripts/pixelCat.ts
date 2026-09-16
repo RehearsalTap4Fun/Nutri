@@ -15,6 +15,8 @@
  *                                                     #   有的图层用平涂源，没有的回退毛绒版，方便小批验证
  *   npm run pixelcat -- --reference <dir>             # 输出 44 张最终坐标的毛绒参考图（给出图时当定位参考）
  *   npm run pixelcat -- --check <solid 目录>            # 收图检查：尺寸/抠底/剪影对齐/清除区覆盖/露出量/色数，输出对比叠加图与报告
+ *                                                     #   几何豁免：读 <solid>/../geometry-exceptions.json（或 --exceptions <file>），
+ *                                                     #   命中 assetId（且 sourceSha256 一致）的 geometryChanged 条目只跳过位置/剪影项
  *   npm run pixelcat -- --preview out.png --compare dirA,dirB   # 两套生成目录（各自 --out 的产物）同一只猫并排对比
  *
  * 依赖 sharp：从 RandomPet 仓库的 node_modules 里借用，nutri 自己不装（这是偶尔跑一次的美术工具）。
@@ -317,8 +319,19 @@ function polygonMask(n: number, polys: readonly (readonly (readonly number[])[])
  * 换耳换尾件对清除区的覆盖率、部件露出身体轮廓的面积（换算成 64px 下的像素数）、色数（疑似渐变）。
  * 每张输出一张剪影叠加图到 <dir>/../check/，并写 check-report.json。
  */
+/** 几何豁免登记（与 Codex 约定的格式）：有意改形的部件跳过位置/剪影对齐检查，其余检查照常 */
+interface GeometryException { assetId: string; sourceSha256?: string; geometryChanged: boolean; reason: string; exempt?: string[] }
+function loadExceptions(dir: string): GeometryException[] {
+  const file = argOf('--exceptions') ?? join(dir, '..', 'geometry-exceptions.json')
+  if (!existsSync(file)) return []
+  const raw = JSON.parse(readFileSync(file, 'utf8')) as unknown
+  return Array.isArray(raw) ? (raw as GeometryException[]).filter((e) => e && typeof e.assetId === 'string') : []
+}
+
 async function check(dir: string): Promise<void> {
   const catalog = JSON.parse(readFileSync(join(RP, 'packages/asset-catalog/catalog/v0.10.0/catalog.json'), 'utf8')) as Catalog
+  const exceptions = loadExceptions(dir)
+  const { createHash } = await import('node:crypto')
   const registration = JSON.parse(readFileSync(join(RP, 'packages/renderer-canvas/src/feline-combination-registration.json'), 'utf8')) as Record<string, Transform>
   const outDir = join(dir, '..', 'check')
   mkdirSync(outDir, { recursive: true })
@@ -338,6 +351,11 @@ async function check(dir: string): Promise<void> {
     const issues: string[] = []
     const row: Record<string, unknown> = { id }
     if (!parsed) { issues.push('文件名不是已知资源 id'); report.push({ ...row, issues }); console.log(`✗ ${id}: ${issues.join('；')}`); continue }
+    const bytes = readFileSync(join(dir, f))
+    const fileSha = createHash('sha256').update(bytes).digest('hex')
+    const exception = exceptions.find((e) => e.assetId === id && e.geometryChanged && (!e.sourceSha256 || e.sourceSha256 === fileSha))
+    const exemptPosition = !!exception && (exception.exempt ?? ['position', 'silhouette']).some((x) => x === 'position' || x === 'silhouette')
+    if (exception) row.geometryException = exception.reason
     const meta = await sharp(join(dir, f)).metadata()
     row.size = `${meta.width}×${meta.height}`
     if (meta.width !== meta.height) issues.push('不是正方形')
@@ -365,7 +383,8 @@ async function check(dir: string): Promise<void> {
     const colors = new Set<number>()
     for (let i = 0; i < keyed.length; i += 4) if (keyed[i + 3]) colors.add(((keyed[i] >> 2) << 12) | ((keyed[i + 1] >> 2) << 6) | (keyed[i + 2] >> 2))
     row.colors = colors.size
-    if (colors.size > 2500) issues.push(`色数 ${colors.size}，疑似渐变或纹理，不够平涂`)
+    // AI 赛璐璐画带抗锯齿边与毛尖笔触，6 位色计数几千很正常；超过一万才提示（批 0 母版 7599 通过）
+    if (colors.size > 10000) issues.push(`色数 ${colors.size}，疑似渐变或纹理，不够平涂`)
     // 参考剪影
     let B: Uint8Array
     if (parsed.kind === 'body') B = alphaMask(await rawOf(readFileSync(join(RP, catalog.resources[id].path))))
@@ -381,10 +400,11 @@ async function check(dir: string): Promise<void> {
     row.centroidOffset = [Math.round(a.cx - b.cx), Math.round(a.cy - b.cy)]
     row.bbox = a.bbox
     if (parsed.kind === 'body') {
-      if ((row.iou as number) < 0.85) issues.push(`剪影重合率 ${row.iou}，与毛绒版对不上`)
+      if (exemptPosition) { /* 登记过的有意改形，不检查对齐 */ }
+      else if ((row.iou as number) < 0.85) issues.push(`剪影重合率 ${row.iou}，与毛绒版对不上`)
       else if ((row.iou as number) < 0.92) issues.push(`剪影重合率 ${row.iou}，偏低`)
       const [dx, dy] = row.centroidOffset as number[]
-      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) issues.push(`质心偏移 (${dx}, ${dy})px`)
+      if (!exemptPosition && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) issues.push(`质心偏移 (${dx}, ${dy})px`)
     } else {
       const slot = PART_SLOT[parsed.mutation]
       const body = await bodyMask(parsed.coat ?? 'orange-white')
@@ -405,7 +425,7 @@ async function check(dir: string): Promise<void> {
         if ((row.visibleOutsideBody64px as number) < 12) issues.push(`露出身体外的面积只有 ${row.visibleOutsideBody64px} 个 64px 像素，缩小后看不见`)
         else if ((row.visibleOutsideBody64px as number) < 30) issues.push(`露出身体外的面积 ${row.visibleOutsideBody64px} 个 64px 像素，偏小（官方光环是 15，已知偏细）`)
       }
-      if ((row.iou as number) < 0.3) issues.push(`与参考位置重合率 ${row.iou}，位置或大小可能偏了`)
+      if (!exemptPosition && (row.iou as number) < 0.3) issues.push(`与参考位置重合率 ${row.iou}，位置或大小可能偏了`)
     }
     // 叠加图：蓝=只有毛绒参考，红=只有来图，灰=重合；缩到 627
     const ov = Buffer.alloc(CANVAS * CANVAS * 4)
@@ -422,7 +442,8 @@ async function check(dir: string): Promise<void> {
     const summary = parsed.kind === 'body'
       ? `重合 ${row.iou} 偏移 (${(row.centroidOffset as number[]).join(',')}) 色数 ${row.colors}`
       : `位置重合 ${row.iou}${row.clearCoverage !== undefined ? ` 清除区覆盖 ${row.clearCoverage}` : ''}${row.visibleOutsideBody64px !== undefined ? ` 露出 ${row.visibleOutsideBody64px}px²` : ''} 色数 ${row.colors}`
-    console.log(`${issues.length ? '✗' : '✓'} ${id}: ${summary}${issues.length ? '\n    - ' + issues.join('\n    - ') : ''}`)
+    const note = exception ? `（几何例外：${exception.reason}）` : ''
+    console.log(`${issues.length ? '✗' : '✓'} ${id}: ${summary}${note}${issues.length ? '\n    - ' + issues.join('\n    - ') : ''}`)
   }
   writeFileSync(join(outDir, 'check-report.json'), JSON.stringify(report, null, 2) + '\n')
   const bad = report.filter((r) => (r.issues as string[] | undefined)?.length).length

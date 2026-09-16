@@ -76,6 +76,39 @@ export function outlineRgba(src: Rgba, n: number, darken = 0.36): Rgba {
   return out
 }
 
+/** 通用合成计划：与 QMonster pixel-rgba-v1 的操作一一对应 */
+export type PixelOp =
+  | { kind: 'clear'; polygons: readonly (readonly (readonly number[])[])[] }
+  | { kind: 'draw'; layer: string; target: 'frame' | 'subject'; occlusion: readonly (readonly (readonly number[])[])[] }
+
+/**
+ * 按计划合成（pixel-rgba-v1 语义，与 QMonster composePixelArt 逐字节一致）：
+ * clear 从已累计的 subject 上擦多边形；draw 先复制部件、要求二值 alpha、透明像素清零、擦掉自身 occlusion，
+ * 画到 frame 的部件单独描边再叠，画到 subject 的直接叠；最后 subject 整体描边盖到 frame 上。
+ */
+export function composePlan(ops: readonly PixelOp[], layer: (id: string) => Rgba, n: number): Rgba {
+  const frame = blankRgba(n)
+  const subject = blankRgba(n)
+  for (const op of ops) {
+    if (op.kind === 'clear') {
+      for (const poly of op.polygons) clearPolygon(subject, n, poly)
+      continue
+    }
+    const src = layer(op.layer)
+    if (src.length !== n * n * 4) throw new Error(`图层尺寸不对: ${op.layer}`)
+    const px = new Uint8ClampedArray(src)
+    for (let i = 0; i < px.length; i += 4) {
+      if (px[i + 3] !== 0 && px[i + 3] !== 255) throw new Error(`图层 alpha 不是二值: ${op.layer}`)
+      if (px[i + 3] === 0) { px[i] = 0; px[i + 1] = 0; px[i + 2] = 0 }
+    }
+    for (const poly of op.occlusion) clearPolygon(px, n, poly)
+    if (op.target === 'frame') overRgba(frame, outlineRgba(px, n))
+    else overRgba(subject, px)
+  }
+  overRgba(frame, outlineRgba(subject, n))
+  return frame
+}
+
 export interface ClearRegions {
   ears: readonly (readonly (readonly number[])[])[]
   tailTip: readonly (readonly number[])[]
@@ -86,19 +119,11 @@ export interface ClearRegions {
  * subject 整体描一次边再盖到 frame 上，部件与身体之间就有了分隔线。
  */
 export function composeSprite(ops: readonly RenderOp[], layer: (id: string) => Rgba, n: number, clear: ClearRegions): Rgba {
-  const frame = blankRgba(n)
-  const subject = blankRgba(n)
-  for (const op of ops) {
-    if (op.kind === 'clear') {
-      for (const poly of op.region === 'ears' ? clear.ears : [clear.tailTip]) clearPolygon(subject, n, poly)
-      continue
-    }
-    const px = hardenAlpha(new Uint8ClampedArray(layer(op.layer)))
-    if (op.target === 'frame') overRgba(frame, outlineRgba(px, n))
-    else overRgba(subject, px)
-  }
-  overRgba(frame, outlineRgba(subject, n))
-  return frame
+  // 老轨（毛绒像素化）的计划翻译成通用计划；图层先二值化，语义与像素包同一份 composePlan
+  const plan: PixelOp[] = ops.map((op) => op.kind === 'clear'
+    ? { kind: 'clear', polygons: op.region === 'ears' ? clear.ears : [clear.tailTip] }
+    : { kind: 'draw', layer: op.layer, target: op.target, occlusion: [] })
+  return composePlan(plan, (id) => hardenAlpha(new Uint8ClampedArray(layer(id))), n)
 }
 
 /**
