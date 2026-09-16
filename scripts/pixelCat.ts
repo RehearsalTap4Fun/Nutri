@@ -14,6 +14,8 @@
  *   npm run pixelcat -- --source <dir>                # 平涂源图入口：<dir>/<resourceId>.png（1254 最终坐标，可带纯色底）
  *                                                     #   有的图层用平涂源，没有的回退毛绒版，方便小批验证
  *   npm run pixelcat -- --reference <dir>             # 输出 44 张最终坐标的毛绒参考图（给出图时当定位参考）
+ *   npm run pixelcat -- --check <solid 目录>            # 收图检查：尺寸/抠底/剪影对齐/清除区覆盖/露出量/色数，输出对比叠加图与报告
+ *   npm run pixelcat -- --preview out.png --compare dirA,dirB   # 两套生成目录（各自 --out 的产物）同一只猫并排对比
  *
  * 依赖 sharp：从 RandomPet 仓库的 node_modules 里借用，nutri 自己不装（这是偶尔跑一次的美术工具）。
  * 模板几何来自 RandomPet packages/renderer-canvas/src/feline-combination-render.ts 的 FELINE_COMBINATION_TEMPLATE_V1，
@@ -23,7 +25,7 @@ import { createRequire } from 'node:module'
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { composeSprite, despeckleRgba, hardenAlpha, keyBackgroundRgba, type ClearRegions, type Rgba } from '../src/core/pixelize'
+import { composeSprite, cornerColor, despeckleRgba, hardenAlpha, insidePolygon, keyBackgroundRgba, type ClearRegions, type Rgba } from '../src/core/pixelize'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, '..')
@@ -213,35 +215,33 @@ async function generate(): Promise<void> {
 }
 
 /** 预览：用运行时同一份 renderOps + composeSprite，在 Node 里复现合成结果 */
-async function preview(outFile: string): Promise<void> {
-  const { renderOps, catForCreature } = await import('../src/core/pixelcat')
-  const manifest = JSON.parse(readFileSync(join(OUT, 'manifest.json'), 'utf8')) as { size: number; clear: ClearRegions }
-  const n = manifest.size
+/** 读入一个生成目录的全部图层（sharp 解码是异步的，先解好再给同步的 composeSprite 用） */
+async function loadLayerDir(dir: string): Promise<{ n: number; clear: ClearRegions; layerOf: (id: string) => Rgba }> {
+  const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8')) as { size: number; clear: ClearRegions }
   const cache = new Map<string, Rgba>()
-  const layerOf = (id: string): Rgba => {
-    let px = cache.get(id)
-    if (!px) {
-      const raw: Buffer = require_sync_raw(join(OUT, `${id}.png`))
-      px = new Uint8ClampedArray(raw.buffer, raw.byteOffset, raw.length)
-      cache.set(id, px)
-    }
-    return px
+  for (const f of readdirSync(dir)) {
+    if (!f.endsWith('.png')) continue
+    const raw: Buffer = await sharp(join(dir, f)).ensureAlpha().raw().toBuffer()
+    cache.set(f.slice(0, -4), new Uint8ClampedArray(raw.buffer, raw.byteOffset, raw.length))
   }
-  // sharp 解码是异步的，先把所有图层解出来
-  const rawCache = new Map<string, Buffer>()
-  for (const f of readdirSync(OUT)) if (f.endsWith('.png')) rawCache.set(f.slice(0, -4), await sharp(join(OUT, f)).ensureAlpha().raw().toBuffer())
-  function require_sync_raw(path: string): Buffer {
-    const id = path.split('/').pop()!.slice(0, -4)
-    const buf = rawCache.get(id)
-    if (!buf) throw new Error(`预览缺图层 ${id}`)
-    return buf
+  return {
+    n: manifest.size, clear: manifest.clear,
+    layerOf: (id) => { const px = cache.get(id); if (!px) throw new Error(`${dir} 缺图层 ${id}`); return px },
   }
-  const toPng = (px: Rgba, up: number) => sharp(Buffer.from(px.buffer, px.byteOffset, px.length), { raw: { width: n, height: n, channels: 4 } })
-    .resize(n * up, n * up, { kernel: 'nearest' }).png().toBuffer()
-  const label = (text: string, w: number) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="26"><text x="${w / 2}" y="18" font-size="14" text-anchor="middle" font-family="Helvetica" fill="#2c2e2a">${text}</text></svg>`)
+}
+
+async function preview(outFile: string, dirs: string[]): Promise<void> {
+  const { renderOps, catForCreature } = await import('../src/core/pixelcat')
+  const sets = await Promise.all(dirs.map(loadLayerDir))
+  const n = sets[0].n
+  if (sets.some((s) => s.n !== n)) throw new Error('对比的目录原生尺寸不一致')
+  const label = (text: string, w: number) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="26"><text x="${w / 2}" y="18" font-size="13" text-anchor="middle" font-family="Helvetica" fill="#2c2e2a">${text}</text></svg>`)
 
   type Spec = Parameters<typeof renderOps>[0]
   const samples: Array<[string, Spec]> = [
+    // 批 0 对照：橘白微张嘴母版 + 小龙角 + 焰尾（平涂源图路线的三张）
+    ['橘白 · 普通', { coat: 'orange-white', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }],
+    ['橘白 · 小龙角+焰尾', { coat: 'orange-white', expression: 'parted-mouth', crown: 'dragon-horns', ears: 'none', neck: 'none', back: 'none', tailTip: 'flame-tail' }],
     ['三花 · 鳍耳+分叉尾', { coat: 'calico', expression: 'parted-mouth', crown: 'none', ears: 'fin-ears', neck: 'none', back: 'none', tailTip: 'forked-tail-tip' }],
     ['棕虎斑 · 鹿角+小狮鬃', { coat: 'brown-tabby', expression: 'tongue-tip', crown: 'antlers', ears: 'none', neck: 'small-lion-mane', back: 'none', tailTip: 'none' }],
     ['燕尾服 · 小龙角+小翅膀+焰尾', { coat: 'tuxedo', expression: 'small-fangs', crown: 'dragon-horns', ears: 'none', neck: 'none', back: 'small-wings', tailTip: 'flame-tail' }],
@@ -249,28 +249,184 @@ async function preview(outFile: string): Promise<void> {
     ['橘白 · 羽翼', { coat: 'orange-white', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'feathered-wings', tailTip: 'none' }],
     ['重点色 · 普通', catForCreature({ id: 'demo-2', mutations: 0 })],
   ]
-  // 每行：2 倍显示（实际尺寸）×3 只 + 6 倍放大看细节
-  const up2 = 2, up6 = 6
-  const rowW = n * up2 * 3 + n * up6 + 80
-  const rowH = n * up6 + 40
+  // 每个目录一栏：2 倍显示（实际大小）+ 5 倍放大；多目录并排即为对比图
+  const up2 = 2, up5 = 5
+  const colW = n * up2 + n * up5 + 30
+  const rowW = colW * sets.length + 20
+  const rowH = n * up5 + 44
   const rows: Buffer[] = []
-  for (let i = 0; i < samples.length; i += 1) {
-    const [name, spec] = samples[i]
-    const px = composeSprite(renderOps(spec), layerOf, n, manifest.clear)
-    const small = await toPng(px, up2)
-    const big = await toPng(px, up6)
-    const tiles = [
-      { input: small, left: 10, top: 10 },
-      { input: small, left: 20 + n * up2, top: 10 },
-      { input: small, left: 30 + n * up2 * 2, top: 10 },
-      { input: big, left: 60 + n * up2 * 3, top: 6 },
-      { input: label(`${name} · ${n}px ×${up2}（实际大小，三只并排）| 右：×${up6} 放大`, rowW), left: 0, top: rowH - 28 },
-    ]
+  for (const [name, spec] of samples) {
+    const tiles: Array<{ input: Buffer; left: number; top: number }> = []
+    for (const [c, set] of sets.entries()) {
+      const px = composeSprite(renderOps(spec), set.layerOf, n, set.clear)
+      const x0 = 10 + c * colW
+      tiles.push({ input: await toPng(px, n, up2), left: x0, top: 10 })
+      tiles.push({ input: await toPng(px, n, up5), left: x0 + n * up2 + 10, top: 6 })
+      tiles.push({ input: label(`${name} · ${dirs.length > 1 ? dirs[c].split('/').pop() + ' · ' : ''}${n}px ×${up2} | ×${up5}`, colW), left: x0 - 10, top: rowH - 30 })
+    }
     rows.push(await sharp({ create: { width: rowW, height: rowH, channels: 4, background: '#EDE6D6' } }).composite(tiles).png().toBuffer())
   }
   await sharp({ create: { width: rowW, height: rowH * rows.length, channels: 4, background: '#EDE6D6' } })
     .composite(rows.map((r, i) => ({ input: r, left: 0, top: i * rowH }))).png().toFile(outFile)
-  console.log(`预览已写到 ${outFile}（${n}px）`)
+  console.log(`预览已写到 ${outFile}（${n}px，${dirs.length} 个目录）`)
+}
+
+/** 最近邻整数放大成 PNG */
+function toPng(px: Rgba, n: number, up: number): Promise<Buffer> {
+  return sharp(Buffer.from(px.buffer, px.byteOffset, px.length), { raw: { width: n, height: n, channels: 4 } })
+    .resize(n * up, n * up, { kernel: 'nearest' }).png().toBuffer()
+}
+
+/** 部件 id → 位置（与 src/core/pixelcat.ts 一致） */
+const PART_SLOT: Record<string, 'crown' | 'ears' | 'neck' | 'back' | 'tailTip'> = {
+  'dragon-horns': 'crown', antlers: 'crown', halo: 'crown',
+  'fin-ears': 'ears',
+  'small-lion-mane': 'neck', 'frill-neck': 'neck',
+  'small-wings': 'back', 'feathered-wings': 'back', 'dragon-wings': 'back',
+  'forked-tail-tip': 'tailTip', 'flame-tail': 'tailTip',
+}
+
+/** 解析资源 id：主体 / 绑花纹部件 / 通用部件 */
+function parseId(id: string): { kind: 'body'; coat: string; expression: string } | { kind: 'part'; coat: string | null; mutation: string } | null {
+  if (PART_SLOT[id]) return { kind: 'part', coat: null, mutation: id }
+  for (const coat of COATS) {
+    if (!id.startsWith(`${coat}-`)) continue
+    const rest = id.slice(coat.length + 1)
+    if (EXPRESSIONS.includes(rest)) return { kind: 'body', coat, expression: rest }
+    if (PART_SLOT[rest]) return { kind: 'part', coat, mutation: rest }
+  }
+  return null
+}
+
+const alphaMask = (px: Rgba): Uint8Array => { const m = new Uint8Array(px.length / 4); for (let i = 0; i < m.length; i++) m[i] = px[i * 4 + 3] >= 128 ? 1 : 0; return m }
+const rawOf = async (png: Buffer): Promise<Rgba> => { const raw: Buffer = await sharp(png).ensureAlpha().raw().toBuffer(); return new Uint8ClampedArray(raw.buffer, raw.byteOffset, raw.length) }
+function maskStats(m: Uint8Array, n: number) {
+  let count = 0, sx = 0, sy = 0, minX = n, minY = n, maxX = -1, maxY = -1
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (m[y * n + x]) { count++; sx += x; sy += y; if (x < minX) minX = x; if (y < minY) minY = y; if (x > maxX) maxX = x; if (y > maxY) maxY = y }
+  return { count, cx: count ? sx / count : 0, cy: count ? sy / count : 0, bbox: count ? [minX, minY, maxX, maxY] : null }
+}
+function polygonMask(n: number, polys: readonly (readonly (readonly number[])[])[]): Uint8Array {
+  const m = new Uint8Array(n * n)
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (polys.some((p) => insidePolygon(x + 0.5, y + 0.5, p))) m[y * n + x] = 1
+  return m
+}
+
+/**
+ * 收图检查：对 <dir>/<id>.png 逐张验收，把肉眼不可靠的几项量化：
+ * 尺寸与抠底、剪影与毛绒版的重合率/质心偏移（主体必须逐像素对齐，否则清除多边形会露馅）、
+ * 换耳换尾件对清除区的覆盖率、部件露出身体轮廓的面积（换算成 64px 下的像素数）、色数（疑似渐变）。
+ * 每张输出一张剪影叠加图到 <dir>/../check/，并写 check-report.json。
+ */
+async function check(dir: string): Promise<void> {
+  const catalog = JSON.parse(readFileSync(join(RP, 'packages/asset-catalog/catalog/v0.10.0/catalog.json'), 'utf8')) as Catalog
+  const registration = JSON.parse(readFileSync(join(RP, 'packages/renderer-canvas/src/feline-combination-registration.json'), 'utf8')) as Record<string, Transform>
+  const outDir = join(dir, '..', 'check')
+  mkdirSync(outDir, { recursive: true })
+  const files = readdirSync(dir).filter((f) => f.endsWith('.png')).sort()
+  if (files.length === 0) { console.log(`目录里没有 PNG: ${dir}`); return }
+  const OUT_PX = (SIZE - 2) / CANVAS // 1254 → 64px 图层的比例（留 1px 边）
+  const report: Record<string, unknown>[] = []
+  const bodyMaskCache = new Map<string, Uint8Array>()
+  const bodyMask = async (coat: string): Promise<Uint8Array> => {
+    let m = bodyMaskCache.get(coat)
+    if (!m) { m = alphaMask(await rawOf(readFileSync(join(RP, catalog.resources[`${coat}-parted-mouth`].path)))); bodyMaskCache.set(coat, m) }
+    return m
+  }
+  for (const f of files) {
+    const id = f.slice(0, -4)
+    const parsed = parseId(id)
+    const issues: string[] = []
+    const row: Record<string, unknown> = { id }
+    if (!parsed) { issues.push('文件名不是已知资源 id'); report.push({ ...row, issues }); console.log(`✗ ${id}: ${issues.join('；')}`); continue }
+    const meta = await sharp(join(dir, f)).metadata()
+    row.size = `${meta.width}×${meta.height}`
+    if (meta.width !== meta.height) issues.push('不是正方形')
+    else if (meta.width !== CANVAS) issues.push(`尺寸 ${meta.width}，会缩放到 1254`)
+    // 抠底
+    const raw = await rawOf(await sharp(join(dir, f)).resize(CANVAS, CANVAS, { kernel: 'lanczos3' }).png().toBuffer())
+    let opaque = true
+    for (let i = 3; i < raw.length; i += 4) if (raw[i] < 250) { opaque = false; break }
+    let keyed: Rgba
+    if (opaque) {
+      const bg = cornerColor(raw, CANVAS, CANVAS)
+      row.background = `#${bg.map((v) => v.toString(16).padStart(2, '0')).join('')}`
+      const nearMagenta = Math.hypot(bg[0] - 255, bg[1], bg[2] - 255) < 40
+      if (!nearMagenta) issues.push(`底色 ${row.background} 不是洋红`)
+      let ambiguous = 0
+      for (let i = 0; i < raw.length; i += 4) { const d = Math.hypot(raw[i] - bg[0], raw[i + 1] - bg[1], raw[i + 2] - bg[2]); if (d >= 50 && d < 130) ambiguous++ }
+      row.ambiguousPct = +((ambiguous / (CANVAS * CANVAS)) * 100).toFixed(2)
+      if ((row.ambiguousPct as number) > 1.5) issues.push(`与底色相近的模糊像素 ${row.ambiguousPct}%（可能有渐变/暗角/软边）`)
+      keyed = keyBackgroundRgba(raw, CANVAS, CANVAS, { threshold: 90, erode: 3 })
+    } else { row.background = '自带 alpha'; keyed = hardenAlpha(new Uint8ClampedArray(raw)) }
+    const A = alphaMask(keyed)
+    const a = maskStats(A, CANVAS)
+    if (a.count === 0) { issues.push('抠底后没有主体'); report.push({ ...row, issues }); console.log(`✗ ${id}: ${issues.join('；')}`); continue }
+    // 色数（6 位/通道粗略计）
+    const colors = new Set<number>()
+    for (let i = 0; i < keyed.length; i += 4) if (keyed[i + 3]) colors.add(((keyed[i] >> 2) << 12) | ((keyed[i + 1] >> 2) << 6) | (keyed[i + 2] >> 2))
+    row.colors = colors.size
+    if (colors.size > 2500) issues.push(`色数 ${colors.size}，疑似渐变或纹理，不够平涂`)
+    // 参考剪影
+    let B: Uint8Array
+    if (parsed.kind === 'body') B = alphaMask(await rawOf(readFileSync(join(RP, catalog.resources[id].path))))
+    else {
+      let t = TEMPLATE.transforms[parsed.mutation] ?? IDENTITY
+      if (parsed.coat && TEMPLATE.coatBound.includes(parsed.mutation)) t = combine(t, registration[`${parsed.coat}-${parsed.mutation}`])
+      B = alphaMask(await rawOf(await placeLayer(join(RP, catalog.resources[id].path), t)))
+    }
+    const b = maskStats(B, CANVAS)
+    let inter = 0, union = 0
+    for (let i = 0; i < A.length; i++) { if (A[i] && B[i]) inter++; if (A[i] || B[i]) union++ }
+    row.iou = +(inter / union).toFixed(3)
+    row.centroidOffset = [Math.round(a.cx - b.cx), Math.round(a.cy - b.cy)]
+    row.bbox = a.bbox
+    if (parsed.kind === 'body') {
+      if ((row.iou as number) < 0.85) issues.push(`剪影重合率 ${row.iou}，与毛绒版对不上`)
+      else if ((row.iou as number) < 0.92) issues.push(`剪影重合率 ${row.iou}，偏低`)
+      const [dx, dy] = row.centroidOffset as number[]
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) issues.push(`质心偏移 (${dx}, ${dy})px`)
+    } else {
+      const slot = PART_SLOT[parsed.mutation]
+      const body = await bodyMask(parsed.coat ?? 'orange-white')
+      if (slot === 'ears' || slot === 'tailTip') {
+        // 清除区里真正"必须盖住"的只有官方同名部件也盖住的那部分（其余是被有意抠掉的原耳/原尾），
+        // 官方件按定义为 1.0；来图低于它就会在合成时露出缺口
+        const poly = polygonMask(CANVAS, slot === 'ears' ? TEMPLATE.ears : [TEMPLATE.tailTip])
+        let must = 0, covered = 0
+        for (let i = 0; i < A.length; i++) if (body[i] && poly[i] && B[i]) { must++; if (A[i]) covered++ }
+        row.clearCoverage = must ? +(covered / must).toFixed(3) : 1
+        row.gap64px = Math.round((must - covered) * OUT_PX * OUT_PX)
+        if ((row.clearCoverage as number) < 0.97 && (row.gap64px as number) >= 2) issues.push(`清除区覆盖率 ${row.clearCoverage}，合成后约有 ${row.gap64px} 个 64px 像素的缺口露出原${slot === 'ears' ? '耳' : '尾'}位置`)
+      } else {
+        // 外挂件（额顶/颈/背）：露出身体轮廓外的面积换算到 64px，太小缩放后就看不见（官方光环 15 是已知偏细的反例）
+        let outside = 0
+        for (let i = 0; i < A.length; i++) if (A[i] && !body[i]) outside++
+        row.visibleOutsideBody64px = Math.round(outside * OUT_PX * OUT_PX)
+        if ((row.visibleOutsideBody64px as number) < 12) issues.push(`露出身体外的面积只有 ${row.visibleOutsideBody64px} 个 64px 像素，缩小后看不见`)
+        else if ((row.visibleOutsideBody64px as number) < 30) issues.push(`露出身体外的面积 ${row.visibleOutsideBody64px} 个 64px 像素，偏小（官方光环是 15，已知偏细）`)
+      }
+      if ((row.iou as number) < 0.3) issues.push(`与参考位置重合率 ${row.iou}，位置或大小可能偏了`)
+    }
+    // 叠加图：蓝=只有毛绒参考，红=只有来图，灰=重合；缩到 627
+    const ov = Buffer.alloc(CANVAS * CANVAS * 4)
+    for (let i = 0; i < A.length; i++) {
+      const o = i * 4
+      if (A[i] && B[i]) { ov[o] = 120; ov[o + 1] = 120; ov[o + 2] = 120; ov[o + 3] = 255 }
+      else if (B[i]) { ov[o] = 60; ov[o + 1] = 110; ov[o + 2] = 230; ov[o + 3] = 255 }
+      else if (A[i]) { ov[o] = 230; ov[o + 1] = 70; ov[o + 2] = 60; ov[o + 3] = 255 }
+      else { ov[o] = 237; ov[o + 1] = 230; ov[o + 2] = 214; ov[o + 3] = 255 }
+    }
+    await sharp(ov, { raw: { width: CANVAS, height: CANVAS, channels: 4 } }).resize(627, 627).png().toFile(join(outDir, `${id}.png`))
+    row.issues = issues
+    report.push(row)
+    const summary = parsed.kind === 'body'
+      ? `重合 ${row.iou} 偏移 (${(row.centroidOffset as number[]).join(',')}) 色数 ${row.colors}`
+      : `位置重合 ${row.iou}${row.clearCoverage !== undefined ? ` 清除区覆盖 ${row.clearCoverage}` : ''}${row.visibleOutsideBody64px !== undefined ? ` 露出 ${row.visibleOutsideBody64px}px²` : ''} 色数 ${row.colors}`
+    console.log(`${issues.length ? '✗' : '✓'} ${id}: ${summary}${issues.length ? '\n    - ' + issues.join('\n    - ') : ''}`)
+  }
+  writeFileSync(join(outDir, 'check-report.json'), JSON.stringify(report, null, 2) + '\n')
+  const bad = report.filter((r) => (r.issues as string[] | undefined)?.length).length
+  console.log(`检查 ${report.length} 张，${bad} 张有问题；叠加图与 check-report.json 在 ${outDir}（蓝=毛绒参考独有，红=来图独有，灰=重合）`)
 }
 
 /** 输出 44 张最终坐标的毛绒参考图（部件已按模板×注册变换摆好），出平涂图时当作定位/形状参考 */
@@ -294,6 +450,8 @@ async function emitReference(dir: string): Promise<void> {
 
 const pv = argOf('--preview')
 const ref = argOf('--reference')
-if (pv !== undefined) await preview(resolve(pv))
+const chk = argOf('--check')
+if (pv !== undefined) await preview(resolve(pv), (argOf('--compare') ?? OUT).split(',').map((d) => resolve(d.trim())))
 else if (ref !== undefined) await emitReference(resolve(ref))
+else if (chk !== undefined) await check(resolve(chk))
 else await generate()

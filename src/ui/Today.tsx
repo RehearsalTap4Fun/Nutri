@@ -20,7 +20,7 @@ import { CanIEat } from './CanIEat'
 import { CreatureView, EggView, SpeechBubble } from './Creature'
 import type { Creature } from '../core/creature'
 import { PixelCatView } from './PixelCat'
-import { PIXEL_CAT_DISPLAY, PIXEL_CAT_TRIAL, catDiff, catForCreature } from '../core/pixelcat'
+import { PIXEL_CAT_DISPLAY, PIXEL_CAT_TRIAL, catDiff } from '../core/pixelcat'
 
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
@@ -87,8 +87,8 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   )
   const talk = useMemo(() => creatureLine(talkInput), [talkInput])
   const mood = useMemo(() => creatureMood(talkInput), [talkInput])
-  // 像素猫试验：外观由 creature 的 id + 异变次数确定性推导，不动存档；关掉 PIXEL_CAT_TRIAL 即切回 SVG 小管家
-  const cat = useMemo(() => (PIXEL_CAT_TRIAL && creature ? catForCreature(creature) : null), [creature])
+  // 像素猫：外观存在 creature.cat 里（孵化定型、异变推进、老存档加载时补齐）；关掉 PIXEL_CAT_TRIAL 即切回 SVG 小管家
+  const cat = PIXEL_CAT_TRIAL && creature ? creature.cat : null
   // 刚变了什么：像素尺度下有些变化（表情、小翅膀）不容易一眼看出，冒烟之后补一句话，几秒后自动消失
   const prevCat = useRef(cat)
   const [catNote, setCatNote] = useState<string | null>(null)

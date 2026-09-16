@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES, hatch, mutate, retire } from '../src/core/creature'
+import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES, ensureCat, hatch, mutate, retire, type Creature } from '../src/core/creature'
+import { MUTABLE_SLOTS, MUTATION_SLOTS, PIXEL_CAT_RULES, catForCreature, catKey, isCatSpec, tierRank } from '../src/core/pixelcat'
 import { makeRng } from '../src/core/rng'
 
 describe('hatch：一次随机定型', () => {
@@ -63,5 +64,56 @@ describe('retire：存进历史', () => {
     expect(r.retiredAt).toBe(999)
     expect(r.traits).toEqual(c.traits)
     expect(r.id).toBe(c.id)
+  })
+})
+
+describe('像素猫外观存进 creature：孵化定型、异变推进、老数据补齐', () => {
+  it('孵化时带上合法的 cat 与规则版本', () => {
+    const c = hatch('a', 1000, makeRng(1))
+    expect(isCatSpec(c.cat)).toBe(true)
+    expect(c.catRules).toBe(PIXEL_CAT_RULES)
+    const mutationCount = MUTATION_SLOTS.filter((s) => c.cat[s] !== 'none').length
+    expect(mutationCount).toBeLessThanOrEqual(1)
+  })
+  it('每次异变 cat 恰好推进一步，只进不退，花纹不变', () => {
+    let c = hatch('a', 0, makeRng(5))
+    for (let i = 0; i < 60; i++) {
+      const next = mutate(c, i + 1, makeRng(100 + i))
+      const changed = MUTABLE_SLOTS.filter((s) => c.cat[s] !== next.cat[s])
+      expect(changed).toHaveLength(1)
+      expect(next.cat.coat).toBe(c.cat.coat)
+      for (const slot of MUTATION_SLOTS) {
+        expect(tierRank(next.cat[slot])).toBeGreaterThanOrEqual(tierRank(c.cat[slot]))
+        if (c.cat[slot] !== 'none') expect(next.cat[slot]).not.toBe('none')
+      }
+      c = next
+    }
+  })
+  it('异变从存档里的 cat 出发，不重放历史：改了存档里的 cat，下一步就从改后的值继续', () => {
+    const c = hatch('a', 0, makeRng(5))
+    const edited: Creature = { ...c, cat: { ...c.cat, coat: 'tuxedo', crown: 'halo' } }
+    const next = mutate(edited, 1, makeRng(9))
+    expect(next.cat.coat).toBe('tuxedo')
+    expect(next.cat.crown).toBe('halo') // 光环已是额顶最高，不会被降级
+  })
+  it('ensureCat：老数据没有 cat 时按 id + 异变次数推导，结果与 catForCreature 一致；已有合法 cat 时原样返回', () => {
+    const c = hatch('old-1', 0, makeRng(2))
+    const legacy = { ...c, mutations: 4 } as Creature
+    delete (legacy as Partial<Creature>).cat
+    delete (legacy as Partial<Creature>).catRules
+    const fixed = ensureCat(legacy)
+    expect(catKey(fixed.cat)).toBe(catKey(catForCreature({ id: 'old-1', mutations: 4 })))
+    expect(fixed.catRules).toBe(PIXEL_CAT_RULES)
+    expect(ensureCat(fixed)).toBe(fixed)
+  })
+  it('ensureCat：存档里的 cat 含未知值时视为非法，重新推导', () => {
+    const c = hatch('bad', 0, makeRng(3))
+    const broken = { ...c, cat: { ...c.cat, back: 'jet-engine' } } as unknown as Creature
+    expect(isCatSpec(broken.cat)).toBe(false)
+    expect(isCatSpec(ensureCat(broken).cat)).toBe(true)
+  })
+  it('回炉后历史里的 cat 原样保留', () => {
+    const c = hatch('a', 10, makeRng(1))
+    expect(retire(c, 999).cat).toEqual(c.cat)
   })
 })

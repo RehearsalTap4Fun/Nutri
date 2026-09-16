@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import manifest from '../src/assets/pixelcat/manifest.json'
-import { CAT_COATS, CAT_SLOT_OPTIONS, CAT_TIER, MUTABLE_SLOTS, MUTATION_SLOTS, catDiff, catForCreature, catKey, describeCat, layersFor, mutateCat, renderOps, tierRank, upgradesFor, type CatSpec } from '../src/core/pixelcat'
+import { CAT_COATS, CAT_SLOT_OPTIONS, CAT_TIER, MUTABLE_SLOTS, MUTATION_SLOTS, catDiff, catForCreature, catKey, describeCat, hatchCat, isCatSpec, layersFor, mutateCat, renderOps, tierRank, upgradesFor, type CatSpec } from '../src/core/pixelcat'
 import { makeRng } from '../src/core/rng'
 
 const ASSETS = join(__dirname, '..', 'src', 'assets', 'pixelcat')
@@ -170,5 +170,24 @@ describe('像素猫：文案', () => {
     expect(catDiff({ ...base, crown: 'dragon-horns' }, { ...base, crown: 'antlers' })).toBe('小龙角换成了鹿角')
     expect(catDiff({ ...base, back: 'small-wings' }, { ...base, back: 'dragon-wings' })).toBe('小翅膀进化成了龙翼（传说）')
     expect(catDiff(base, { ...base, expression: 'small-fangs' })).toBe('表情变成小牙')
+  })
+})
+
+describe('像素猫：hatchCat 与 isCatSpec', () => {
+  it('hatchCat 由随机流决定、最多自带一件异变；catForCreature 的第 0 步就是它', () => {
+    for (let i = 0; i < 40; i++) {
+      const a = hatchCat(makeRng(i))
+      const b = hatchCat(makeRng(i))
+      expect(catKey(a)).toBe(catKey(b))
+      expect(MUTATION_SLOTS.filter((s) => a[s] !== 'none').length).toBeLessThanOrEqual(1)
+    }
+  })
+  it('isCatSpec 只认当前选项池里的值', () => {
+    const ok: CatSpec = { coat: 'calico', expression: 'tongue-tip', crown: 'halo', ears: 'fin-ears', neck: 'none', back: 'dragon-wings', tailTip: 'flame-tail' }
+    expect(isCatSpec(ok)).toBe(true)
+    expect(isCatSpec({ ...ok, coat: 'sphynx' })).toBe(false)
+    expect(isCatSpec({ ...ok, back: undefined })).toBe(false)
+    expect(isCatSpec(null)).toBe(false)
+    expect(isCatSpec('calico')).toBe(false)
   })
 })

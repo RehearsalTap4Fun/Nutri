@@ -1,7 +1,7 @@
 import { INGREDIENT_MAP } from '../data/ingredients'
 import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry, WaterEntry, Dish } from '../core/types'
 import type { Creature, CreatureTraits, RetiredCreature } from '../core/creature'
-import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES } from '../core/creature'
+import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES, ensureCat } from '../core/creature'
 import { hashString } from '../core/rng'
 
 export interface CustomFood {
@@ -96,11 +96,12 @@ export function normalizeState(raw: unknown): AppState {
   // 老数据没有 personality 字段（这个属性是后加的），按 id 哈希稳定补一个，不会每次刷新都变
   const withPersonality = <T extends Creature>(c: T): T =>
     (PERSONALITIES as readonly string[]).includes(c.personality as string) ? c : { ...c, personality: PERSONALITIES[hashString(c.id) % PERSONALITIES.length] }
-  if (isCreature(raw.creature)) s.creature = withPersonality(raw.creature)
+  // 像素猫外观也是后加的字段：老数据按 id + 异变次数推导一次并落盘（ensureCat），此后规则再改也不动它
+  if (isCreature(raw.creature)) s.creature = ensureCat(withPersonality(raw.creature))
   if (Array.isArray(raw.creatureHistory)) {
     s.creatureHistory = raw.creatureHistory
       .filter((c): c is RetiredCreature => isCreature(c) && typeof (c as { retiredAt?: unknown }).retiredAt === 'number')
-      .map(withPersonality)
+      .map((c) => ensureCat(withPersonality(c)))
   }
   if (isObj(raw.settings)) {
     const st = raw.settings

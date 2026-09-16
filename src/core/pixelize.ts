@@ -29,7 +29,7 @@ export function overRgba(dst: Rgba, src: Rgba): Rgba {
   return dst
 }
 
-function insidePolygon(x: number, y: number, poly: readonly (readonly number[])[]): boolean {
+export function insidePolygon(x: number, y: number, poly: readonly (readonly number[])[]): boolean {
   let inside = false
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
     const [xi, yi] = poly[i]

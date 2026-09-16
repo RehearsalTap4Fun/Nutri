@@ -11,6 +11,8 @@ import manifest from '../assets/pixelcat/manifest.json'
 import { hashString, makeRng, weightedPick } from './rng'
 
 export const PIXEL_CAT_TRIAL = true
+/** 规则版本：写进存档，规则再改时能知道一只猫是按哪版长出来的。v1=均匀随机，v2=品质分层只进不退 */
+export const PIXEL_CAT_RULES = 'pixelcat-rules-v2'
 /** 原生像素尺寸与整数放大倍数：显示尺寸 = size × scale，保证每个像素都是整齐的方块 */
 export const PIXEL_CAT_SIZE = manifest.size
 export const PIXEL_CAT_SCALE = manifest.scale
@@ -95,21 +97,37 @@ export function mutateCat(spec: CatSpec, rnd: () => number): CatSpec {
   return { ...spec, [slot]: pickUpgrade(slot, spec[slot], rnd) }
 }
 
-/** 由小管家的 id + 异变次数推导当前这只猫。同一 id 的随机流固定，第 k 次异变的结果是前缀确定的 */
-export function catForCreature(c: { id: string; mutations: number }): CatSpec {
-  const rnd = makeRng(hashString(`pixelcat|${c.id}`))
+/** 孵化：花纹与表情随机定型；一半概率自带一件异变（按品质加权），另一半是只普通小猫 */
+export function hatchCat(rnd: () => number): CatSpec {
   let spec: CatSpec = {
     coat: pick(CAT_COATS, rnd),
     expression: pick(CAT_SLOT_OPTIONS.expression, rnd),
     crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none',
   }
-  // 刚孵化：一半概率自带一件异变，另一半是只普通小猫
   if (rnd() < 0.5) {
     const slot = pick(MUTATION_SLOTS, rnd)
     spec = { ...spec, [slot]: pickUpgrade(slot, 'none', rnd) }
   }
+  return spec
+}
+
+/**
+ * 老存档兼容：没存过 spec 的小管家，由 id + 异变次数按当前规则推导一次（之后写进存档，不再重算）。
+ * 同一 id 的随机流固定，第 k 次异变的结果是前缀确定的。这个函数的行为要保持稳定，改它会让还没迁移的老猫换样。
+ */
+export function catForCreature(c: { id: string; mutations: number }): CatSpec {
+  const rnd = makeRng(hashString(`pixelcat|${c.id}`))
+  let spec = hatchCat(rnd)
   for (let i = 0; i < Math.max(0, c.mutations); i++) spec = mutateCat(spec, rnd)
   return spec
+}
+
+/** 存档里读出来的 spec 是否合法（每个槽位都在当前选项池里；不认识的值一律视为非法，重新推导） */
+export function isCatSpec(x: unknown): x is CatSpec {
+  if (typeof x !== 'object' || x === null) return false
+  const o = x as Record<string, unknown>
+  if (!(CAT_COATS as readonly string[]).includes(o.coat as string)) return false
+  return (Object.keys(CAT_SLOT_OPTIONS) as CatSlot[]).every((slot) => (CAT_SLOT_OPTIONS[slot] as readonly string[]).includes(o[slot] as string))
 }
 
 export type RenderOp =

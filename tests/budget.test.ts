@@ -5,6 +5,7 @@ import { INGREDIENTS } from '../src/data/ingredients'
 import { budgetFocus, remainOf, suggestForBudget } from '../src/core/budget'
 import { dishAllergens } from '../src/core/nutrition'
 import { normalizeState } from '../src/store/storage'
+import { PIXEL_CAT_RULES, catForCreature, catKey } from '../src/core/pixelcat'
 
 const base: Profile = {
   sex: 'male', birthYear: 1990, heightCm: 175, weightKg: 72, activity: 'light', goal: 'lose', dietStyle: 'chinese', mealsPerDay: 3,
@@ -118,5 +119,27 @@ describe('健康小管家存储：性格字段是后加的，老数据要能兼�
     const c = { id: 'pet-2', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 0 }
     const s = normalizeState({ profile: base, entries: [], creature: c })
     expect(s.creature?.personality).toBe('bossy')
+  })
+  it('老数据没有 cat：加载时按 id + 异变次数推导一次并带上规则版本，当前与历史都补', () => {
+    const old = { id: 'pet-3', traits, personality: 'cool', bornAt: 1, lastMutatedAt: 1, mutations: 7 }
+    const retired = { id: 'pet-4', traits, personality: 'gentle', bornAt: 1, lastMutatedAt: 1, mutations: 2, retiredAt: 5 }
+    const s = normalizeState({ profile: base, entries: [], creature: old, creatureHistory: [retired] })
+    expect(catKey(s.creature!.cat)).toBe(catKey(catForCreature({ id: 'pet-3', mutations: 7 })))
+    expect(s.creature!.catRules).toBe(PIXEL_CAT_RULES)
+    expect(catKey(s.creatureHistory[0].cat)).toBe(catKey(catForCreature({ id: 'pet-4', mutations: 2 })))
+  })
+  it('存档里已有合法 cat 就原样保留，不按规则重算', () => {
+    const cat = { coat: 'tuxedo', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+    const c = { id: 'pet-5', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 3, cat, catRules: 'pixelcat-rules-v1' }
+    const s = normalizeState({ profile: base, entries: [], creature: c })
+    expect(s.creature!.cat).toEqual(cat)
+    expect(s.creature!.catRules).toBe('pixelcat-rules-v1')
+  })
+  it('存档里的 cat 有不认识的值就重新推导', () => {
+    const cat = { coat: 'tuxedo', expression: 'small-fangs', crown: 'unicorn-horn', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+    const c = { id: 'pet-6', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 3, cat, catRules: 'pixelcat-rules-v9' }
+    const s = normalizeState({ profile: base, entries: [], creature: c })
+    expect(catKey(s.creature!.cat)).toBe(catKey(catForCreature({ id: 'pet-6', mutations: 3 })))
+    expect(s.creature!.catRules).toBe(PIXEL_CAT_RULES)
   })
 })
