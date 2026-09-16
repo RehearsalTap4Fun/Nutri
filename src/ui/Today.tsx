@@ -19,6 +19,8 @@ import { SignalChips } from './bits'
 import { CanIEat } from './CanIEat'
 import { CreatureView, EggView, SpeechBubble } from './Creature'
 import type { Creature } from '../core/creature'
+import { PixelCatView } from './PixelCat'
+import { PIXEL_CAT_DISPLAY, PIXEL_CAT_TRIAL, catDiff, catForCreature } from '../core/pixelcat'
 
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
@@ -85,6 +87,19 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   )
   const talk = useMemo(() => creatureLine(talkInput), [talkInput])
   const mood = useMemo(() => creatureMood(talkInput), [talkInput])
+  // 像素猫试验：外观由 creature 的 id + 异变次数确定性推导，不动存档；关掉 PIXEL_CAT_TRIAL 即切回 SVG 小管家
+  const cat = useMemo(() => (PIXEL_CAT_TRIAL && creature ? catForCreature(creature) : null), [creature])
+  // 刚变了什么：像素尺度下有些变化（表情、小翅膀）不容易一眼看出，冒烟之后补一句话，几秒后自动消失
+  const prevCat = useRef(cat)
+  const [catNote, setCatNote] = useState<string | null>(null)
+  useEffect(() => {
+    const note = prevCat.current && cat ? catDiff(prevCat.current, cat) : null
+    prevCat.current = cat
+    if (!note) return
+    setCatNote(note)
+    const t = setTimeout(() => setCatNote(null), 6000)
+    return () => clearTimeout(t)
+  }, [cat])
   // 展开时把列表滚进视野，让人看见它出现在哪、也看见右上角的「收起」
   useEffect(() => { if (showBudget) budgetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [showBudget])
   const touch = useRef<{ id: string; x: number; y: number; dx: number; el: HTMLElement } | null>(null)
@@ -167,9 +182,12 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
 
       <div className="card creature-card">
         <div className="row" style={{ gap: 12, alignItems: 'center' }}>
-          {creature ? <CreatureView traits={creature.traits} size={64} mood={mood} /> : <EggView size={64} />}
-          <div className="grow">
+          {creature
+            ? (cat ? <PixelCatView spec={cat} mood={mood} /> : <CreatureView traits={creature.traits} size={64} mood={mood} />)
+            : <EggView size={PIXEL_CAT_TRIAL ? PIXEL_CAT_DISPLAY : 64} />}
+          <div className="grow stack" style={{ gap: 6 }}>
             {creature ? <SpeechBubble text={talk} /> : <div className="tiny muted">记第一笔，孵化你的健康小管家</div>}
+            {catNote && <div className="tiny muted" aria-live="polite">{catNote}</div>}
           </div>
         </div>
       </div>

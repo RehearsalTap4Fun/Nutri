@@ -123,7 +123,7 @@ function Extra({ extra }: { extra: CreatureTraits['extra'] }) {
 }
 
 /** 待机动画 + 表情用的关键帧；用内联 <style> 而不是 styles.css，SVG 各处随渲染自带，不用改共享样式表 */
-const CREATURE_KEYFRAMES = `
+export const CREATURE_KEYFRAMES = `
 @keyframes creature-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
 @keyframes creature-blink { 0%, 88%, 100% { transform: scaleY(1); } 93% { transform: scaleY(.15); } }
 @keyframes creature-twinkle { 0%, 100% { opacity: .5; transform: scale(.82); } 50% { opacity: 1; transform: scale(1.06); } }
@@ -140,10 +140,10 @@ const CREATURE_KEYFRAMES = `
 `
 
 /** 异变时长相在烟雾里"换脸"：多长出现全遮住、多久后散尽，跟 CSS 关键帧的百分比对应上 */
-const POOF_TOTAL_MS = 700
-const POOF_SWAP_AT_MS = 260
+export const POOF_TOTAL_MS = 700
+export const POOF_SWAP_AT_MS = 260
 
-function prefersReducedMotion(): boolean {
+export function prefersReducedMotion(): boolean {
   try {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
   } catch {
@@ -152,7 +152,7 @@ function prefersReducedMotion(): boolean {
 }
 
 /** 一团遮挡用的烟雾：几个软圆叠出云团感，交给 CSS 关键帧一次性播放（不遮 mood/呼吸，单独盖在最上层） */
-function SmokePoof({ onDone }: { onDone: () => void }) {
+export function SmokePoof({ onDone }: { onDone: () => void }) {
   return (
     <g
       className="creature-poof"
@@ -174,7 +174,7 @@ function sparklePath(cx: number, cy: number, r: number): string {
 }
 
 /** 心情表情：只加小幅点缀，不碰 trait 决定的眼嘴造型，避免和生物固定长相打架 */
-function MoodAccent({ mood }: { mood: Mood }) {
+export function MoodAccent({ mood }: { mood: Mood }) {
   if (mood === 'concerned') {
     return (
       <g className="creature-mood-accent" style={{ transformOrigin: '78px 16px' }} transform="translate(78,10)">
