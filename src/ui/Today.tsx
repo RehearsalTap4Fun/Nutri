@@ -21,6 +21,7 @@ import { CreatureView, EggView, SpeechBubble } from './Creature'
 import type { Creature } from '../core/creature'
 import { PixelCatView } from './PixelCat'
 import { PIXEL_CAT_DISPLAY, PIXEL_CAT_TRIAL, catDiff } from '../core/pixelcat'
+import { CAT_TITLE_MAP, newTitles } from '../core/catTitles'
 
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
 const SLOT_DOT: Record<MealSlot, string> = { breakfast: 'var(--sun)', lunch: 'var(--land)', dinner: 'var(--land-2)', snack: 'var(--surface)' }
@@ -93,8 +94,13 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   const prevCat = useRef(cat)
   const [catNote, setCatNote] = useState<string | null>(null)
   useEffect(() => {
-    const note = prevCat.current && cat ? catDiff(prevCat.current, cat) : null
+    const prev = prevCat.current
     prevCat.current = cat
+    if (!cat) return
+    const change = prev ? catDiff(prev, cat) : null
+    // 新达成的称号比"变了什么"更值得说，所以排在前面
+    const earned = newTitles(prev, cat).map((id) => CAT_TITLE_MAP[id]?.name).filter(Boolean)
+    const note = earned.length > 0 ? `达成称号「${earned.join('」「')}」` : change
     if (!note) return
     setCatNote(note)
     const t = setTimeout(() => setCatNote(null), 6000)

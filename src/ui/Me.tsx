@@ -167,7 +167,7 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
 
       <CloudSyncCard code={sync.code} enabled={sync.enabled} status={sync.status} onEnable={onSyncEnable} onDisable={onSyncDisable} onSyncNow={onSyncNow} />
 
-      <CreatureCard creature={state.creature} history={state.creatureHistory} onReforge={onReforgeCreature} />
+      <CreatureCard creature={state.creature} history={state.creatureHistory} dex={state.creatureDex} onReforge={onReforgeCreature} />
 
       <ContributeCard customFoods={state.customFoods} customDishes={state.customDishes} contributedIds={state.settings.contributedFoodIds} onMarkContributed={onMarkContributed} />
 

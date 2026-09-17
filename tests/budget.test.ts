@@ -135,6 +135,18 @@ describe('健康小管家存储：性格字段是后加的，老数据要能兼�
     expect(s.creature!.cat).toEqual(cat)
     expect(s.creature!.catRules).toBe('pixelcat-rules-v1')
   })
+  it('图鉴是后加的：存档没有就按当前猫与历史猫的最终外观补种', () => {
+    const cat = { coat: 'tuxedo', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+    const c = { id: 'pet-7', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 3, cat, catRules: PIXEL_CAT_RULES }
+    const s = normalizeState({ profile: base, entries: [], creature: c })
+    expect(s.creatureDex.parts['halo']).toBe(1)
+    expect(s.creatureDex.titles['solitary']).toBe(1) // 只有光环，其余全空
+  })
+  it('存档里已有图鉴就原样保留，不重新补种', () => {
+    const dex = { parts: { 'small-wings': 4 }, titles: {} }
+    const s = normalizeState({ profile: base, entries: [], creatureDex: dex })
+    expect(s.creatureDex).toEqual(dex)
+  })
   it('存档里的 cat 有不认识的值就重新推导', () => {
     const cat = { coat: 'tuxedo', expression: 'small-fangs', crown: 'unicorn-horn', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
     const c = { id: 'pet-6', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 3, cat, catRules: 'pixelcat-rules-v9' }

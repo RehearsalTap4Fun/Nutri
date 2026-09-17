@@ -2,6 +2,7 @@ import { INGREDIENT_MAP } from '../data/ingredients'
 import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry, WaterEntry, Dish } from '../core/types'
 import type { Creature, CreatureTraits, RetiredCreature } from '../core/creature'
 import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES, ensureCat } from '../core/creature'
+import { emptyDex, isCatDex, seedDex, type CatDex } from '../core/catDex'
 import { hashString } from '../core/rng'
 
 export interface CustomFood {
@@ -46,6 +47,8 @@ export interface AppState {
   creature: Creature | null
   /** 回炉重造后存进来的历史生物 */
   creatureHistory: RetiredCreature[]
+  /** 图鉴：跨猫的收集账本（部件与称号各出现过几次） */
+  creatureDex: CatDex
   settings: {
     useAdaptiveTdee: boolean; provider: 'anthropic' | 'deepseek'; anthropicKey: string; deepseekKey: string; sync: { code: string; enabled: boolean }
     /** 已经贡献给食品库的自定义食物/自建菜 id，贡献面板用来避免重复提示 */
@@ -56,7 +59,7 @@ export interface AppState {
 export const STORAGE_KEY = 'nutri.v1'
 
 export function defaultState(): AppState {
-  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, creature: null, creatureHistory: [], settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false }, contributedFoodIds: [] } }
+  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, creature: null, creatureHistory: [], creatureDex: emptyDex(), settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false }, contributedFoodIds: [] } }
 }
 
 export function uid(): string {
@@ -103,6 +106,10 @@ export function normalizeState(raw: unknown): AppState {
       .filter((c): c is RetiredCreature => isCreature(c) && typeof (c as { retiredAt?: unknown }).retiredAt === 'number')
       .map((c) => ensureCat(withPersonality(c)))
   }
+  // 图鉴是后加的：存档里没有就按当前猫与历史猫的最终外观补种一次（途中升掉的部件找不回来，可接受）
+  s.creatureDex = isCatDex(raw.creatureDex)
+    ? raw.creatureDex
+    : seedDex([s.creature, ...s.creatureHistory].filter((c): c is NonNullable<typeof c> => !!c).map((c) => c.cat))
   if (isObj(raw.settings)) {
     const st = raw.settings
     s.settings = {

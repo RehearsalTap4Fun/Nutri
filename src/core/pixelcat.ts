@@ -68,7 +68,7 @@ export const CAT_LINES: Record<MutationSlot, Record<string, CatMutation[]>> = {
   tailTip: { flame: ['forked-tail-tip', 'flame-tail'] },
 }
 export const CAT_LINE_NAMES: Record<string, string> = {
-  horn: '角', antler: '鹿角', light: '光', fin: '鳍', mane: '鬃', wing: '翼', flame: '焰',
+  horn: '角', antler: '鹿', light: '光', fin: '鳍', mane: '鬃', wing: '翼', flame: '焰',
 }
 
 /** 某部件属于哪条链 */
