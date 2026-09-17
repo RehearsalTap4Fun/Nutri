@@ -6,6 +6,9 @@
  *
  * 支持 pixel-art-catalog v1 与 v2；v2 的 eyes 在 nutri 成长规则里尚未建模，按横向性状处理（取值域来自目录）。
  *
+ *   npx tsx scripts/pixelPackCoverage.ts --missing        # 另一种模式：按 profile 列出「完整格里还缺哪些组合」
+ * 用于对照 Codex 的零新图补洞批次：每个 profile 的完整格 = 各槽位已有映射的笛卡尔积。
+ *
  * 口径：以目录里每个已覆盖表现型为起点，枚举 nutri `mutateCat` 允许的全部下一步（只进不退、
  * 表情横向可换），看落点是否仍在覆盖内。不模拟概率，只看图的连通性。
  */
@@ -21,8 +24,34 @@ const args = process.argv.slice(2)
 const argOf = (n: string) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined }
 const PACK = resolve(argOf('--pack') ?? join(RP, 'dist', 'pixel-art', 'approved'))
 
+/** --missing：按 profile 列出完整格里还缺的组合（完整格 = 该 profile 各槽位已有映射的笛卡尔积） */
+function reportMissing(pack: ReturnType<typeof openPack>): void {
+  const cat = pack.catalog as unknown as { profiles: Array<Record<string, unknown>>; coverage: Array<Record<string, unknown>> }
+  let totalHave = 0, totalFull = 0
+  for (const prof of cat.profiles) {
+    const steps = prof.steps as Array<{ slot: string; resources: Record<string, string> }>
+    const parts: Record<string, string[]> = {}
+    for (const st of steps) if (st.slot !== 'body') parts[st.slot] = Object.keys(st.resources)
+    const lattice: string[][] = []
+    const build = (i: number, acc: string[]) => {
+      if (i === MUTATION_SLOTS.length) { lattice.push([...acc]); return }
+      for (const v of ['none', ...(parts[MUTATION_SLOTS[i]] ?? [])]) build(i + 1, [...acc, v])
+    }
+    build(0, [])
+    const have = cat.coverage.filter((c) => c.profileId === prof.id)
+    const haveKeys = new Set(have.map((c) => MUTATION_SLOTS.map((s) => (c.phenotype as Record<string, string>)[s]).join('|')))
+    const missing = lattice.filter((l) => !haveKeys.has(l.join('|')))
+    totalHave += have.length; totalFull += lattice.length
+    const emptySlots = MUTATION_SLOTS.filter((s) => (parts[s] ?? []).length === 0)
+    console.log(`\n${String(prof.id)}：完整格 ${lattice.length} · 已登记 ${have.length} · 缺 ${missing.length}${emptySlots.length ? `（无映射的槽位：${emptySlots.join(', ')}）` : ''}`)
+    for (const l of missing) console.log(`    ${MUTATION_SLOTS.map((s, i) => (l[i] === 'none' ? null : l[i])).filter(Boolean).join(' + ') || '(无异变)'}`)
+  }
+  console.log(`\n合计：完整格 ${totalFull} · 已登记 ${totalHave} · 缺 ${totalFull - totalHave}`)
+}
+
 const raw: unknown = JSON.parse(readFileSync(join(PACK, 'catalog.json'), 'utf8'))
 const pack = openPack(raw)
+if (args.includes('--missing')) { reportMissing(pack); process.exit(0) }
 const catalog = pack.catalog
 const cov = pack.coverage()
 const covered = new Map(cov.map((c) => [pack.keyOf(c.phenotype), c]))
