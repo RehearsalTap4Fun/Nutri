@@ -205,10 +205,10 @@ export function planPixelArtV2(catalog: PixelCatalogV2, p: PhenotypeV2): { ops: 
 // ── 版本无关的薄适配层：脚本用它，各版本的严格校验留在各自实现里 ──
 
 export type AnyPhenotype = Phenotype | PhenotypeV2
-export type AnyPixelCatalog = PixelCatalog | PixelCatalogV2
+export type AnyPixelCatalog = PixelCatalog | PixelCatalogV2 | PixelCatalogV3
 
 export interface PackAdapter {
-  version: 1 | 2
+  version: 1 | 2 | 3
   catalog: AnyPixelCatalog
   traits: readonly string[]
   /** 该包在表现型里表达、但 nutri 的成长规则尚未建模的性状（目前是 eyes） */
@@ -222,6 +222,17 @@ export interface PackAdapter {
 
 /** 打开一个像素包目录：按 schemaVersion 严格分派，不认识的版本直接报错 */
 export function openPack(raw: unknown): PackAdapter {
+  if (isPixelCatalogV3(raw)) {
+    const catalog = raw
+    return {
+      version: 3, catalog, traits: PHENOTYPE_TRAITS_V2, extraTraits: ['eyes'],
+      keyOf: (p) => phenotypeKeyV2(p as PhenotypeV2),
+      artKeyOf: (p) => pixelArtKeyV3(p as PhenotypeV2, catalog),
+      plan: (p) => planPixelArtV3(catalog, p as PhenotypeV2),
+      coverage: () => catalog.coverage,
+      generatable: () => catalog.generatable.map((id) => catalog.coverage.find((c) => c.id === id)?.phenotype).filter((x): x is PhenotypeV2 => !!x),
+    }
+  }
   if (isPixelCatalogV2(raw)) {
     const catalog = raw
     return {
@@ -244,8 +255,69 @@ export function openPack(raw: unknown): PackAdapter {
       generatable: () => generatablePhenotypes(catalog),
     }
   }
-  throw new Error('不认识的像素包 schema（只支持 pixel-art-catalog-v1 / v2）')
+  throw new Error('不认识的像素包 schema（只支持 pixel-art-catalog-v1 / v2 / v3）')
 }
 
 /** 内部别名，避免与适配层同名 */
 const planPixelArtA = planPixelArt
+
+// ──────────────────────────────────────────────────────────────────────────
+// 像素包 v3（`pixel-art-catalog-v3`，QMonster 1.3.0 起）：表现型仍是 `feline-phenotype-v2`（九字段），
+// 目录多了 `steps[].variants`——**按性状覆盖该步的渲染层级**（target／clear／occlusion）。
+// 它解决的是"同一个槽位里不同部件要画在主体前 / 后"（小狮鬃在前、颈膜在后）。
+// 渲染语义没变，仍是 `pixel-rgba-v1`，composePlan 复用。与 v1/v2 严格区分，不做隐式兼容。
+// ──────────────────────────────────────────────────────────────────────────
+
+/** 按性状覆盖的渲染方式；缺省时沿用该步自身的 target／clear／occlusion */
+export interface PixelVariantRendering {
+  target: 'frame' | 'subject'
+  clear: PixelPolygon[]
+  occlusion: PixelPolygon[]
+}
+export interface PixelStepV3 extends PixelStep {
+  variants?: Record<string, PixelVariantRendering>
+}
+export interface PixelProfileV3 extends Omit<PixelProfileV2, 'steps'> { steps: PixelStepV3[] }
+export interface PixelCatalogV3 extends Omit<PixelCatalogV2, 'schemaVersion' | 'profiles'> {
+  schemaVersion: 'pixel-art-catalog-v3'
+  profiles: PixelProfileV3[]
+}
+
+export function isPixelCatalogV3(x: unknown): x is PixelCatalogV3 {
+  if (typeof x !== 'object' || x === null) return false
+  const c = x as Record<string, unknown>
+  return c.schemaVersion === 'pixel-art-catalog-v3' && c.size === PIXEL_PACK_SIZE && typeof c.revision === 'string'
+    && typeof c.resources === 'object' && Array.isArray(c.profiles) && Array.isArray(c.coverage) && Array.isArray(c.generatable)
+}
+
+export function findCoverageV3(catalog: PixelCatalogV3, p: PhenotypeV2): PixelCoverageV2 | null {
+  const key = phenotypeKeyV2(p)
+  return catalog.coverage.find((c) => phenotypeKeyV2(c.phenotype) === key) ?? null
+}
+
+export function pixelArtKeyV3(p: PhenotypeV2, catalog: Pick<PixelCatalogV3, 'styleId' | 'artVersion' | 'revision'>): string {
+  return canonicalJson([catalog.styleId, catalog.artVersion, catalog.revision, phenotypeKeyV2(p)])
+}
+
+/**
+ * 与 resolvePixelArtV3 一致。唯一的新增是 `const rendering = step.variants?.[selected] ?? step`：
+ * 选中的性状若在 variants 里有条目，就用它的 target／clear／occlusion，否则用该步的默认值。
+ */
+export function planPixelArtV3(catalog: PixelCatalogV3, p: PhenotypeV2): { ops: PixelOp[]; coverage: PixelCoverageV2 } | null {
+  const coverage = findCoverageV3(catalog, p)
+  if (!coverage) return null
+  const profile = catalog.profiles.find((x) => x.id === coverage.profileId)
+  if (!profile) return null
+  if (profile.body !== p.body || profile.coat !== p.coat || profile.eyes !== p.eyes || profile.expression !== p.expression) return null
+  const ops: PixelOp[] = []
+  for (const s of profile.steps) {
+    const selected = s.slot === 'body' ? p.expression : p[s.slot]
+    if (selected === 'none') continue
+    const layer = s.resources[selected]
+    if (!layer || !catalog.resources[layer]) return null
+    const rendering: PixelVariantRendering = s.variants?.[selected] ?? { target: s.target, clear: s.clear, occlusion: s.occlusion }
+    if (rendering.clear.length) ops.push({ kind: 'clear', polygons: rendering.clear })
+    ops.push({ kind: 'draw', layer, target: rendering.target, occlusion: rendering.occlusion })
+  }
+  return { ops, coverage }
+}

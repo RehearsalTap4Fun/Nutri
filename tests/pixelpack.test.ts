@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canonicalJson, catalogRevisionInput, findCoverage, generatablePhenotypes, isPhenotypeV2, openPack, phenotypeKey, phenotypeKeyV2, phenotypeOf, phenotypeV2Of, pixelArtKey, pixelArtKeyV2, planPixelArt, planPixelArtV2, type Phenotype, type PhenotypeV2, type PixelCatalog, type PixelCatalogV2 } from '../src/core/pixelpack'
+import { canonicalJson, catalogRevisionInput, findCoverage, generatablePhenotypes, isPhenotypeV2, openPack, phenotypeKey, phenotypeKeyV2, phenotypeOf, phenotypeV2Of, pixelArtKey, pixelArtKeyV2, planPixelArt, planPixelArtV2, planPixelArtV3, type Phenotype, type PhenotypeV2, type PixelCatalog, type PixelCatalogV2, type PixelCatalogV3 } from '../src/core/pixelpack'
 import { blankRgba, composePlan, type Rgba } from '../src/core/pixelize'
 import type { CatSpec } from '../src/core/pixelcat'
 
@@ -141,5 +141,55 @@ describe('pixelpack v2：严格区分 v1/v2', () => {
   it('pixelArtKeyV2 带版本与 revision，且与 v1 的键不同', () => {
     expect(pixelArtKeyV2(p2, catalog2)).toContain('1.2.0')
     expect(pixelArtKeyV2(p2, catalog2)).not.toBe(pixelArtKey(base, catalog))
+  })
+})
+
+describe('pixelpack v3：按性状覆盖渲染层级', () => {
+  const p2: PhenotypeV2 = { schemaVersion: 'feline-phenotype-v2', body: 'standard', coat: 'orange-white', eyes: 'round', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'small-lion-mane', back: 'none', tailTip: 'none' }
+  const frillSpec: PhenotypeV2 = { ...p2, neck: 'frill-neck' }
+  const poly = [[[0, 0], [8, 0], [8, 4], [0, 4]]]
+  const catalog3: PixelCatalogV3 = {
+    ...catalog, schemaVersion: 'pixel-art-catalog-v3', artVersion: '1.3.0',
+    resources: { ...catalog.resources, frill: { path: 'assets/frill.png', sha256: 'd', width: 64, height: 64 } },
+    profiles: [{
+      id: 'std3', body: 'standard', coat: 'orange-white', eyes: 'round', expression: 'small-fangs',
+      steps: [
+        { slot: 'back', target: 'frame', resources: {}, clear: [], occlusion: [] },
+        { slot: 'crown', target: 'frame', resources: {}, clear: [], occlusion: [] },
+        { slot: 'body', target: 'subject', resources: { 'small-fangs': 'body' }, clear: [], occlusion: [] },
+        { slot: 'ears', target: 'subject', resources: {}, clear: [], occlusion: [] },
+        { slot: 'tailTip', target: 'frame', resources: {}, clear: [], occlusion: [] },
+        // 默认画在主体前（subject）；颈膜用 variants 改到主体后（frame）
+        { slot: 'neck', target: 'subject', resources: { 'small-lion-mane': 'mane', 'frill-neck': 'frill' }, clear: [], occlusion: poly, variants: { 'frill-neck': { target: 'frame', clear: [], occlusion: [] } } },
+      ],
+    }],
+    coverage: [
+      { id: 'mane3', label: '鬃', phenotype: p2, profileId: 'std3', review: 'approved', rgbaSha256: 'x' },
+      { id: 'frill3', label: '膜', phenotype: frillSpec, profileId: 'std3', review: 'pending', rgbaSha256: 'y' },
+    ],
+    generatable: ['mane3'],
+  }
+  it('openPack 认得 v3 并优先于 v2 分派', () => {
+    expect(openPack(catalog3).version).toBe(3)
+    expect(openPack(catalog3).traits).toContain('eyes')
+  })
+  it('没有 variants 的性状沿用该步默认层级与遮罩', () => {
+    const plan = planPixelArtV3(catalog3, p2)!
+    expect(plan.ops).toEqual([
+      { kind: 'draw', layer: 'body', target: 'subject', occlusion: [] },
+      { kind: 'draw', layer: 'mane', target: 'subject', occlusion: poly },
+    ])
+  })
+  it('有 variants 的性状用它自己的层级与遮罩，同一槽位不同部件可以一前一后', () => {
+    const plan = planPixelArtV3(catalog3, frillSpec)!
+    expect(plan.ops).toEqual([
+      { kind: 'draw', layer: 'body', target: 'subject', occlusion: [] },
+      { kind: 'draw', layer: 'frill', target: 'frame', occlusion: [] },
+    ])
+    expect(plan.coverage.review).toBe('pending')
+  })
+  it('未覆盖的组合返回 null；generatable 只给已验收的', () => {
+    expect(planPixelArtV3(catalog3, { ...p2, crown: 'halo' })).toBeNull()
+    expect(openPack(catalog3).generatable()).toHaveLength(1)
   })
 })
