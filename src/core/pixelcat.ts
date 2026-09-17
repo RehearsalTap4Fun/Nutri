@@ -12,8 +12,12 @@ import manifest from '../assets/pixelcat/manifest.json'
 import { hashString, makeRng, weightedPick } from './rng'
 
 export const PIXEL_CAT_TRIAL = true
-/** 规则版本：写进存档，规则再改时能知道一只猫是按哪版长出来的。v1=均匀随机，v2=品质分层只进不退 */
-export const PIXEL_CAT_RULES = 'pixelcat-rules-v2'
+/**
+ * 规则版本：写进存档，规则再改时能知道一只猫是按哪版长出来的。
+ * v1=均匀随机；v2=品质分层只进不退（同级可互换）；v3=进化链，沿链升一阶、同阶不互换、顶阶只能升不能生、节奏按阶数递减。
+ * **规则实质变化时必须升这个号**，否则同一个字符串会描述两套不同的规则，这个字段就失去意义了。
+ */
+export const PIXEL_CAT_RULES = 'pixelcat-rules-v3'
 /** 原生像素尺寸与整数放大倍数：显示尺寸 = size × scale，保证每个像素都是整齐的方块 */
 export const PIXEL_CAT_SIZE = manifest.size
 export const PIXEL_CAT_SCALE = manifest.scale
