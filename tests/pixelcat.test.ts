@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import manifest from '../src/assets/pixelcat/manifest.json'
-import { CAT_COATS, CAT_SLOT_OPTIONS, CAT_TIER, MUTABLE_SLOTS, MUTATION_SLOTS, catDiff, catForCreature, catKey, describeCat, hatchCat, isCatSpec, layersFor, mutateCat, renderOps, tierRank, upgradesFor, type CatSpec } from '../src/core/pixelcat'
+import { CAT_COATS, CAT_SLOT_OPTIONS, CAT_TIER, GROWTH_DECAY, MUTABLE_SLOTS, MUTATION_SLOTS, catDiff, catForCreature, catKey, describeCat, growthSteps, hatchCat, isCatSpec, isFullyGrown, layersFor, lineOf, maxGrowthSteps, mutateCat, renderOps, slotLadder, slotStep, tierRank, upgradeChance, upgradesFor, type CatSpec } from '../src/core/pixelcat'
 import { makeRng } from '../src/core/rng'
 
 const ASSETS = join(__dirname, '..', 'src', 'assets', 'pixelcat')
@@ -93,16 +93,50 @@ describe('像素猫：异变只进不退', () => {
     }
   })
 
-  it('upgradesFor：只列非空、不同于当前、品质不低于当前的部件', () => {
-    expect(upgradesFor('crown', 'none').sort()).toEqual(['antlers', 'dragon-horns', 'halo'])
-    expect(upgradesFor('crown', 'dragon-horns').sort()).toEqual(['antlers', 'halo'])
+  it('upgradesFor：只列「高于当前的最低那一阶」，同阶不互换、不跳级', () => {
+    // 额顶缺 R，所以阶梯是 N → L，从空槽先给 N 级的两件
+    expect(upgradesFor('crown', 'none').sort()).toEqual(['antlers', 'dragon-horns'])
+    expect(upgradesFor('crown', 'dragon-horns')).toEqual(['halo'])
+    expect(upgradesFor('crown', 'antlers')).toEqual(['halo']) // 缺阶自动跳过
     expect(upgradesFor('crown', 'halo')).toEqual([])
+    expect(upgradesFor('back', 'none')).toEqual(['small-wings'])
+    expect(upgradesFor('back', 'small-wings')).toEqual(['feathered-wings']) // 不跳级到龙翼
     expect(upgradesFor('back', 'feathered-wings')).toEqual(['dragon-wings'])
     expect(upgradesFor('ears', 'fin-ears')).toEqual([])
     expect(upgradesFor('neck', 'small-lion-mane')).toEqual(['frill-neck'])
   })
 
-  it('高品质更难抽到：从空位首次长出的部件里 N 远多于 R，R 多于 L', () => {
+  it('阶梯与步数：缺阶的槽位按阶梯位置算步数，不按品质档位', () => {
+    expect(slotLadder('crown')).toEqual([1, 3]) // N 与 L，缺 R
+    expect(slotLadder('back')).toEqual([1, 2, 3])
+    expect(slotStep('crown', 'none')).toBe(0)
+    expect(slotStep('crown', 'dragon-horns')).toBe(1)
+    expect(slotStep('crown', 'halo')).toBe(2) // 不是 3
+    expect(maxGrowthSteps()).toBe(10) // 2+1+2+3+2
+  })
+
+  it('顶阶只能升不能生：孵化自带的那件一定是入口阶，不会直接给 L', () => {
+    for (let i = 0; i < 200; i++) {
+      const c = catForCreature({ id: `hatch-L-${i}`, mutations: 0 })
+      for (const slot of MUTATION_SLOTS) if (c[slot] !== 'none') expect(slotStep(slot, c[slot]), `${slot}=${c[slot]}`).toBe(1)
+    }
+  })
+
+  it('同链优先：背部沿翼链逐阶升，颈部沿鬃链升', () => {
+    expect(lineOf('back', 'feathered-wings')).toBe('wing')
+    expect(lineOf('crown', 'halo')).toBe('light')
+    let spec = { coat: 'calico', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'small-wings', tailTip: 'none' } as CatSpec
+    const seen: string[] = []
+    const rnd = makeRng(11)
+    for (let i = 0; i < 80 && upgradesFor('back', spec.back).length; i++) {
+      const next = mutateCat(spec, rnd)
+      if (next.back !== spec.back) seen.push(next.back)
+      spec = next
+    }
+    expect(seen).toEqual(['feathered-wings', 'dragon-wings'])
+  })
+
+  it('从空位首次长出的一定是入口阶（N），传说不会凭空出现', () => {
     const count: Record<string, number> = { N: 0, R: 0, L: 0 }
     for (let i = 0; i < 2000; i++) {
       const rnd = makeRng(1000 + i)
@@ -110,9 +144,30 @@ describe('像素猫：异变只进不退', () => {
       const next = mutateCat(base, rnd)
       for (const slot of MUTATION_SLOTS) if (next[slot] !== 'none') count[CAT_TIER[next[slot]]]++
     }
-    expect(count.N).toBeGreaterThan(count.R * 2)
-    expect(count.R).toBeGreaterThan(count.L * 2)
-    expect(count.L).toBeGreaterThan(0)
+    expect(count.N).toBeGreaterThan(0)
+    expect(count.R).toBe(0)
+    expect(count.L).toBe(0)
+  })
+
+  it('成长节奏：首笔必升级，之后升级概率随已升阶数递减', () => {
+    const empty: CatSpec = { coat: 'calico', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+    expect(upgradeChance(empty)).toBe(1)
+    const grown: CatSpec = { ...empty, crown: 'halo', back: 'dragon-wings', neck: 'frill-neck' }
+    expect(growthSteps(grown)).toBe(2 + 3 + 2)
+    expect(upgradeChance(grown)).toBeCloseTo(1 / (1 + 7 / GROWTH_DECAY), 6)
+  })
+
+  it('满级后每笔仍有可见变化（换表情），且不再动异变位', () => {
+    const maxed: CatSpec = { coat: 'calico', expression: 'parted-mouth', crown: 'halo', ears: 'fin-ears', neck: 'frill-neck', back: 'dragon-wings', tailTip: 'flame-tail' }
+    expect(isFullyGrown(maxed)).toBe(true)
+    const rnd = makeRng(5)
+    let spec = maxed
+    for (let i = 0; i < 30; i++) {
+      const next = mutateCat(spec, rnd)
+      expect(next.expression).not.toBe(spec.expression)
+      for (const slot of MUTATION_SLOTS) expect(next[slot]).toBe(maxed[slot])
+      spec = next
+    }
   })
 })
 

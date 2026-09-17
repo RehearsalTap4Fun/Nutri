@@ -2,8 +2,9 @@
  * 健康小管家「像素猫」试验：外观不再另存，而是由现有 creature 的 id 与异变次数确定性推导——
  * 同一只小管家、同样的异变次数，永远得到同一只猫；每记一笔（mutations+1）就换一个槽位。
  * 花纹在孵化时定型不再变（换花纹等于换了一只猫），可变的是表情 + 5 个异变位。
- * 异变**只进不退**：每个位置只能换成同级或更高品质的部件（N 普通 → R 稀有 → L 传说），不会变回没有、不会降级；
+ * 异变**只进不退**：每个位置沿进化链升一阶（N 普通 → R 稀有 → L 传说），不会变回没有、不会降级、同阶不互换；
  * 表情不分品质，作横向变化保留，所以满级之后每记一笔仍有看得见的变化。
+ * 成长节奏见 `upgradeChance`：升级概率随已升阶数递减，没升级的那些笔换表情，保证每笔都有变化。
  * 素材来自 RandomPet v0.10 小猫组合（scripts/pixelCat.ts 预先像素化成 96px 图层）。
  * 随时可以把 PIXEL_CAT_TRIAL 关掉切回原来的 SVG 小管家，存档不受影响。
  */
@@ -46,26 +47,101 @@ export const CAT_TIER: Record<CatMutation, CatTier> = {
   halo: 'L', 'dragon-wings': 'L',
 }
 export const TIER_NAMES: Record<CatTier, string> = { N: '普通', R: '稀有', L: '传说' }
-/** 升级抽取权重：同级横换与升级都在候选里，但高品质更难抽到 */
+/** 升级抽取权重：高品质更难抽到 */
 const TIER_WEIGHT: Record<CatTier, number> = { N: 70, R: 25, L: 5 }
 const TIER_RANK: Record<CatTier | 'none', number> = { none: 0, N: 1, R: 2, L: 3 }
+
+/**
+ * 进化链（设计稿 v2）：槽位内的有序序列，异变沿链升一阶，读起来是「翅膀长大了」而不是「换了个部件」。
+ * 缺阶自动跳过：升级取「当前阶之上、本槽位内存在的最低阶」，所以美术没补齐时体系照常运转
+ * （额顶目前只有 N 和 L，就是 none→N→L 两步）。同链优先，同阶不互换。
+ */
+export const CAT_LINES: Record<MutationSlot, Record<string, CatMutation[]>> = {
+  crown: { horn: ['dragon-horns'], antler: ['antlers'], light: ['halo'] },
+  ears: { fin: ['fin-ears'] },
+  neck: { mane: ['small-lion-mane', 'frill-neck'] },
+  back: { wing: ['small-wings', 'feathered-wings', 'dragon-wings'] },
+  tailTip: { flame: ['forked-tail-tip', 'flame-tail'] },
+}
+export const CAT_LINE_NAMES: Record<string, string> = {
+  horn: '角', antler: '鹿角', light: '光', fin: '鳍', mane: '鬃', wing: '翼', flame: '焰',
+}
+
+/** 某部件属于哪条链 */
+export function lineOf(slot: MutationSlot, value: string): string | null {
+  for (const [line, parts] of Object.entries(CAT_LINES[slot])) if ((parts as string[]).includes(value)) return line
+  return null
+}
+
+/**
+ * 某槽位的品质阶梯：该槽位实际存在的品质档，从低到高。
+ * 额顶目前只有 N 和 L（缺 R），阶梯就是 [N, L]，所以 none→N→L 是**两步**而不是三步——
+ * 「升了几阶」要按阶梯位置数，不能按品质档位数，否则缺阶时会算多。
+ */
+export function slotLadder(slot: MutationSlot): number[] {
+  const tiers = new Set<number>()
+  for (const parts of Object.values(CAT_LINES[slot])) for (const v of parts) tiers.add(tierRank(v))
+  return [...tiers].sort((a, b) => a - b)
+}
+
+/** 某槽位当前值处在阶梯的第几步（空槽 0） */
+export function slotStep(slot: MutationSlot, value: string): number {
+  if (value === 'none') return 0
+  return slotLadder(slot).indexOf(tierRank(value)) + 1
+}
+
+/** 一只猫从空槽走到顶最多能升几次（由部件数量决定，与登记/渲染无关） */
+export function maxGrowthSteps(): number {
+  return MUTATION_SLOTS.reduce((sum, slot) => sum + slotLadder(slot).length, 0)
+}
+
+/** 是否所有异变位都到顶 */
+export function isFullyGrown(spec: CatSpec): boolean {
+  return MUTATION_SLOTS.every((s) => upgradesFor(s, spec[s]).length === 0)
+}
 
 export function tierRank(value: string): number {
   return value === 'none' ? 0 : TIER_RANK[CAT_TIER[value as CatMutation]] ?? 0
 }
 
-/** 某位置从 current 出发允许换成的部件：非空、不同于当前、品质不低于当前 */
+/**
+ * 某位置从 current 出发允许升到的部件：**品质严格更高**（同阶不互换，那不是成长），
+ * 且只取「高于当前的最低那一阶」——即沿链升一格，不跳级。
+ */
 export function upgradesFor(slot: MutationSlot, current: string): CatMutation[] {
   const rank = tierRank(current)
-  return (CAT_SLOT_OPTIONS[slot] as readonly string[]).filter(
-    (v): v is CatMutation => v !== 'none' && v !== current && tierRank(v) >= rank,
-  )
+  const higher = (CAT_SLOT_OPTIONS[slot] as readonly string[]).filter((v): v is CatMutation => v !== 'none' && tierRank(v) > rank)
+  if (higher.length === 0) return []
+  const nextRank = Math.min(...higher.map((v) => tierRank(v)))
+  return higher.filter((v) => tierRank(v) === nextRank)
 }
 
+/** 升一阶：同链优先，没有同链的下一阶才跨链；同阶多选按品质加权 */
 function pickUpgrade(slot: MutationSlot, current: string, rnd: () => number): CatMutation {
   const options = upgradesFor(slot, current)
-  const idx = weightedPick(options.map((v) => TIER_WEIGHT[CAT_TIER[v]]), rnd)
-  return options[Math.max(0, idx)]
+  const line = current === 'none' ? null : lineOf(slot, current)
+  const sameLine = line ? options.filter((v) => lineOf(slot, v) === line) : []
+  const pool = sameLine.length > 0 ? sameLine : options
+  const idx = weightedPick(pool.map((v) => TIER_WEIGHT[CAT_TIER[v]]), rnd)
+  return pool[Math.max(0, idx)]
+}
+
+/**
+ * 成长节奏（设计稿 v2，用户定的 7 天）：每笔记录必有一次可见变化，其中「升级」的概率随已升阶数递减，
+ * 其余是横向变化（换表情）。衰减参数 9 是按目标阵容（18 阶）反推的——
+ * 阵容补齐时自然落到约 35 笔／7 天；阵容不全时周期按比例变短，而不是让没升级的笔空转。
+ */
+export const GROWTH_DECAY = 9
+/** 空槽权重：广度优先，先让猫长齐再让它长强 */
+export const EMPTY_SLOT_WEIGHT = 3
+
+/** 已升阶数 = 各异变位在自己阶梯上走了几步之和 */
+export function growthSteps(spec: CatSpec): number {
+  return MUTATION_SLOTS.reduce((n, s) => n + slotStep(s, spec[s]), 0)
+}
+
+export function upgradeChance(spec: CatSpec): number {
+  return 1 / (1 + growthSteps(spec) / GROWTH_DECAY)
 }
 
 export const CAT_NAMES: Record<string, string> = {
@@ -83,17 +159,22 @@ function pick<T>(arr: readonly T[], rnd: () => number): T {
   return arr[Math.floor(rnd() * arr.length) % arr.length]
 }
 
+/** 横向变化：换表情。满级之后每笔记录仍然看得见变化，靠的就是这个 */
+function lateralChange(spec: CatSpec, rnd: () => number): CatSpec {
+  const options = CAT_SLOT_OPTIONS.expression.filter((v) => v !== spec.expression)
+  return { ...spec, expression: pick(options, rnd) }
+}
+
 /**
- * 异变：在"还有得升"的位置里随机挑一个（表情永远算一个），异变位只往同级或更高品质换，绝不退化或消失。
- * 位置全部满级后只剩表情在换——这是"养满了"的自然状态。
+ * 异变：每笔记录必有一次可见变化。
+ * 先按 `upgradeChance` 掷是否升级；升级时在「还有得升」的位置里挑一个（空槽权重 ×3，广度优先），
+ * 沿进化链升一阶，只进不退；不升级、或所有位置都满了，就做横向变化（换表情）。
  */
 export function mutateCat(spec: CatSpec, rnd: () => number): CatSpec {
-  const slots = MUTABLE_SLOTS.filter((s) => s === 'expression' || upgradesFor(s, spec[s]).length > 0)
-  const slot = pick(slots, rnd)
-  if (slot === 'expression') {
-    const options = CAT_SLOT_OPTIONS.expression.filter((v) => v !== spec.expression)
-    return { ...spec, expression: pick(options, rnd) }
-  }
+  const open = MUTATION_SLOTS.filter((s) => upgradesFor(s, spec[s]).length > 0)
+  if (open.length === 0 || rnd() >= upgradeChance(spec)) return lateralChange(spec, rnd)
+  const idx = weightedPick(open.map((s) => (spec[s] === 'none' ? EMPTY_SLOT_WEIGHT : 1)), rnd)
+  const slot = open[Math.max(0, idx)]
   return { ...spec, [slot]: pickUpgrade(slot, spec[slot], rnd) }
 }
 
@@ -104,9 +185,10 @@ export function hatchCat(rnd: () => number): CatSpec {
     expression: pick(CAT_SLOT_OPTIONS.expression, rnd),
     crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none',
   }
+  // 一半概率自带一件异变（只可能是入口阶，顶阶只能升不能生）
   if (rnd() < 0.5) {
     const slot = pick(MUTATION_SLOTS, rnd)
-    spec = { ...spec, [slot]: pickUpgrade(slot, 'none', rnd) }
+    if (upgradesFor(slot, 'none').length > 0) spec = { ...spec, [slot]: pickUpgrade(slot, 'none', rnd) }
   }
   return spec
 }
