@@ -73,7 +73,7 @@ export function canonicalJson(value: unknown): string {
 }
 
 /** 目录 revision 的被签内容：去掉 revision 字段后的规范 JSON（调用方对其做 SHA-256 与 revision 比对） */
-export function catalogRevisionInput(catalog: PixelCatalog): string {
+export function catalogRevisionInput(catalog: AnyPixelCatalog): string {
   const { revision: _revision, ...content } = catalog
   return canonicalJson(content)
 }
@@ -123,3 +123,129 @@ export function planPixelArt(catalog: PixelCatalog, p: Phenotype): { ops: PixelO
 export function generatablePhenotypes(catalog: PixelCatalog): Phenotype[] {
   return catalog.generatable.map((id) => catalog.coverage.find((c) => c.id === id)?.phenotype).filter((x): x is Phenotype => !!x)
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// 像素包 v2（`pixel-art-catalog-v2`，QMonster 1.2.0 起）：表现型必填 `eyes`，
+// 九字段键，profile 选择子为 body + coat + eyes + expression，美术身份为 `feline-appearance-v2`。
+// 与 v1 严格区分：缺 `eyes` 的数据不是 v2，不做隐式补齐。渲染语义未变，仍复用 composePlan。
+// ──────────────────────────────────────────────────────────────────────────
+
+export const PHENOTYPE_TRAITS_V2 = ['body', 'coat', 'eyes', 'expression', 'crown', 'ears', 'neck', 'back', 'tailTip'] as const
+export type PhenotypeTraitV2 = (typeof PHENOTYPE_TRAITS_V2)[number]
+export interface PhenotypeV2 {
+  schemaVersion: 'feline-phenotype-v2'
+  body: string; coat: string; eyes: string; expression: string
+  crown: string; ears: string; neck: string; back: string; tailTip: string
+}
+
+export interface PixelProfileV2 extends Omit<PixelProfile, 'id'> { id: string; eyes: string }
+export interface PixelCoverageV2 extends Omit<PixelCoverage, 'phenotype'> { phenotype: PhenotypeV2 }
+export interface PixelCatalogV2 extends Omit<PixelCatalog, 'schemaVersion' | 'profiles' | 'coverage'> {
+  schemaVersion: 'pixel-art-catalog-v2'
+  profiles: PixelProfileV2[]
+  coverage: PixelCoverageV2[]
+}
+
+export function isPhenotypeV2(x: unknown): x is PhenotypeV2 {
+  if (typeof x !== 'object' || x === null) return false
+  const p = x as Record<string, unknown>
+  return p.schemaVersion === 'feline-phenotype-v2' && PHENOTYPE_TRAITS_V2.every((k) => typeof p[k] === 'string')
+}
+
+export function isPixelCatalogV2(x: unknown): x is PixelCatalogV2 {
+  if (typeof x !== 'object' || x === null) return false
+  const c = x as Record<string, unknown>
+  return c.schemaVersion === 'pixel-art-catalog-v2' && c.size === PIXEL_PACK_SIZE && typeof c.revision === 'string'
+    && typeof c.resources === 'object' && Array.isArray(c.profiles) && Array.isArray(c.coverage) && Array.isArray(c.generatable)
+}
+
+/** 与 QMonster phenotypeKeyV2 一致：九个性状按固定顺序。缺 eyes 的 v1 数据在这里被拒绝，不隐式补齐 */
+export function phenotypeKeyV2(p: PhenotypeV2): string {
+  if (!isPhenotypeV2(p)) throw new Error('不是 feline-phenotype-v2（eyes 必填）')
+  return canonicalJson(PHENOTYPE_TRAITS_V2.map((k) => p[k]))
+}
+
+export function pixelArtKeyV2(p: PhenotypeV2, catalog: Pick<PixelCatalogV2, 'styleId' | 'artVersion' | 'revision'>): string {
+  return canonicalJson([catalog.styleId, catalog.artVersion, catalog.revision, phenotypeKeyV2(p)])
+}
+
+/** nutri 的 CatSpec → v2 表现型。eyes 与 body 目前 nutri 尚未存，必须显式传入，不给默认值 */
+export function phenotypeV2Of(cat: CatSpec, body: string, eyes: string): PhenotypeV2 {
+  return {
+    schemaVersion: 'feline-phenotype-v2', body, coat: cat.coat, eyes, expression: cat.expression,
+    crown: cat.crown, ears: cat.ears, neck: cat.neck, back: cat.back, tailTip: cat.tailTip,
+  }
+}
+
+export function findCoverageV2(catalog: PixelCatalogV2, p: PhenotypeV2): PixelCoverageV2 | null {
+  const key = phenotypeKeyV2(p)
+  return catalog.coverage.find((c) => phenotypeKeyV2(c.phenotype) === key) ?? null
+}
+
+/** 与 resolvePixelArtV2 一致；步骤语义与 v1 相同（none 整步跳过、body 用 expression 查资源、先 clear 再 draw） */
+export function planPixelArtV2(catalog: PixelCatalogV2, p: PhenotypeV2): { ops: PixelOp[]; coverage: PixelCoverageV2 } | null {
+  const coverage = findCoverageV2(catalog, p)
+  if (!coverage) return null
+  const profile = catalog.profiles.find((x) => x.id === coverage.profileId)
+  if (!profile) return null
+  // 选择子必须四项全等，避免拿错 profile
+  if (profile.body !== p.body || profile.coat !== p.coat || profile.eyes !== p.eyes || profile.expression !== p.expression) return null
+  const ops: PixelOp[] = []
+  for (const s of profile.steps) {
+    const selected = s.slot === 'body' ? p.expression : p[s.slot]
+    if (selected === 'none') continue
+    const layer = s.resources[selected]
+    if (!layer || !catalog.resources[layer]) return null
+    if (s.clear.length) ops.push({ kind: 'clear', polygons: s.clear })
+    ops.push({ kind: 'draw', layer, target: s.target, occlusion: s.occlusion })
+  }
+  return { ops, coverage }
+}
+
+// ── 版本无关的薄适配层：脚本用它，各版本的严格校验留在各自实现里 ──
+
+export type AnyPhenotype = Phenotype | PhenotypeV2
+export type AnyPixelCatalog = PixelCatalog | PixelCatalogV2
+
+export interface PackAdapter {
+  version: 1 | 2
+  catalog: AnyPixelCatalog
+  traits: readonly string[]
+  /** 该包在表现型里表达、但 nutri 的成长规则尚未建模的性状（目前是 eyes） */
+  extraTraits: readonly string[]
+  keyOf(p: AnyPhenotype): string
+  artKeyOf(p: AnyPhenotype): string
+  plan(p: AnyPhenotype): { ops: PixelOp[]; coverage: { id: string; label: string; review: string; rgbaSha256: string } } | null
+  coverage(): Array<{ id: string; label: string; review: string; rgbaSha256: string; phenotype: AnyPhenotype }>
+  generatable(): AnyPhenotype[]
+}
+
+/** 打开一个像素包目录：按 schemaVersion 严格分派，不认识的版本直接报错 */
+export function openPack(raw: unknown): PackAdapter {
+  if (isPixelCatalogV2(raw)) {
+    const catalog = raw
+    return {
+      version: 2, catalog, traits: PHENOTYPE_TRAITS_V2, extraTraits: ['eyes'],
+      keyOf: (p) => phenotypeKeyV2(p as PhenotypeV2),
+      artKeyOf: (p) => pixelArtKeyV2(p as PhenotypeV2, catalog),
+      plan: (p) => planPixelArtV2(catalog, p as PhenotypeV2),
+      coverage: () => catalog.coverage,
+      generatable: () => catalog.generatable.map((id) => catalog.coverage.find((c) => c.id === id)?.phenotype).filter((x): x is PhenotypeV2 => !!x),
+    }
+  }
+  if (isPixelCatalog(raw)) {
+    const catalog = raw
+    return {
+      version: 1, catalog, traits: PHENOTYPE_TRAITS, extraTraits: [],
+      keyOf: (p) => phenotypeKey(p as Phenotype),
+      artKeyOf: (p) => pixelArtKey(p as Phenotype, catalog),
+      plan: (p) => planPixelArtA(catalog, p as Phenotype),
+      coverage: () => catalog.coverage,
+      generatable: () => generatablePhenotypes(catalog),
+    }
+  }
+  throw new Error('不认识的像素包 schema（只支持 pixel-art-catalog-v1 / v2）')
+}
+
+/** 内部别名，避免与适配层同名 */
+const planPixelArtA = planPixelArt

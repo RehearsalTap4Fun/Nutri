@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canonicalJson, catalogRevisionInput, findCoverage, generatablePhenotypes, phenotypeKey, phenotypeOf, pixelArtKey, planPixelArt, type Phenotype, type PixelCatalog } from '../src/core/pixelpack'
+import { canonicalJson, catalogRevisionInput, findCoverage, generatablePhenotypes, isPhenotypeV2, openPack, phenotypeKey, phenotypeKeyV2, phenotypeOf, phenotypeV2Of, pixelArtKey, pixelArtKeyV2, planPixelArt, planPixelArtV2, type Phenotype, type PhenotypeV2, type PixelCatalog, type PixelCatalogV2 } from '../src/core/pixelpack'
 import { blankRgba, composePlan, type Rgba } from '../src/core/pixelize'
 import type { CatSpec } from '../src/core/pixelcat'
 
@@ -101,5 +101,45 @@ describe('composePlan：pixel-rgba-v1 语义', () => {
     const dirty = rect(2, 2, 5, 5, [100, 100, 100]); dirty[0] = 255; dirty[1] = 255; dirty[2] = 255 // 透明像素带颜色
     const out = composePlan([{ kind: 'draw', layer: 'dirty', target: 'subject', occlusion: [] }], () => dirty, N)
     expect(px(out, 0, 0)[3]).toBe(0)
+  })
+})
+
+describe('pixelpack v2：严格区分 v1/v2', () => {
+  const p2: PhenotypeV2 = { schemaVersion: 'feline-phenotype-v2', body: 'standard', coat: 'orange-white', eyes: 'sleepy-almond', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+  const catalog2: PixelCatalogV2 = {
+    ...catalog, schemaVersion: 'pixel-art-catalog-v2', artVersion: '1.2.0',
+    profiles: [{ ...catalog.profiles[0], id: 'std2', eyes: 'sleepy-almond' }],
+    coverage: [{ id: 'base2', label: '半眯基础', phenotype: p2, profileId: 'std2', review: 'approved', rgbaSha256: 'x' }],
+    generatable: ['base2'],
+  }
+  it('isPhenotypeV2 要求 schemaVersion 与 eyes；v1 数据不算 v2', () => {
+    expect(isPhenotypeV2(p2)).toBe(true)
+    expect(isPhenotypeV2(base)).toBe(false)
+    expect(isPhenotypeV2({ ...p2, eyes: undefined })).toBe(false)
+    expect(isPhenotypeV2({ ...p2, schemaVersion: 'feline-phenotype-v1' })).toBe(false)
+  })
+  it('phenotypeKeyV2 是九字段固定顺序，eyes 排在 coat 之后', () => {
+    expect(phenotypeKeyV2(p2)).toBe('["standard","orange-white","sleepy-almond","small-fangs","none","none","none","none","none"]')
+    expect(() => phenotypeKeyV2(base as unknown as PhenotypeV2)).toThrow()
+  })
+  it('phenotypeV2Of 必须显式给 body 与 eyes，不隐式补默认值', () => {
+    const cat: CatSpec = { coat: 'calico', expression: 'tongue-tip', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+    expect(phenotypeV2Of(cat, 'slender-tall', 'round').eyes).toBe('round')
+    expect(phenotypeV2Of(cat, 'slender-tall', 'round').body).toBe('slender-tall')
+  })
+  it('openPack 按 schemaVersion 分派，未知版本报错', () => {
+    expect(openPack(catalog).version).toBe(1)
+    expect(openPack(catalog2).version).toBe(2)
+    expect(openPack(catalog2).extraTraits).toEqual(['eyes'])
+    expect(() => openPack({ ...catalog, schemaVersion: 'pixel-art-catalog-v9' })).toThrow()
+  })
+  it('planPixelArtV2 的 profile 选择子四项必须全等，错配返回 null', () => {
+    expect(planPixelArtV2(catalog2, p2)).not.toBeNull()
+    const wrongEyes: PixelCatalogV2 = { ...catalog2, profiles: [{ ...catalog2.profiles[0], eyes: 'round' }] }
+    expect(planPixelArtV2(wrongEyes, p2)).toBeNull()
+  })
+  it('pixelArtKeyV2 带版本与 revision，且与 v1 的键不同', () => {
+    expect(pixelArtKeyV2(p2, catalog2)).toContain('1.2.0')
+    expect(pixelArtKeyV2(p2, catalog2)).not.toBe(pixelArtKey(base, catalog))
   })
 })

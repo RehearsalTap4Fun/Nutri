@@ -1,5 +1,6 @@
 /**
- * QMonster 像素包接入验证（契约方案 b）：构建期校验目录 revision 与每张 PNG 摘要/尺寸/二值 alpha，
+ * QMonster 像素包接入验证（契约方案 b）：支持 pixel-art-catalog v1 与 v2（v2 表现型必填 eyes）。
+ * 构建期校验目录 revision 与每张 PNG 摘要/尺寸/二值 alpha，
  * 再用 nutri 自己的 composePlan 按 profile 合成目录里全部 coverage 组合，逐个比对 rgbaSha256（原生 RGBA，不比 PNG 文件）。
  *
  *   npx tsx scripts/pixelPackReplay.ts [--pack ../RandomPet-master/dist/pixel-art/approved] [--preview out.png]
@@ -11,7 +12,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { PIXEL_PACK_SIZE, catalogRevisionInput, isPixelCatalog, planPixelArt, type PixelCatalog } from '../src/core/pixelpack'
+import { PIXEL_PACK_SIZE, catalogRevisionInput, openPack, type AnyPixelCatalog } from '../src/core/pixelpack'
 import { composePlan, type Rgba } from '../src/core/pixelize'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -29,13 +30,13 @@ const N = PIXEL_PACK_SIZE
 const catalogFile = join(PACK, 'catalog.json')
 if (!existsSync(catalogFile)) throw new Error(`找不到 ${catalogFile}（先在 RandomPet 里 npm run build:pixel）`)
 const raw: unknown = JSON.parse(readFileSync(catalogFile, 'utf8'))
-if (!isPixelCatalog(raw)) throw new Error('catalog.json 不是 pixel-art-catalog-v1')
-const catalog: PixelCatalog = raw
+const pack = openPack(raw)
+const catalog = pack.catalog as AnyPixelCatalog
 
 // 1. 目录 revision
 const rev = sha256(Buffer.from(catalogRevisionInput(catalog)))
 if (rev !== catalog.revision) throw new Error(`目录 revision 不一致：算得 ${rev}，目录写 ${catalog.revision}`)
-console.log(`目录 ${catalog.styleId} ${catalog.artVersion} · rendererVersion ${catalog.rendererVersion} · revision ${catalog.revision.slice(0, 12)}… 校验通过`)
+console.log(`目录 ${catalog.schemaVersion}（v${pack.version}）${catalog.styleId} ${catalog.artVersion} · rendererVersion ${catalog.rendererVersion} · revision ${catalog.revision.slice(0, 12)}… 校验通过`)
 
 // 2. PNG 摘要、IHDR 尺寸、解码后二值 alpha
 const layers = new Map<string, Rgba>()
@@ -54,8 +55,8 @@ console.log(`${layers.size} 张图层摘要/尺寸/二值 alpha 校验通过`)
 // 3. 回放
 let pass = 0
 const results: Array<{ id: string; ok: boolean; px: Rgba }> = []
-for (const c of catalog.coverage) {
-  const plan = planPixelArt(catalog, c.phenotype)
+for (const c of pack.coverage()) {
+  const plan = pack.plan(c.phenotype)
   if (!plan) { console.log(`✗ ${c.id}: 生成计划失败（资源缺失或 profile 缺失）`); results.push({ id: c.id, ok: false, px: new Uint8ClampedArray(N * N * 4) }); continue }
   const px = composePlan(plan.ops, (id) => { const l = layers.get(id); if (!l) throw new Error(`缺图层 ${id}`); return l }, N)
   const ok = sha256(px) === c.rgbaSha256
@@ -68,7 +69,7 @@ for (const [id, res] of Object.entries(catalog.resources)) {
   const decoded: Buffer = await sharp(readFileSync(join(PACK, res.path))).ensureAlpha().raw().toBuffer()
   if (Buffer.compare(decoded, Buffer.from(layers.get(id)!.buffer, layers.get(id)!.byteOffset, layers.get(id)!.length)) !== 0) throw new Error(`图层在合成过程中被改动: ${id}`)
 }
-console.log(`回放 ${pass}/${catalog.coverage.length} 一致；可生成白名单 ${catalog.generatable.length} 条；输入图层未被修改`)
+console.log(`回放 ${pass}/${pack.coverage().length} 一致；可生成白名单 ${catalog.generatable.length} 条；输入图层未被修改`)
 
 const pv = argOf('--preview')
 if (pv) {
@@ -86,4 +87,4 @@ if (pv) {
   await sharp({ create: { width: cols * tile, height: rows * (tile + 22), channels: 4, background: '#EDE6D6' } }).composite(tiles).png().toFile(resolve(pv))
   console.log(`预览已写到 ${resolve(pv)}`)
 }
-if (pass !== catalog.coverage.length) process.exit(1)
+if (pass !== pack.coverage().length) process.exit(1)
