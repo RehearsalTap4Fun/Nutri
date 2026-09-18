@@ -1,0 +1,125 @@
+{
+  "source": "<RandomPet>/dist/pixel-art/v3-approved-1.5.0",
+  "artVersion": "1.5.0",
+  "revision": "0659f6e4112c840b56a6b535b873564d1d2a5c248fda15ea9ce875b2b936ad0d",
+  "rendererVersion": "pixel-rgba-v1",
+  "verifiedAt": "2026-09-18",
+  "checks": {
+    "layers": 58,
+    "replayed": 8064,
+    "coverageEquivalent": 8064,
+    "compactPlanMatch": 8064
+  },
+  "islands": [
+    {
+      "coat": "brown-tabby",
+      "body": "standard",
+      "eyes": [
+        "round",
+        "sleepy-almond"
+      ],
+      "expressions": [
+        "parted-mouth",
+        "small-fangs"
+      ],
+      "closed": true,
+      "hatchable": true
+    },
+    {
+      "coat": "calico",
+      "body": "standard",
+      "eyes": [
+        "round",
+        "sleepy-almond"
+      ],
+      "expressions": [
+        "parted-mouth",
+        "small-fangs"
+      ],
+      "closed": true,
+      "hatchable": true
+    },
+    {
+      "coat": "colorpoint",
+      "body": "standard",
+      "eyes": [
+        "round",
+        "sleepy-almond"
+      ],
+      "expressions": [
+        "parted-mouth",
+        "small-fangs"
+      ],
+      "closed": true,
+      "hatchable": true
+    },
+    {
+      "coat": "orange-white",
+      "body": "shortleg-round",
+      "eyes": [
+        "round",
+        "sleepy-almond"
+      ],
+      "expressions": [
+        "small-fangs"
+      ],
+      "closed": true,
+      "hatchable": false
+    },
+    {
+      "coat": "orange-white",
+      "body": "slender-tall",
+      "eyes": [
+        "round",
+        "sleepy-almond"
+      ],
+      "expressions": [
+        "small-fangs"
+      ],
+      "closed": true,
+      "hatchable": false
+    },
+    {
+      "coat": "orange-white",
+      "body": "standard",
+      "eyes": [
+        "round",
+        "sleepy-almond"
+      ],
+      "expressions": [
+        "parted-mouth",
+        "small-fangs"
+      ],
+      "closed": true,
+      "hatchable": true
+    },
+    {
+      "coat": "rosetted",
+      "body": "standard",
+      "eyes": [
+        "round",
+        "sleepy-almond"
+      ],
+      "expressions": [
+        "parted-mouth",
+        "small-fangs"
+      ],
+      "closed": true,
+      "hatchable": true
+    },
+    {
+      "coat": "tuxedo",
+      "body": "standard",
+      "eyes": [
+        "round",
+        "sleepy-almond"
+      ],
+      "expressions": [
+        "parted-mouth",
+        "small-fangs"
+      ],
+      "closed": true,
+      "hatchable": true
+    }
+  ]
+}

@@ -17,10 +17,11 @@ import { SLOT_LABEL, entryPortionText, portionText, r0, showsSodium, withoutSodi
 import { CONDITION_LABEL } from '../core/conditions'
 import { SignalChips } from './bits'
 import { CanIEat } from './CanIEat'
-import { CreatureView, EggView, SpeechBubble } from './Creature'
+import { EggView, SpeechBubble } from './Creature'
 import type { Creature } from '../core/creature'
 import { PixelCatView } from './PixelCat'
-import { PIXEL_CAT_DISPLAY, PIXEL_CAT_TRIAL, catDiff } from '../core/pixelcat'
+import { catDiff } from '../core/pixelcat'
+import { ART_DISPLAY } from '../core/catArt'
 import { CAT_TITLE_MAP, newTitles } from '../core/catTitles'
 
 // 餐次用色地的颜色（早餐太阳黄 / 午餐陆地绿 / 晚餐浅绿 / 加餐白），不借用三宏量的红蓝琥珀
@@ -89,7 +90,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   const talk = useMemo(() => creatureLine(talkInput), [talkInput])
   const mood = useMemo(() => creatureMood(talkInput), [talkInput])
   // 像素猫：外观存在 creature.cat 里（孵化定型、异变推进、老存档加载时补齐）；关掉 PIXEL_CAT_TRIAL 即切回 SVG 小管家
-  const cat = PIXEL_CAT_TRIAL && creature ? creature.cat : null
+  const cat = creature ? creature.cat : null
   // 刚变了什么：像素尺度下有些变化（表情、小翅膀）不容易一眼看出，冒烟之后补一句话，几秒后自动消失
   const prevCat = useRef(cat)
   const [catNote, setCatNote] = useState<string | null>(null)
@@ -188,9 +189,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
 
       <div className="card creature-card">
         <div className="row" style={{ gap: 12, alignItems: 'center' }}>
-          {creature
-            ? (cat ? <PixelCatView spec={cat} mood={mood} /> : <CreatureView traits={creature.traits} size={64} mood={mood} />)
-            : <EggView size={PIXEL_CAT_TRIAL ? PIXEL_CAT_DISPLAY : 64} />}
+          {cat ? <PixelCatView spec={cat} mood={mood} /> : <EggView size={ART_DISPLAY} />}
           <div className="grow stack" style={{ gap: 6 }}>
             {creature ? <SpeechBubble text={talk} /> : <div className="tiny muted">记第一笔，孵化你的健康小管家</div>}
             {catNote && <div className="tiny muted" aria-live="polite">{catNote}</div>}

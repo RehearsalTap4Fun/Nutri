@@ -1,0 +1,5600 @@
+{
+  "schemaVersion": "pixel-art-catalog-v3",
+  "styleId": "pixel-flat",
+  "artVersion": "1.5.0",
+  "revision": "0659f6e4112c840b56a6b535b873564d1d2a5c248fda15ea9ce875b2b936ad0d",
+  "rendererVersion": "pixel-rgba-v1",
+  "size": 64,
+  "resources": {
+    "layer-c68b7f3b61d5650f": {
+      "path": "layer-c68b7f3b61d5650f.png",
+      "sha256": "c68b7f3b61d5650f51436a4beee6c47af3f1b30a06a5c3b6d2d412e7bd0ebc96",
+      "width": 64,
+      "height": 64
+    },
+    "layer-892032f0a47bbdf4": {
+      "path": "layer-892032f0a47bbdf4.png",
+      "sha256": "892032f0a47bbdf4117a2204c725133df3ed86f3bdbfae7db9ca475261a63c77",
+      "width": 64,
+      "height": 64
+    },
+    "layer-bd1ab44533f33a3a": {
+      "path": "layer-bd1ab44533f33a3a.png",
+      "sha256": "bd1ab44533f33a3adf1ad827305b5d566f8490af2c339f87bca60de605568ea1",
+      "width": 64,
+      "height": 64
+    },
+    "layer-fec0335aee4cb501": {
+      "path": "layer-fec0335aee4cb501.png",
+      "sha256": "fec0335aee4cb501aecfa9b986bd849420775461cf335b2958842aefe9d5b791",
+      "width": 64,
+      "height": 64
+    },
+    "layer-6d8134b5c93d11f7": {
+      "path": "layer-6d8134b5c93d11f7.png",
+      "sha256": "6d8134b5c93d11f7c0a9bf8c6730cdbfd448fd215680dbcf86fae37d27e3fcec",
+      "width": 64,
+      "height": 64
+    },
+    "layer-0dc4c49bf437b30a": {
+      "path": "layer-0dc4c49bf437b30a.png",
+      "sha256": "0dc4c49bf437b30a9437e09e655dfac25b78d34d3c7ba5babb5d2fe8cce50936",
+      "width": 64,
+      "height": 64
+    },
+    "layer-99a3492a4188b39e": {
+      "path": "layer-99a3492a4188b39e.png",
+      "sha256": "99a3492a4188b39e905c1fa87343541006eefa9b041cb41834d8147387917db6",
+      "width": 64,
+      "height": 64
+    },
+    "layer-4441d1f37a59c04b": {
+      "path": "layer-4441d1f37a59c04b.png",
+      "sha256": "4441d1f37a59c04b8db5d47e4521faa1a15a33848d69a7da897e3ebd1e6c24f2",
+      "width": 64,
+      "height": 64
+    },
+    "layer-deeba5734233692e": {
+      "path": "layer-deeba5734233692e.png",
+      "sha256": "deeba5734233692e03a377eddcbd8cc20a299283eb3df17df059327a0896cc58",
+      "width": 64,
+      "height": 64
+    },
+    "layer-eed43e314ab2e856": {
+      "path": "layer-eed43e314ab2e856.png",
+      "sha256": "eed43e314ab2e856c0bdf39afd1fa09f6e7e08eeb844d6fb5770bdf8df18c017",
+      "width": 64,
+      "height": 64
+    },
+    "layer-3ea7d5f9d24e6ed2": {
+      "path": "layer-3ea7d5f9d24e6ed2.png",
+      "sha256": "3ea7d5f9d24e6ed2a0bb507f84a315c4509f51ce2b08d331ad898220f5cfaaef",
+      "width": 64,
+      "height": 64
+    },
+    "layer-189e6d6ebb01e538": {
+      "path": "layer-189e6d6ebb01e538.png",
+      "sha256": "189e6d6ebb01e538e996b3e695cb00fd567d21a8c3420c0435d501c923190c6e",
+      "width": 64,
+      "height": 64
+    },
+    "layer-ad5eaf902a730023": {
+      "path": "layer-ad5eaf902a730023.png",
+      "sha256": "ad5eaf902a730023480515e60ac75138b31c7e6674884c5cc6c3f079985a3a16",
+      "width": 64,
+      "height": 64
+    },
+    "layer-cede70e77fa121d1": {
+      "path": "layer-cede70e77fa121d1.png",
+      "sha256": "cede70e77fa121d1776b0eaa7f96a1a3f7501a823b5704d89e9a0b6afe134e08",
+      "width": 64,
+      "height": 64
+    },
+    "layer-f43b645bd12e6f68": {
+      "path": "layer-f43b645bd12e6f68.png",
+      "sha256": "f43b645bd12e6f688287cce8f0293f83e149c3e9ba67855cee5f0cfe0f9a32b3",
+      "width": 64,
+      "height": 64
+    },
+    "layer-a9633de63f4acf17": {
+      "path": "layer-a9633de63f4acf17.png",
+      "sha256": "a9633de63f4acf170ad45c233e349bc3322409f367f7de947c280fdcfbcc06eb",
+      "width": 64,
+      "height": 64
+    },
+    "layer-00db017bd6155a11": {
+      "path": "layer-00db017bd6155a11.png",
+      "sha256": "00db017bd6155a11d7e1716e92f7cbeb0e1d9f6fbc2be4c88ec197a7309cf135",
+      "width": 64,
+      "height": 64
+    },
+    "layer-22e5180e5f07027e": {
+      "path": "layer-22e5180e5f07027e.png",
+      "sha256": "22e5180e5f07027ef2826d4425d7e3d06e922cdc743d359acdda4e3fdade225b",
+      "width": 64,
+      "height": 64
+    },
+    "layer-84bf0ee56a2eef86": {
+      "path": "layer-84bf0ee56a2eef86.png",
+      "sha256": "84bf0ee56a2eef86389921bad6a0c821648e286218f51eeaa8b936bb52ae5327",
+      "width": 64,
+      "height": 64
+    },
+    "layer-95540cb48509fe27": {
+      "path": "layer-95540cb48509fe27.png",
+      "sha256": "95540cb48509fe277898f05d94c401442a4b1a8aec8a3394765e5dd4874a3d8d",
+      "width": 64,
+      "height": 64
+    },
+    "layer-5bded66bade6e39d": {
+      "path": "layer-5bded66bade6e39d.png",
+      "sha256": "5bded66bade6e39d054b60c917902033eda4c450c1169a09cb19bdc2d2f70d9a",
+      "width": 64,
+      "height": 64
+    },
+    "layer-28f0a9fba22b4bae": {
+      "path": "layer-28f0a9fba22b4bae.png",
+      "sha256": "28f0a9fba22b4bae35ebf8c2ca1693d183fe5138f1d5b67e5756a0fa7f45ee1b",
+      "width": 64,
+      "height": 64
+    },
+    "layer-10d12c620bc4520f": {
+      "path": "layer-10d12c620bc4520f.png",
+      "sha256": "10d12c620bc4520ffeb331edd6adef8079d08b829f7ab8ed2bbda431004478c2",
+      "width": 64,
+      "height": 64
+    },
+    "layer-cb8ad098038cc0de": {
+      "path": "layer-cb8ad098038cc0de.png",
+      "sha256": "cb8ad098038cc0de1c8fed45dbb1ccfd11c7a774b61dbcdcbd9114435c07202d",
+      "width": 64,
+      "height": 64
+    },
+    "layer-21c2c2e0bec315f3": {
+      "path": "layer-21c2c2e0bec315f3.png",
+      "sha256": "21c2c2e0bec315f39a5bf4bd5381559eeee50dbb992e085da21bf4742cc01885",
+      "width": 64,
+      "height": 64
+    },
+    "layer-7e714c16e7dc96af": {
+      "path": "layer-7e714c16e7dc96af.png",
+      "sha256": "7e714c16e7dc96afad06c3c627c1f0e34a2d717bcf5a0e059c596bcb88dad3af",
+      "width": 64,
+      "height": 64
+    },
+    "layer-9705184c23b9027b": {
+      "path": "layer-9705184c23b9027b.png",
+      "sha256": "9705184c23b9027b8a3e2d9f6a34cf176d10d4bf2757c400fd3f0f95aba1c362",
+      "width": 64,
+      "height": 64
+    },
+    "layer-ed3a87f6e6dbbe71": {
+      "path": "layer-ed3a87f6e6dbbe71.png",
+      "sha256": "ed3a87f6e6dbbe7122b727daf777950ec8d3bd92826eb1cfb125914e1c9dc97e",
+      "width": 64,
+      "height": 64
+    },
+    "layer-6dd2d6e77471af03": {
+      "path": "layer-6dd2d6e77471af03.png",
+      "sha256": "6dd2d6e77471af03ccc95d19fcd29a54f6856785a89e781d39092793585884f3",
+      "width": 64,
+      "height": 64
+    },
+    "layer-ca7e6b84a29268b1": {
+      "path": "layer-ca7e6b84a29268b1.png",
+      "sha256": "ca7e6b84a29268b164721068dccc21b77cdbff181c6c1ba14198d686639bca44",
+      "width": 64,
+      "height": 64
+    },
+    "layer-a29af10c838a30dc": {
+      "path": "layer-a29af10c838a30dc.png",
+      "sha256": "a29af10c838a30dcb0560c334756958db9e6283b19eea417fd25adb27d687316",
+      "width": 64,
+      "height": 64
+    },
+    "layer-f44fe44a608c50ba": {
+      "path": "layer-f44fe44a608c50ba.png",
+      "sha256": "f44fe44a608c50ba1d03d0605285008efda495ec23731ff3b5badad7758c9103",
+      "width": 64,
+      "height": 64
+    },
+    "layer-da2820c570724624": {
+      "path": "layer-da2820c570724624.png",
+      "sha256": "da2820c570724624861bd7b3e653bc622f680da66571cf2926084660a5153b2b",
+      "width": 64,
+      "height": 64
+    },
+    "layer-ef8bb6edec1d1543": {
+      "path": "layer-ef8bb6edec1d1543.png",
+      "sha256": "ef8bb6edec1d15439f003f7fd03ccd535931364a68c791d16e773ece56eb0e1a",
+      "width": 64,
+      "height": 64
+    },
+    "layer-2dcb1971f5439589": {
+      "path": "layer-2dcb1971f5439589.png",
+      "sha256": "2dcb1971f5439589a9d3a92194100072cc789e29904b7224ebd84d64c9467f61",
+      "width": 64,
+      "height": 64
+    },
+    "layer-096351544c2988c0": {
+      "path": "layer-096351544c2988c0.png",
+      "sha256": "096351544c2988c00722fb2fedfa874ff868c044ab859412b2cd0bb4da98c921",
+      "width": 64,
+      "height": 64
+    },
+    "layer-3489c422e93d7f7a": {
+      "path": "layer-3489c422e93d7f7a.png",
+      "sha256": "3489c422e93d7f7ade92cd383ad5a81dc8846042b8a7a96a84eb530256dd3149",
+      "width": 64,
+      "height": 64
+    },
+    "layer-317bd5989f3d9e30": {
+      "path": "layer-317bd5989f3d9e30.png",
+      "sha256": "317bd5989f3d9e302723ce96e514a0b1c341fcc961ec1870281ff1b660f19628",
+      "width": 64,
+      "height": 64
+    },
+    "layer-742afec5ccf6b8ce": {
+      "path": "layer-742afec5ccf6b8ce.png",
+      "sha256": "742afec5ccf6b8cefc9a01bda03b0dc24c073b2bef9596c48e225aab1ec9029d",
+      "width": 64,
+      "height": 64
+    },
+    "layer-f8c93e622b23670f": {
+      "path": "layer-f8c93e622b23670f.png",
+      "sha256": "f8c93e622b23670f9bed45185c3be0fcef50e561b5eaf4970cbd05583fdb5aae",
+      "width": 64,
+      "height": 64
+    },
+    "layer-4d3f070180d2b1da": {
+      "path": "layer-4d3f070180d2b1da.png",
+      "sha256": "4d3f070180d2b1dacfaacae524ceecddb702590d34366faac14fa4ff87b3e93f",
+      "width": 64,
+      "height": 64
+    },
+    "layer-3ea3fe08a4019532": {
+      "path": "layer-3ea3fe08a4019532.png",
+      "sha256": "3ea3fe08a4019532ea73461a723e17e95f83b8248f7ae852f3aa48eab8844a57",
+      "width": 64,
+      "height": 64
+    },
+    "layer-894649a6f618c8bd": {
+      "path": "layer-894649a6f618c8bd.png",
+      "sha256": "894649a6f618c8bd6aa720ea75197b1a691369f0086f1841b32fc887eb83dc8c",
+      "width": 64,
+      "height": 64
+    },
+    "layer-6772e7fa7dfd8a74": {
+      "path": "layer-6772e7fa7dfd8a74.png",
+      "sha256": "6772e7fa7dfd8a743707d0b61368fd368ac8c6f82bbb6b3930cb923be78e9c09",
+      "width": 64,
+      "height": 64
+    },
+    "layer-80a7dff6e39f1fc9": {
+      "path": "layer-80a7dff6e39f1fc9.png",
+      "sha256": "80a7dff6e39f1fc9217351c3f1e796ae7b4881fed8a8f916a87f13e9b648d2c0",
+      "width": 64,
+      "height": 64
+    },
+    "layer-3a5a1e3db99f4d22": {
+      "path": "layer-3a5a1e3db99f4d22.png",
+      "sha256": "3a5a1e3db99f4d229087287c365dcaab87cc89e6d93220e30595189f82213b82",
+      "width": 64,
+      "height": 64
+    },
+    "layer-e9cf51f2859a39ba": {
+      "path": "layer-e9cf51f2859a39ba.png",
+      "sha256": "e9cf51f2859a39ba50b946b8a2dc068c250084c566d9f673a5d3ea7e8cb7fbbb",
+      "width": 64,
+      "height": 64
+    },
+    "layer-6246afa45e1d3861": {
+      "path": "layer-6246afa45e1d3861.png",
+      "sha256": "6246afa45e1d3861244d0b7daa5db9bc5d8a5724fc546d44454fae4f4681157e",
+      "width": 64,
+      "height": 64
+    },
+    "layer-2974f4ca15da4ac3": {
+      "path": "layer-2974f4ca15da4ac3.png",
+      "sha256": "2974f4ca15da4ac3c2f13b7661460e5b8b4af4ca1c7905e978b578f603dea21f",
+      "width": 64,
+      "height": 64
+    },
+    "layer-5661da1cecba0929": {
+      "path": "layer-5661da1cecba0929.png",
+      "sha256": "5661da1cecba0929d2379e37f345796c41833a752d8f0fe64751978835c87843",
+      "width": 64,
+      "height": 64
+    },
+    "layer-84e22b2b4fb1c9d7": {
+      "path": "layer-84e22b2b4fb1c9d7.png",
+      "sha256": "84e22b2b4fb1c9d798e2b989bfd9a0c6083568053e36f51559ba32f686fc8312",
+      "width": 64,
+      "height": 64
+    },
+    "layer-24caec0dbb23a07c": {
+      "path": "layer-24caec0dbb23a07c.png",
+      "sha256": "24caec0dbb23a07c15139c247e5c6d8491d4f4a3903ab9e3240b85d32410400a",
+      "width": 64,
+      "height": 64
+    },
+    "layer-14594c832b639de6": {
+      "path": "layer-14594c832b639de6.png",
+      "sha256": "14594c832b639de67f19f42ca8ae395564ad98086d85f1351ed6f7c4b6310ac2",
+      "width": 64,
+      "height": 64
+    },
+    "layer-342d87b0752a317d": {
+      "path": "layer-342d87b0752a317d.png",
+      "sha256": "342d87b0752a317dab07ea10552ea8cc0264c05d1c5a0479608ea511e827774d",
+      "width": 64,
+      "height": 64
+    },
+    "layer-2a3301c3bfe82d03": {
+      "path": "layer-2a3301c3bfe82d03.png",
+      "sha256": "2a3301c3bfe82d03870689835aab41422c324895948bf4961708e4b1479077bb",
+      "width": 64,
+      "height": 64
+    },
+    "layer-5aaa674e192a211b": {
+      "path": "layer-5aaa674e192a211b.png",
+      "sha256": "5aaa674e192a211b73c33141917d8c5d8ffd43536f679463a94cc8dd3f9f16e7",
+      "width": 64,
+      "height": 64
+    },
+    "layer-b088b28668f5485c": {
+      "path": "layer-b088b28668f5485c.png",
+      "sha256": "b088b28668f5485c5f53a528fddea41b91c9e223bbfcb1c8a615dc6c9f23fed4",
+      "width": 64,
+      "height": 64
+    },
+    "layer-0f7393eab903d8ec": {
+      "path": "layer-0f7393eab903d8ec.png",
+      "sha256": "0f7393eab903d8ec4bb484e0f08f1f46d74ed3c45f1bf05549fccc127f31007b",
+      "width": 64,
+      "height": 64
+    }
+  },
+  "profiles": [
+    {
+      "id": "standard-parted-mouth-round",
+      "body": "standard",
+      "coat": "orange-white",
+      "eyes": "round",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "parted-mouth": "layer-c68b7f3b61d5650f"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-6d8134b5c93d11f7"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-28f0a9fba22b4bae"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-0dc4c49bf437b30a",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-small-fangs-round",
+      "body": "standard",
+      "coat": "orange-white",
+      "eyes": "round",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-fec0335aee4cb501"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-6d8134b5c93d11f7"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-28f0a9fba22b4bae"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-0dc4c49bf437b30a",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shortleg-round-small-fangs-round",
+      "body": "shortleg-round",
+      "coat": "orange-white",
+      "eyes": "round",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-99a3492a4188b39e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-6d8134b5c93d11f7"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-28f0a9fba22b4bae"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.84688995215311
+              ],
+              [
+                49.65071770334928,
+                58.84688995215311
+              ],
+              [
+                49.89792663476874,
+                53.40829346092504
+              ],
+              [
+                50.54066985645933,
+                49.70015948963317
+              ],
+              [
+                50.54066985645933,
+                45.74481658692185
+              ],
+              [
+                49.5518341307815,
+                42.28389154704944
+              ],
+              [
+                48.16746411483253,
+                39.07017543859649
+              ],
+              [
+                46.48644338118022,
+                36.103668261563
+              ],
+              [
+                45.250398724082935,
+                33.1371610845295
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-4441d1f37a59c04b",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.696969696969697,
+                1
+              ],
+              [
+                47.72248803827751,
+                1
+              ],
+              [
+                47.72248803827751,
+                24.237639553429027
+              ],
+              [
+                44.261562998405104,
+                29.923444976076556
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                35.11483253588517
+              ],
+              [
+                27.20414673046252,
+                35.609250398724086
+              ],
+              [
+                19.78787878787879,
+                34.86762360446571
+              ],
+              [
+                13.113237639553429,
+                32.39553429027113
+              ],
+              [
+                7.6746411483253585,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-sleepy-almond-small-fangs",
+      "body": "standard",
+      "coat": "orange-white",
+      "eyes": "sleepy-almond",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-deeba5734233692e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-6d8134b5c93d11f7"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-28f0a9fba22b4bae"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-0dc4c49bf437b30a",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shortleg-round-sleepy-almond-small-fangs",
+      "body": "shortleg-round",
+      "coat": "orange-white",
+      "eyes": "sleepy-almond",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-eed43e314ab2e856"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-6d8134b5c93d11f7"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-28f0a9fba22b4bae"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.84688995215311
+              ],
+              [
+                49.65071770334928,
+                58.84688995215311
+              ],
+              [
+                49.89792663476874,
+                53.40829346092504
+              ],
+              [
+                50.54066985645933,
+                49.70015948963317
+              ],
+              [
+                50.54066985645933,
+                45.74481658692185
+              ],
+              [
+                49.5518341307815,
+                42.28389154704944
+              ],
+              [
+                48.16746411483253,
+                39.07017543859649
+              ],
+              [
+                46.48644338118022,
+                36.103668261563
+              ],
+              [
+                45.250398724082935,
+                33.1371610845295
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-4441d1f37a59c04b",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.696969696969697,
+                1
+              ],
+              [
+                47.72248803827751,
+                1
+              ],
+              [
+                47.72248803827751,
+                24.237639553429027
+              ],
+              [
+                44.261562998405104,
+                29.923444976076556
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                35.11483253588517
+              ],
+              [
+                27.20414673046252,
+                35.609250398724086
+              ],
+              [
+                19.78787878787879,
+                34.86762360446571
+              ],
+              [
+                13.113237639553429,
+                32.39553429027113
+              ],
+              [
+                7.6746411483253585,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "slender-tall-round-small-fangs",
+      "body": "slender-tall",
+      "coat": "orange-white",
+      "eyes": "round",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-3ea7d5f9d24e6ed2"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-ad5eaf902a730023"
+          },
+          "clear": [
+            [
+              [
+                14.10207336523126,
+                1
+              ],
+              [
+                26.709728867623603,
+                1
+              ],
+              [
+                26.215311004784688,
+                9.157894736842104
+              ],
+              [
+                14.596491228070175,
+                17.31578947368421
+              ]
+            ],
+            [
+              [
+                32.14832535885168,
+                1
+              ],
+              [
+                46.98086124401914,
+                1
+              ],
+              [
+                44.50877192982456,
+                21.76555023923445
+              ],
+              [
+                40.30622009569378,
+                19.046251993620416
+              ],
+              [
+                32.642743221690594,
+                9.652312599681022
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-28f0a9fba22b4bae"
+          },
+          "clear": [
+            [
+              [
+                42.28389154704944,
+                24.484848484848484
+              ],
+              [
+                63,
+                24.484848484848484
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                40.30622009569378,
+                58.3524720893142
+              ],
+              [
+                41.047846889952154,
+                55.3859649122807
+              ],
+              [
+                42.77830940988836,
+                51.92503987240829
+              ],
+              [
+                43.025518341307816,
+                47.47527910685805
+              ],
+              [
+                43.76714513556619,
+                43.27272727272727
+              ],
+              [
+                42.036682615629985,
+                38.08133971291866
+              ],
+              [
+                41.29505582137161,
+                32.642743221690594
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-cede70e77fa121d1",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                46.239234449760765,
+                1
+              ],
+              [
+                46.239234449760765,
+                21.271132376395535
+              ],
+              [
+                41.29505582137161,
+                26.215311004784688
+              ],
+              [
+                37.09250398724083,
+                28.934609250398726
+              ],
+              [
+                32.642743221690594,
+                30.41786283891547
+              ],
+              [
+                26.215311004784688,
+                31.060606060606062
+              ],
+              [
+                20.77671451355662,
+                30.170653907496014
+              ],
+              [
+                16.079744816586924,
+                27.451355661881976
+              ],
+              [
+                12.866028708133971,
+                24.732057416267942
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "slender-tall-sleepy-almond-small-fangs",
+      "body": "slender-tall",
+      "coat": "orange-white",
+      "eyes": "sleepy-almond",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-189e6d6ebb01e538"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-ad5eaf902a730023"
+          },
+          "clear": [
+            [
+              [
+                14.10207336523126,
+                1
+              ],
+              [
+                26.709728867623603,
+                1
+              ],
+              [
+                26.215311004784688,
+                9.157894736842104
+              ],
+              [
+                14.596491228070175,
+                17.31578947368421
+              ]
+            ],
+            [
+              [
+                32.14832535885168,
+                1
+              ],
+              [
+                46.98086124401914,
+                1
+              ],
+              [
+                44.50877192982456,
+                21.76555023923445
+              ],
+              [
+                40.30622009569378,
+                19.046251993620416
+              ],
+              [
+                32.642743221690594,
+                9.652312599681022
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-28f0a9fba22b4bae"
+          },
+          "clear": [
+            [
+              [
+                42.28389154704944,
+                24.484848484848484
+              ],
+              [
+                63,
+                24.484848484848484
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                40.30622009569378,
+                58.3524720893142
+              ],
+              [
+                41.047846889952154,
+                55.3859649122807
+              ],
+              [
+                42.77830940988836,
+                51.92503987240829
+              ],
+              [
+                43.025518341307816,
+                47.47527910685805
+              ],
+              [
+                43.76714513556619,
+                43.27272727272727
+              ],
+              [
+                42.036682615629985,
+                38.08133971291866
+              ],
+              [
+                41.29505582137161,
+                32.642743221690594
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-cede70e77fa121d1",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                46.239234449760765,
+                1
+              ],
+              [
+                46.239234449760765,
+                21.271132376395535
+              ],
+              [
+                41.29505582137161,
+                26.215311004784688
+              ],
+              [
+                37.09250398724083,
+                28.934609250398726
+              ],
+              [
+                32.642743221690594,
+                30.41786283891547
+              ],
+              [
+                26.215311004784688,
+                31.060606060606062
+              ],
+              [
+                20.77671451355662,
+                30.170653907496014
+              ],
+              [
+                16.079744816586924,
+                27.451355661881976
+              ],
+              [
+                12.866028708133971,
+                24.732057416267942
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-sleepy-almond-parted-mouth",
+      "body": "standard",
+      "coat": "orange-white",
+      "eyes": "sleepy-almond",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-deeba5734233692e",
+            "parted-mouth": "layer-10d12c620bc4520f"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-6d8134b5c93d11f7"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-28f0a9fba22b4bae"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-0dc4c49bf437b30a",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-brown-tabby-parted-mouth-round",
+      "body": "standard",
+      "coat": "brown-tabby",
+      "eyes": "round",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "parted-mouth": "layer-cb8ad098038cc0de"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-7e714c16e7dc96af"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-ed3a87f6e6dbbe71"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-9705184c23b9027b",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-brown-tabby-small-fangs-round",
+      "body": "standard",
+      "coat": "brown-tabby",
+      "eyes": "round",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-21c2c2e0bec315f3"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-7e714c16e7dc96af"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-ed3a87f6e6dbbe71"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-9705184c23b9027b",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-tuxedo-parted-mouth-round",
+      "body": "standard",
+      "coat": "tuxedo",
+      "eyes": "round",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "parted-mouth": "layer-6dd2d6e77471af03"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-a29af10c838a30dc"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-da2820c570724624"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-f44fe44a608c50ba",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-tuxedo-small-fangs-round",
+      "body": "standard",
+      "coat": "tuxedo",
+      "eyes": "round",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-ca7e6b84a29268b1"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-a29af10c838a30dc"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-da2820c570724624"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-f44fe44a608c50ba",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-calico-parted-mouth-round",
+      "body": "standard",
+      "coat": "calico",
+      "eyes": "round",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "parted-mouth": "layer-ef8bb6edec1d1543"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-096351544c2988c0"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-317bd5989f3d9e30"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-3489c422e93d7f7a",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-calico-small-fangs-round",
+      "body": "standard",
+      "coat": "calico",
+      "eyes": "round",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-2dcb1971f5439589"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-096351544c2988c0"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-317bd5989f3d9e30"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-3489c422e93d7f7a",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-colorpoint-parted-mouth-round",
+      "body": "standard",
+      "coat": "colorpoint",
+      "eyes": "round",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "parted-mouth": "layer-742afec5ccf6b8ce"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-4d3f070180d2b1da"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-894649a6f618c8bd"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-3ea3fe08a4019532",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-colorpoint-small-fangs-round",
+      "body": "standard",
+      "coat": "colorpoint",
+      "eyes": "round",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-f8c93e622b23670f"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-4d3f070180d2b1da"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-894649a6f618c8bd"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-3ea3fe08a4019532",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-rosetted-parted-mouth-round",
+      "body": "standard",
+      "coat": "rosetted",
+      "eyes": "round",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "parted-mouth": "layer-6772e7fa7dfd8a74"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-3a5a1e3db99f4d22"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-6246afa45e1d3861"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-e9cf51f2859a39ba",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-rosetted-small-fangs-round",
+      "body": "standard",
+      "coat": "rosetted",
+      "eyes": "round",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-80a7dff6e39f1fc9"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-3a5a1e3db99f4d22"
+          },
+          "clear": [
+            [
+              [
+                11.38,
+                1
+              ],
+              [
+                25.23,
+                1
+              ],
+              [
+                24.24,
+                10.39
+              ],
+              [
+                11.88,
+                15.34
+              ]
+            ],
+            [
+              [
+                31.9,
+                1
+              ],
+              [
+                47.48,
+                1
+              ],
+              [
+                45.5,
+                21.27
+              ],
+              [
+                33.63,
+                10.89
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-6246afa45e1d3861"
+          },
+          "clear": [
+            [
+              [
+                45.25,
+                18.3
+              ],
+              [
+                63,
+                18.3
+              ],
+              [
+                63,
+                58.35
+              ],
+              [
+                46.98,
+                58.35
+              ],
+              [
+                47.87,
+                53.41
+              ],
+              [
+                48.32,
+                47.48
+              ],
+              [
+                48.46,
+                42.04
+              ],
+              [
+                47.33,
+                37.09
+              ],
+              [
+                45.25,
+                35.11
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-e9cf51f2859a39ba",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-brown-tabby-sleepy-almond-parted-mouth",
+      "body": "standard",
+      "coat": "brown-tabby",
+      "eyes": "sleepy-almond",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-deeba5734233692e",
+            "parted-mouth": "layer-2974f4ca15da4ac3"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-7e714c16e7dc96af"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-ed3a87f6e6dbbe71"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-9705184c23b9027b",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-brown-tabby-sleepy-almond-small-fangs",
+      "body": "standard",
+      "coat": "brown-tabby",
+      "eyes": "sleepy-almond",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-5661da1cecba0929"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-7e714c16e7dc96af"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-ed3a87f6e6dbbe71"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-9705184c23b9027b",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-tuxedo-sleepy-almond-parted-mouth",
+      "body": "standard",
+      "coat": "tuxedo",
+      "eyes": "sleepy-almond",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-deeba5734233692e",
+            "parted-mouth": "layer-84e22b2b4fb1c9d7"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-a29af10c838a30dc"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-da2820c570724624"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-f44fe44a608c50ba",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-tuxedo-sleepy-almond-small-fangs",
+      "body": "standard",
+      "coat": "tuxedo",
+      "eyes": "sleepy-almond",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-24caec0dbb23a07c"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-a29af10c838a30dc"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-da2820c570724624"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-f44fe44a608c50ba",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-calico-sleepy-almond-parted-mouth",
+      "body": "standard",
+      "coat": "calico",
+      "eyes": "sleepy-almond",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-deeba5734233692e",
+            "parted-mouth": "layer-14594c832b639de6"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-096351544c2988c0"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-317bd5989f3d9e30"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-3489c422e93d7f7a",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-calico-sleepy-almond-small-fangs",
+      "body": "standard",
+      "coat": "calico",
+      "eyes": "sleepy-almond",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-342d87b0752a317d"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-096351544c2988c0"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-317bd5989f3d9e30"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-3489c422e93d7f7a",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-colorpoint-sleepy-almond-parted-mouth",
+      "body": "standard",
+      "coat": "colorpoint",
+      "eyes": "sleepy-almond",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-deeba5734233692e",
+            "parted-mouth": "layer-2a3301c3bfe82d03"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-4d3f070180d2b1da"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-894649a6f618c8bd"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-3ea3fe08a4019532",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-colorpoint-sleepy-almond-small-fangs",
+      "body": "standard",
+      "coat": "colorpoint",
+      "eyes": "sleepy-almond",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-5aaa674e192a211b"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-4d3f070180d2b1da"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-894649a6f618c8bd"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-3ea3fe08a4019532",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-rosetted-sleepy-almond-parted-mouth",
+      "body": "standard",
+      "coat": "rosetted",
+      "eyes": "sleepy-almond",
+      "expression": "parted-mouth",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-deeba5734233692e",
+            "parted-mouth": "layer-b088b28668f5485c"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-3a5a1e3db99f4d22"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-6246afa45e1d3861"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-e9cf51f2859a39ba",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "standard-rosetted-sleepy-almond-small-fangs",
+      "body": "standard",
+      "coat": "rosetted",
+      "eyes": "sleepy-almond",
+      "expression": "small-fangs",
+      "steps": [
+        {
+          "slot": "back",
+          "target": "frame",
+          "resources": {
+            "small-wings": "layer-a9633de63f4acf17",
+            "feathered-wings": "layer-00db017bd6155a11",
+            "dragon-wings": "layer-22e5180e5f07027e"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "crown",
+          "target": "frame",
+          "resources": {
+            "dragon-horns": "layer-892032f0a47bbdf4",
+            "antlers": "layer-84bf0ee56a2eef86",
+            "halo": "layer-95540cb48509fe27"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "body",
+          "target": "subject",
+          "resources": {
+            "small-fangs": "layer-0f7393eab903d8ec"
+          },
+          "clear": [],
+          "occlusion": []
+        },
+        {
+          "slot": "ears",
+          "target": "subject",
+          "resources": {
+            "fin-ears": "layer-3a5a1e3db99f4d22"
+          },
+          "clear": [
+            [
+              [
+                11.382775119617225,
+                1
+              ],
+              [
+                25.226475279106857,
+                1
+              ],
+              [
+                24.237639553429027,
+                10.393939393939394
+              ],
+              [
+                11.87719298245614,
+                15.33811802232855
+              ]
+            ],
+            [
+              [
+                31.901116427432218,
+                1
+              ],
+              [
+                47.47527910685805,
+                1
+              ],
+              [
+                45.49760765550239,
+                21.271132376395535
+              ],
+              [
+                33.63157894736842,
+                10.88835725677831
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "tailTip",
+          "target": "frame",
+          "resources": {
+            "flame-tail": "layer-f43b645bd12e6f68",
+            "forked-tail-tip": "layer-6246afa45e1d3861"
+          },
+          "clear": [
+            [
+              [
+                45.250398724082935,
+                18.304625199362043
+              ],
+              [
+                63,
+                18.304625199362043
+              ],
+              [
+                63,
+                58.3524720893142
+              ],
+              [
+                46.98086124401914,
+                58.3524720893142
+              ],
+              [
+                47.87081339712919,
+                53.40829346092504
+              ],
+              [
+                48.31578947368421,
+                47.47527910685805
+              ],
+              [
+                48.464114832535884,
+                42.036682615629985
+              ],
+              [
+                47.32695374800638,
+                37.09250398724083
+              ],
+              [
+                45.250398724082935,
+                35.11483253588517
+              ]
+            ]
+          ],
+          "occlusion": []
+        },
+        {
+          "slot": "neck",
+          "target": "subject",
+          "resources": {
+            "small-lion-mane": "layer-e9cf51f2859a39ba",
+            "frill-neck": "layer-5bded66bade6e39d"
+          },
+          "clear": [],
+          "occlusion": [
+            [
+              [
+                5.944178628389155,
+                1
+              ],
+              [
+                47.96969696969697,
+                1
+              ],
+              [
+                47.96969696969697,
+                24.9792663476874
+              ],
+              [
+                44.261562998405104,
+                30.170653907496014
+              ],
+              [
+                40.059011164274324,
+                33.1371610845295
+              ],
+              [
+                34.620414673046255,
+                34.620414673046255
+              ],
+              [
+                27.20414673046252,
+                35.11483253588517
+              ],
+              [
+                19.78787878787879,
+                34.3732057416268
+              ],
+              [
+                13.360446570972886,
+                31.901116427432218
+              ],
+              [
+                8.169059011164276,
+                28.440191387559807
+              ]
+            ]
+          ],
+          "variants": {
+            "frill-neck": {
+              "target": "frame",
+              "clear": [],
+              "occlusion": []
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

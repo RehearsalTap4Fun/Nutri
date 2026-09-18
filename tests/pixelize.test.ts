@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { blankRgba, clearPolygon, composeSprite, cornerColor, countOpaqueColors, despeckleRgba, erodeAlpha, hardenAlpha, keyBackgroundRgba, outlineRgba, overRgba, type Rgba } from '../src/core/pixelize'
-import type { RenderOp } from '../src/core/pixelcat'
+import { blankRgba, clearPolygon, cornerColor, countOpaqueColors, despeckleRgba, erodeAlpha, hardenAlpha, keyBackgroundRgba, outlineRgba, overRgba, type Rgba } from '../src/core/pixelize'
+import { composeSprite, type RenderOp } from '../src/core/pixelcatPlush'
 
 const N = 8
 const px = (data: Rgba, x: number, y: number) => Array.from(data.slice((y * N + x) * 4, (y * N + x) * 4 + 4))

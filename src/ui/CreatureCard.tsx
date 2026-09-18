@@ -2,22 +2,23 @@ import { useState } from 'react'
 import type { Creature, RetiredCreature } from '../core/creature'
 import { PERSONALITY_LABEL } from '../core/creature'
 import {
-  CAT_LINE_NAMES, CAT_LINES, CAT_NAMES, MUTATION_SLOTS, PIXEL_CAT_DISPLAY, PIXEL_CAT_SIZE, PIXEL_CAT_TRIAL,
+  CAT_LINE_NAMES, CAT_LINES, CAT_NAMES, MUTATION_SLOTS,
   CAT_SLOT_NAMES, TIER_NAMES, CAT_TIER, describeCat, isFullyGrown, type CatSpec,
 } from '../core/pixelcat'
+import { ART_DISPLAY, ART_SIZE } from '../core/catArt'
 import { CAT_TITLES, titlesFor } from '../core/catTitles'
 import { dexOwned, dexTotals, type CatDex } from '../core/catDex'
-import { CreatureView, EggView } from './Creature'
+import { EggView } from './Creature'
 import { PixelCatView } from './PixelCat'
 import { Fold } from './bits'
 
 /** 一只历史小管家的缩略图：像素猫按 1 倍原生尺寸显示，SVG 版保持原来的 56px */
 function HistoryThumb({ c }: { c: RetiredCreature }) {
-  const cat = PIXEL_CAT_TRIAL ? c.cat : null
+  const cat = c.cat
   const titles = cat ? titlesFor(cat) : []
   return (
     <div style={{ textAlign: 'center' }}>
-      {cat ? <PixelCatView spec={cat} size={PIXEL_CAT_SIZE} /> : <CreatureView traits={c.traits} size={56} />}
+      <PixelCatView spec={cat} size={ART_SIZE} />
       <div className="tiny muted">{cat ? `${CAT_NAMES[cat.coat]} · ` : ''}{PERSONALITY_LABEL[c.personality]} · {c.mutations} 次</div>
       {titles.length > 0 && <div className="tiny" style={{ color: 'var(--accent)' }}>{titles.map((id) => CAT_TITLES.find((t) => t.id === id)?.name).join(' ')}</div>}
     </div>
@@ -95,7 +96,7 @@ export function CreatureCard({ creature, history, dex, onReforge }: {
   onReforge: () => void
 }) {
   const [confirm, setConfirm] = useState(false)
-  const cat = PIXEL_CAT_TRIAL && creature ? creature.cat : null
+  const cat = creature ? creature.cat : null
   const grown = cat ? isFullyGrown(cat) : false
   const owned = dexOwned(dex)
   const totals = dexTotals()
@@ -106,9 +107,7 @@ export function CreatureCard({ creature, history, dex, onReforge }: {
     <div className="card">
       <h2>健康小管家</h2>
       <div className="row" style={{ gap: 14, alignItems: 'center' }}>
-        {creature
-          ? (cat ? <PixelCatView spec={cat} /> : <CreatureView traits={creature.traits} size={88} />)
-          : <EggView size={PIXEL_CAT_TRIAL ? PIXEL_CAT_DISPLAY : 88} />}
+        {cat ? <PixelCatView spec={cat} /> : <EggView size={ART_DISPLAY} />}
         <div className="grow stack" style={{ gap: 8 }}>
           <p className="small muted">{intro}{creature && !grown && ' 每记一笔都会再长一点，只进不退。'}</p>
           {grown && <p className="small">已经长齐了，可以让它毕业，换一只新的来陪你。</p>}

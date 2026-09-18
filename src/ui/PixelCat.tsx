@@ -1,28 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import manifest from '../assets/pixelcat/manifest.json'
-import { CLEAR_POLYGONS, PIXEL_CAT_DISPLAY, PIXEL_CAT_SIZE, catKey, renderOps, type CatSpec } from '../core/pixelcat'
-import { composeSprite, type Rgba } from '../core/pixelize'
+import { ART_DISPLAY, ART_SIZE, artLayersFor, artPlanForCat } from '../core/catArt'
+import { catKey, type CatSpec } from '../core/pixelcat'
+import { composePlan, type Rgba } from '../core/pixelize'
 import type { Mood } from '../core/creatureTalk'
 import { hashString } from '../core/rng'
 import { CREATURE_KEYFRAMES, MoodAccent, POOF_SWAP_AT_MS, POOF_TOTAL_MS, SmokePoof, prefersReducedMotion } from './Creature'
 
 /**
- * 像素猫渲染（试验）：图层（已离线像素化成 N×N 小色板 PNG）解码成像素数组后，交给与离线预览完全相同的
- * composeSprite 按 RandomPet 渲染器的层序合成并描边，再按整数倍 image-rendering: pixelated 放大显示。
- * 心情点缀、冒烟换脸、减少动态偏好都沿用 SVG 小管家那套。
+ * 像素小管家的渲染：形象来自 QMonster 像素包。
+ *
+ * 合成走 `composePlan`（`pixel-rgba-v1` 语义，与 QMonster 渲染器逐字节一致），计划由
+ * `catArt` 按包里的 profile 推导。图层是 64px 的小色板 PNG，Vite 会把它们内联成 data URI，
+ * 所以单文件形态也能用。显示按整数倍 `image-rendering: pixelated` 放大，像素格才整齐。
+ *
+ * 心情点缀、冒烟换脸、减少动态偏好沿用 SVG 小管家那套。
  */
 
-// 图层 URL：单文件构建时 Vite 会内联成 data URI，file:// 下同样可用
-const LAYER_URLS = import.meta.glob('../assets/pixelcat/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const LAYER_URLS = import.meta.glob('../assets/pixelpack/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 function layerUrl(id: string): string {
-  const file = (manifest.layers as Record<string, string>)[id]
-  const url = file ? LAYER_URLS[`../assets/pixelcat/${file}`] : undefined
-  if (!url) throw new Error(`缺像素猫图层 ${id}`)
+  const url = LAYER_URLS[`../assets/pixelpack/${id}.png`]
+  if (!url) throw new Error(`缺像素包图层 ${id}`)
   return url
 }
 
-const N = PIXEL_CAT_SIZE
+const N = ART_SIZE
 
 const images = new Map<string, Promise<HTMLImageElement>>()
 function loadLayer(id: string): Promise<HTMLImageElement> {
@@ -31,7 +33,7 @@ function loadLayer(id: string): Promise<HTMLImageElement> {
     p = new Promise<HTMLImageElement>((resolve, reject) => {
       const img = new Image()
       img.onload = () => resolve(img)
-      img.onerror = () => reject(new Error(`像素猫图层加载失败 ${id}`))
+      img.onerror = () => reject(new Error(`像素包图层加载失败 ${id}`))
       img.src = layerUrl(id)
     })
     images.set(id, p)
@@ -68,23 +70,23 @@ async function layerPixels(id: string): Promise<Rgba> {
   return data
 }
 
-const composed = new Map<string, Promise<ImageData>>()
+const composed = new Map<string, Promise<ImageData | null>>()
 
-/** 合成一只猫：先把用到的图层都解码好，再同步走 composeSprite。按外观键缓存，同一外观只合成一次 */
-export function composeCat(spec: CatSpec): Promise<ImageData> {
+/** 合成一只猫；包里画不出来时返回 null（孵化被限制在可孵化的岛上，正常不该出现） */
+export function composeCat(spec: CatSpec): Promise<ImageData | null> {
   const key = catKey(spec)
   let p = composed.get(key)
   if (!p) {
     p = (async () => {
-      const ops = renderOps(spec)
-      const ids = ops.flatMap((op) => (op.kind === 'draw' ? [op.layer] : []))
+      const ops = artPlanForCat(spec)
+      if (!ops) return null
       const loaded = new Map<string, Rgba>()
-      await Promise.all(ids.map(async (id) => loaded.set(id, await layerPixels(id))))
-      const px = composeSprite(ops, (id) => {
+      await Promise.all(artLayersFor(ops).map(async (id) => loaded.set(id, await layerPixels(id))))
+      const px = composePlan(ops, (id) => {
         const data = loaded.get(id)
-        if (!data) throw new Error(`缺像素猫图层 ${id}`)
+        if (!data) throw new Error(`缺像素包图层 ${id}`)
         return data
-      }, N, CLEAR_POLYGONS)
+      }, N)
       const out = new ImageData(N, N)
       out.data.set(px)
       return out
@@ -101,9 +103,9 @@ const PIXEL_KEYFRAMES = `
 @media (prefers-reduced-motion: reduce) { .pixelcat-breathe { animation: none !important; } }
 `
 
-/** 一只像素小管家。size 请用 PIXEL_CAT_DISPLAY 的整数倍关系（默认 2×），否则像素格会不均匀。
+/** 一只像素小管家。size 默认 ART_DISPLAY（原生 ×2），换值请保持整数倍，否则像素格会不均匀。
  *  spec 变化时先把新样子合成好，再冒烟、烟最浓时换脸，散开时已是新长相 */
-export function PixelCatView({ spec, size = PIXEL_CAT_DISPLAY, className, mood = 'neutral' }: { spec: CatSpec; size?: number; className?: string; mood?: Mood }) {
+export function PixelCatView({ spec, size = ART_DISPLAY, className, mood = 'neutral' }: { spec: CatSpec; size?: number; className?: string; mood?: Mood }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [displayed, setDisplayed] = useState(spec)
   const [poofKey, setPoofKey] = useState(0)
@@ -140,7 +142,7 @@ export function PixelCatView({ spec, size = PIXEL_CAT_DISPLAY, className, mood =
         const ctx = canvasRef.current?.getContext('2d')
         if (cancelled || !ctx) return
         ctx.clearRect(0, 0, N, N)
-        ctx.putImageData(img, 0, 0)
+        if (img) ctx.putImageData(img, 0, 0)
       })
       .catch(() => {})
     return () => { cancelled = true }

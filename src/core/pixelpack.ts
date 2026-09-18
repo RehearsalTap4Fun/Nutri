@@ -6,6 +6,7 @@
  */
 import type { CatSpec } from './pixelcat'
 import type { PixelOp } from './pixelize'
+export type { PixelOp }
 
 export const PIXEL_STYLE_FLAT = 'pixel-flat'
 /** nutri 自己的回退风格（毛绒源自动像素化），不在 QMonster 目录里，由 nutri 的存档联合类型承载 */

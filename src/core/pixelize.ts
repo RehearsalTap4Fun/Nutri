@@ -3,7 +3,6 @@
  * 不依赖 canvas，运行时（浏览器）与离线预览脚本（Node）跑的是同一份代码，所见即所得。
  * 像素画的几个约定都在这里落实：无抗锯齿（alpha 只有 0/255）、1px 描边、按像素中心判定多边形。
  */
-import type { RenderOp } from './pixelcat'
 
 export type Rgba = Uint8ClampedArray
 
@@ -109,60 +108,6 @@ export function composePlan(ops: readonly PixelOp[], layer: (id: string) => Rgba
   return frame
 }
 
-export interface ClearRegions {
-  ears: readonly (readonly (readonly number[])[])[]
-  tailTip: readonly (readonly number[])[]
-}
-
-/**
- * 按渲染计划合成一只像素猫：后层部件各自描边后叠到 frame；身体层叠到 subject（先抠再画替换耳）；
- * subject 整体描一次边再盖到 frame 上，部件与身体之间就有了分隔线。
- */
-export function composeSprite(ops: readonly RenderOp[], layer: (id: string) => Rgba, n: number, clear: ClearRegions): Rgba {
-  // 老轨（毛绒像素化）的计划翻译成通用计划；图层先二值化，语义与像素包同一份 composePlan
-  const plan: PixelOp[] = ops.map((op) => op.kind === 'clear'
-    ? { kind: 'clear', polygons: op.region === 'ears' ? clear.ears : [clear.tailTip] }
-    : { kind: 'draw', layer: op.layer, target: op.target, occlusion: [] })
-  return composePlan(plan, (id) => hardenAlpha(new Uint8ClampedArray(layer(id))), n)
-}
-
-/**
- * 去斑：某像素的 8 邻域里若有 ≥minMajority 个像素同为另一种颜色，且该颜色与本像素相近（低对比），就并过去。
- * 目的是抹掉毛发纹理残留的低对比碎点，同时保住眼睛高光、鼻头这种高对比的小细节。透明像素不参与。
- */
-export function despeckleRgba(src: Rgba, n: number, opts: { threshold?: number; minMajority?: number } = {}): Rgba {
-  const threshold = opts.threshold ?? 64
-  const minMajority = opts.minMajority ?? 5
-  const out = new Uint8ClampedArray(src)
-  const key = (i: number) => (src[i] << 16) | (src[i + 1] << 8) | src[i + 2]
-  for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      const i = (y * n + x) * 4
-      if (src[i + 3] === 0) continue
-      const counts = new Map<number, number>()
-      let best = -1, bestCount = 0
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          if (dx === 0 && dy === 0) continue
-          const nx = x + dx, ny = y + dy
-          if (nx < 0 || ny < 0 || nx >= n || ny >= n) continue
-          const j = (ny * n + nx) * 4
-          if (src[j + 3] === 0) continue
-          const k = key(j)
-          const c = (counts.get(k) ?? 0) + 1
-          counts.set(k, c)
-          if (c > bestCount) { bestCount = c; best = k }
-        }
-      }
-      if (best < 0 || best === key(i) || bestCount < minMajority) continue
-      const dr = ((best >> 16) & 255) - src[i], dg = ((best >> 8) & 255) - src[i + 1], db = (best & 255) - src[i + 2]
-      if (Math.sqrt(dr * dr + dg * dg + db * db) > threshold) continue
-      out[i] = (best >> 16) & 255; out[i + 1] = (best >> 8) & 255; out[i + 2] = best & 255
-    }
-  }
-  return out
-}
-
 /**
  * 纯色背景抠图：背景色默认取四角的中位色（生成图通常是纯色底，四角最可靠），
  * 与背景色 RGB 距离小于阈值的像素变透明，其余不透明；再向内腐蚀 erode 像素抹掉边缘的背景色溢出。
@@ -210,6 +155,43 @@ export function erodeAlpha(data: Rgba, w: number, h: number): Rgba {
     }
   }
   return data
+}
+
+/**
+ * 去斑：某像素的 8 邻域里若有 ≥minMajority 个像素同为另一种颜色，且该颜色与本像素相近（低对比），就并过去。
+ * 目的是抹掉毛发纹理残留的低对比碎点，同时保住眼睛高光、鼻头这种高对比的小细节。透明像素不参与。
+ */
+export function despeckleRgba(src: Rgba, n: number, opts: { threshold?: number; minMajority?: number } = {}): Rgba {
+  const threshold = opts.threshold ?? 64
+  const minMajority = opts.minMajority ?? 5
+  const out = new Uint8ClampedArray(src)
+  const key = (i: number) => (src[i] << 16) | (src[i + 1] << 8) | src[i + 2]
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      const i = (y * n + x) * 4
+      if (src[i + 3] === 0) continue
+      const counts = new Map<number, number>()
+      let best = -1, bestCount = 0
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue
+          const nx = x + dx, ny = y + dy
+          if (nx < 0 || ny < 0 || nx >= n || ny >= n) continue
+          const j = (ny * n + nx) * 4
+          if (src[j + 3] === 0) continue
+          const k = key(j)
+          const c = (counts.get(k) ?? 0) + 1
+          counts.set(k, c)
+          if (c > bestCount) { bestCount = c; best = k }
+        }
+      }
+      if (best < 0 || best === key(i) || bestCount < minMajority) continue
+      const dr = ((best >> 16) & 255) - src[i], dg = ((best >> 8) & 255) - src[i + 1], db = (best & 255) - src[i + 2]
+      if (Math.sqrt(dr * dr + dg * dg + db * db) > threshold) continue
+      out[i] = (best >> 16) & 255; out[i + 1] = (best >> 8) & 255; out[i + 2] = best & 255
+    }
+  }
+  return out
 }
 
 /** 统计不透明像素的不同颜色数（测试与预览用） */

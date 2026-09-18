@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES, ensureCat, hatch, mutate, retire, type Creature } from '../src/core/creature'
 import { MUTABLE_SLOTS, MUTATION_SLOTS, PIXEL_CAT_RULES, catForCreature, catKey, isCatSpec, tierRank } from '../src/core/pixelcat'
+import { ART_IDENTITY, artPlanForCat } from '../src/core/catArt'
 import { makeRng } from '../src/core/rng'
 
 describe('hatch：一次随机定型', () => {
@@ -115,5 +116,61 @@ describe('像素猫外观存进 creature：孵化定型、异变推进、老数�
   it('回炉后历史里的 cat 原样保留', () => {
     const c = hatch('a', 10, makeRng(1))
     expect(retire(c, 999).cat).toEqual(c.cat)
+  })
+})
+
+describe('接入像素包后的形象迁移', () => {
+  const legacy = (over: Record<string, unknown> = {}) => {
+    const c = hatch('legacy-1', 0, makeRng(4))
+    // 模拟接包前的存档：没有 body／eyes／catArt，表情可能是已下线的 tongue-tip
+    const cat = { ...c.cat, ...over } as Record<string, unknown>
+    delete cat.body
+    delete cat.eyes
+    const out = { ...c, cat } as unknown as Creature
+    delete (out as Partial<Creature>).catArt
+    return out
+  }
+
+  it('就地补齐 body／eyes，保留花纹与已长出的部件，不重新推导', () => {
+    const before = legacy({ crown: 'halo', tailTip: 'flame-tail' })
+    const after = ensureCat(before)
+    expect(after.cat.body).toBe('standard')
+    expect(after.cat.eyes).toBe('round')
+    expect(after.cat.coat).toBe(before.cat.coat) // 花纹保住了
+    expect(after.cat.crown).toBe('halo')
+    expect(after.cat.tailTip).toBe('flame-tail')
+    expect(isCatSpec(after.cat)).toBe(true)
+    expect(artPlanForCat(after.cat)).not.toBeNull() // 画得出来
+  })
+
+  it('已下线的 tongue-tip 表情迁移成 small-fangs', () => {
+    const after = ensureCat(legacy({ expression: 'tongue-tip' }))
+    expect(after.cat.expression).toBe('small-fangs')
+    expect(artPlanForCat(after.cat)).not.toBeNull()
+  })
+
+  it('补齐后的猫一定落在像素包覆盖内（6 毛色 × 标准体型 × 圆眼 × 两表情）', () => {
+    for (let i = 0; i < 60; i++) {
+      const c = hatch(`legacy-${i}`, 0, makeRng(i))
+      const cat = { ...c.cat } as Record<string, unknown>
+      delete cat.body
+      delete cat.eyes
+      const after = ensureCat({ ...c, cat } as unknown as Creature)
+      expect(artPlanForCat(after.cat), JSON.stringify(after.cat)).not.toBeNull()
+    }
+  })
+
+  it('存了不认识的部件就重新推导，而不是给一只画不出来的猫', () => {
+    const broken = legacy({ back: 'jet-engine' })
+    const after = ensureCat(broken)
+    expect(isCatSpec(after.cat)).toBe(true)
+    expect(artPlanForCat(after.cat)).not.toBeNull()
+  })
+
+  it('孵化与异变都带上美术包身份；已经合法的猫不被改动', () => {
+    const c = hatch('art-1', 0, makeRng(1))
+    expect(c.catArt).toEqual(ART_IDENTITY)
+    expect(ensureCat(c)).toBe(c) // 原样返回，不产生新对象
+    expect(mutate(c, 1, makeRng(2)).catArt).toEqual(ART_IDENTITY)
   })
 })

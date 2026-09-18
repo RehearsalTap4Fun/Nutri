@@ -1,31 +1,37 @@
 /**
- * 健康小管家「像素猫」试验：外观不再另存，而是由现有 creature 的 id 与异变次数确定性推导——
- * 同一只小管家、同样的异变次数，永远得到同一只猫；每记一笔（mutations+1）就换一个槽位。
- * 花纹在孵化时定型不再变（换花纹等于换了一只猫），可变的是表情 + 5 个异变位。
- * 异变**只进不退**：每个位置沿进化链升一阶（N 普通 → R 稀有 → L 传说），不会变回没有、不会降级、同阶不互换；
- * 表情不分品质，作横向变化保留，所以满级之后每记一笔仍有看得见的变化。
- * 成长节奏见 `upgradeChance`：升级概率随已升阶数递减，没升级的那些笔换表情，保证每笔都有变化。
- * 素材来自 RandomPet v0.10 小猫组合（scripts/pixelCat.ts 预先像素化成 96px 图层）。
- * 随时可以把 PIXEL_CAT_TRIAL 关掉切回原来的 SVG 小管家，存档不受影响。
+ * 健康小管家的形象与成长规则。
+ *
+ * 性状分三类，这个分类决定了覆盖要求，也决定了孵化能落在哪：
+ *   - **身份**（`coat`、`body`）：孵化定型、一生不变。所以不同取值之间不需要互相连通。
+ *   - **横向**（`eyes`、`expression`）：随时会换。所以同一身份下的所有取值都必须有美术，
+ *     否则猫一换就画不出来——`catArt.ts` 的「可孵化的岛」就是在保证这件事。
+ *   - **成长**（额顶／耳／颈／背／尾）：每笔记录推进，**只进不退**，沿进化链升一阶
+ *     （N 普通 → R 稀有 → L 传说），不会变回没有、不会降级、同阶不互换。
+ *
+ * 成长节奏见 `upgradeChance`：升级概率随已升阶数递减，没升级的那些笔做横向变化，
+ * 所以每记一笔都有看得见的变化，满级之后也是。
+ *
+ * 形象素材来自 QMonster 像素包（见 `catArt.ts`）。孵化只落在可孵化的岛上，
+ * 这条保证一只猫终其一生都画得出来。
  */
-import manifest from '../assets/pixelcat/manifest.json'
+import { ART_EYES, ART_EXPRESSIONS, ART_IDENTITY_PAIRS, artLateralFor } from './catArt'
 import { hashString, makeRng, weightedPick } from './rng'
 
-export const PIXEL_CAT_TRIAL = true
 /**
  * 规则版本：写进存档，规则再改时能知道一只猫是按哪版长出来的。
- * v1=均匀随机；v2=品质分层只进不退（同级可互换）；v3=进化链，沿链升一阶、同阶不互换、顶阶只能升不能生、节奏按阶数递减。
+ * v1=均匀随机；v2=品质分层只进不退（同级可互换）；v3=进化链，沿链升一阶、同阶不互换、顶阶只能升不能生；
+ * v4=接入 QMonster 像素包：性状加 `body`／`eyes`、去掉 `tongue-tip`、孵化限制在可孵化的岛上。
  * **规则实质变化时必须升这个号**，否则同一个字符串会描述两套不同的规则，这个字段就失去意义了。
  */
-export const PIXEL_CAT_RULES = 'pixelcat-rules-v3'
-/** 原生像素尺寸与整数放大倍数：显示尺寸 = size × scale，保证每个像素都是整齐的方块 */
-export const PIXEL_CAT_SIZE = manifest.size
-export const PIXEL_CAT_SCALE = manifest.scale
-export const PIXEL_CAT_DISPLAY = manifest.size * manifest.scale
+export const PIXEL_CAT_RULES = 'pixelcat-rules-v4'
 
 export const CAT_COATS = ['brown-tabby', 'orange-white', 'tuxedo', 'calico', 'colorpoint', 'rosetted'] as const
+/** 体型：与花纹同为身份性状，孵化定型后一生不变 */
+export const CAT_BODIES = ['standard', 'shortleg-round', 'slender-tall'] as const
 export const CAT_SLOT_OPTIONS = {
-  expression: ['parted-mouth', 'small-fangs', 'tongue-tip'],
+  /** 眼型与表情是横向性状：无品质高低，提供满级之后的持续变化 */
+  eyes: ['round', 'sleepy-almond'],
+  expression: ['parted-mouth', 'small-fangs'],
   crown: ['none', 'dragon-horns', 'antlers', 'halo'],
   ears: ['none', 'fin-ears'],
   neck: ['none', 'small-lion-mane', 'frill-neck'],
@@ -34,12 +40,18 @@ export const CAT_SLOT_OPTIONS = {
 } as const
 
 export type CatCoat = (typeof CAT_COATS)[number]
+export type CatBody = (typeof CAT_BODIES)[number]
 export type CatSlot = keyof typeof CAT_SLOT_OPTIONS
-export type CatSpec = { coat: CatCoat } & { [K in CatSlot]: (typeof CAT_SLOT_OPTIONS)[K][number] }
+export type CatSpec = { coat: CatCoat; body: CatBody } & { [K in CatSlot]: (typeof CAT_SLOT_OPTIONS)[K][number] }
 export type CatMutation = Exclude<CatSpec['crown' | 'ears' | 'neck' | 'back' | 'tailTip'], 'none'>
 
-/** 每次记录可能变化的槽位（花纹不在其中） */
-export const MUTABLE_SLOTS = ['expression', 'crown', 'ears', 'neck', 'back', 'tailTip'] as const satisfies readonly CatSlot[]
+/** 身份性状：孵化定型，一生不变 */
+export const IDENTITY_TRAITS = ['coat', 'body'] as const
+/** 横向性状：随时可换，无优劣 */
+export const LATERAL_SLOTS = ['eyes', 'expression'] as const satisfies readonly CatSlot[]
+
+/** 每次记录可能变化的槽位（身份性状不在其中） */
+export const MUTABLE_SLOTS = ['eyes', 'expression', 'crown', 'ears', 'neck', 'back', 'tailTip'] as const satisfies readonly CatSlot[]
 export const MUTATION_SLOTS = ['crown', 'ears', 'neck', 'back', 'tailTip'] as const
 export type MutationSlot = (typeof MUTATION_SLOTS)[number]
 
@@ -150,29 +162,39 @@ export function upgradeChance(spec: CatSpec): number {
 
 export const CAT_NAMES: Record<string, string> = {
   'brown-tabby': '棕虎斑', 'orange-white': '橘白', tuxedo: '燕尾服', calico: '三花', colorpoint: '重点色', rosetted: '金豹点',
-  'parted-mouth': '微张嘴', 'small-fangs': '小牙', 'tongue-tip': '吐舌',
+  standard: '标准', 'shortleg-round': '短腿圆身', 'slender-tall': '修长高挑',
+  round: '圆眼', 'sleepy-almond': '半眯眼',
+  'parted-mouth': '微张嘴', 'small-fangs': '小牙',
   'dragon-horns': '小龙角', antlers: '鹿角', halo: '光环',
   'fin-ears': '鳍耳',
   'small-lion-mane': '小狮鬃', 'frill-neck': '颈膜',
   'small-wings': '小翅膀', 'feathered-wings': '羽翼', 'dragon-wings': '龙翼',
   'forked-tail-tip': '分叉尾', 'flame-tail': '焰尾',
 }
-export const CAT_SLOT_NAMES: Record<CatSlot, string> = { expression: '表情', crown: '额顶', ears: '耳朵', neck: '颈部', back: '背部', tailTip: '尾巴' }
+export const CAT_SLOT_NAMES: Record<CatSlot, string> = { eyes: '眼型', expression: '表情', crown: '额顶', ears: '耳朵', neck: '颈部', back: '背部', tailTip: '尾巴' }
 
 function pick<T>(arr: readonly T[], rnd: () => number): T {
   return arr[Math.floor(rnd() * arr.length) % arr.length]
 }
 
-/** 横向变化：换表情。满级之后每笔记录仍然看得见变化，靠的就是这个 */
+/**
+ * 横向变化：在眼型／表情里挑一个，换成该岛支持的另一个取值。
+ * 满级之后每笔记录仍然看得见变化，靠的就是这个。取值要跟岛的能力取交集——
+ * 岛里没有的取值画不出来，不能凭规则硬给。
+ */
 function lateralChange(spec: CatSpec, rnd: () => number): CatSpec {
-  const options = CAT_SLOT_OPTIONS.expression.filter((v) => v !== spec.expression)
-  return { ...spec, expression: pick(options, rnd) }
+  const available = artLateralFor(spec.coat, spec.body)
+  const pools: Record<string, readonly string[]> = { eyes: available.eyes, expression: available.expressions }
+  const usable = LATERAL_SLOTS.filter((s) => pools[s].filter((v) => v !== spec[s]).length > 0)
+  if (usable.length === 0) return spec // 该岛没有可换的横向取值（理论上不会发生，可孵化的岛都 ≥2 个落点）
+  const slot = pick(usable, rnd)
+  return { ...spec, [slot]: pick(pools[slot].filter((v) => v !== spec[slot]), rnd) }
 }
 
 /**
  * 异变：每笔记录必有一次可见变化。
  * 先按 `upgradeChance` 掷是否升级；升级时在「还有得升」的位置里挑一个（空槽权重 ×3，广度优先），
- * 沿进化链升一阶，只进不退；不升级、或所有位置都满了，就做横向变化（换表情）。
+ * 沿进化链升一阶，只进不退；不升级、或所有位置都满了，就做横向变化（换眼型或表情）。
  */
 export function mutateCat(spec: CatSpec, rnd: () => number): CatSpec {
   const open = MUTATION_SLOTS.filter((s) => upgradesFor(s, spec[s]).length > 0)
@@ -182,11 +204,21 @@ export function mutateCat(spec: CatSpec, rnd: () => number): CatSpec {
   return { ...spec, [slot]: pickUpgrade(slot, spec[slot], rnd) }
 }
 
-/** 孵化：花纹与表情随机定型；一半概率自带一件异变（按品质加权），另一半是只普通小猫 */
+/**
+ * 孵化：身份性状（花纹＋体型）从**可孵化的岛**里随机挑一对，横向性状在该岛支持的取值里挑；
+ * 一半概率自带一件异变（按品质加权，只可能是入口阶）。
+ *
+ * 为什么必须从岛里挑：身份性状一生不变，所以孵化那一刻就决定了这只猫余生能不能画出来。
+ * 落在没有美术的身份上，等于生下一只永远画不出来的猫。
+ */
 export function hatchCat(rnd: () => number): CatSpec {
+  const pair = pick(ART_IDENTITY_PAIRS, rnd)
+  const available = artLateralFor(pair.coat, pair.body)
   let spec: CatSpec = {
-    coat: pick(CAT_COATS, rnd),
-    expression: pick(CAT_SLOT_OPTIONS.expression, rnd),
+    coat: pair.coat as CatCoat,
+    body: pair.body as CatBody,
+    eyes: pick(available.eyes.length ? available.eyes : ART_EYES, rnd) as CatSpec['eyes'],
+    expression: pick(available.expressions.length ? available.expressions : ART_EXPRESSIONS, rnd) as CatSpec['expression'],
     crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none',
   }
   // 一半概率自带一件异变（只可能是入口阶，顶阶只能升不能生）
@@ -213,44 +245,17 @@ export function isCatSpec(x: unknown): x is CatSpec {
   if (typeof x !== 'object' || x === null) return false
   const o = x as Record<string, unknown>
   if (!(CAT_COATS as readonly string[]).includes(o.coat as string)) return false
+  if (!(CAT_BODIES as readonly string[]).includes(o.body as string)) return false
   return (Object.keys(CAT_SLOT_OPTIONS) as CatSlot[]).every((slot) => (CAT_SLOT_OPTIONS[slot] as readonly string[]).includes(o[slot] as string))
 }
 
-export type RenderOp =
-  | { kind: 'draw'; layer: string; target: 'frame' | 'subject' }
-  | { kind: 'clear'; region: 'ears' | 'tailTip' }
-
-/**
- * 合成顺序与 RandomPet 渲染器一致：背部、额顶先画在身体后面（frame），身体画在 subject，
- * 鳍耳要先抠掉原耳再画到 subject，替换尾要先抠掉原尾再画到 frame（尾根藏在臀部后），颈部件最后画到 frame；
- * 最后 subject 盖到 frame 上。
- */
-export function renderOps(spec: CatSpec): RenderOp[] {
-  const m = manifest.mutations[spec.coat] as Record<string, string>
-  const draw = (layer: string, target: 'frame' | 'subject'): RenderOp => ({ kind: 'draw', layer, target })
-  const ops: RenderOp[] = []
-  if (spec.back !== 'none') ops.push(draw(m[spec.back], 'frame'))
-  if (spec.crown !== 'none') ops.push(draw(m[spec.crown], 'frame'))
-  ops.push(draw(`${spec.coat}-${spec.expression}`, 'subject'))
-  if (spec.ears !== 'none') ops.push({ kind: 'clear', region: 'ears' }, draw(m[spec.ears], 'subject'))
-  if (spec.tailTip !== 'none') ops.push({ kind: 'clear', region: 'tailTip' }, draw(m[spec.tailTip], 'frame'))
-  if (spec.neck !== 'none') ops.push(draw(m[spec.neck], 'frame'))
-  return ops
-}
-
-export function layersFor(spec: CatSpec): string[] {
-  return renderOps(spec).flatMap((op) => (op.kind === 'draw' ? [op.layer] : []))
-}
-
-export const CLEAR_POLYGONS: { ears: number[][][]; tailTip: number[][] } = manifest.clear
-
 /** 缓存键：外观的全部信息 */
 export function catKey(spec: CatSpec): string {
-  return [spec.coat, spec.expression, spec.crown, spec.ears, spec.neck, spec.back, spec.tailTip].join('|')
+  return [spec.coat, spec.body, spec.eyes, spec.expression, spec.crown, spec.ears, spec.neck, spec.back, spec.tailTip].join('|')
 }
 
 export function describeCat(spec: CatSpec): string {
-  const parts = [CAT_NAMES[spec.coat]]
+  const parts = [CAT_NAMES[spec.coat], CAT_NAMES[spec.body], CAT_NAMES[spec.eyes]]
   for (const slot of MUTATION_SLOTS) if (spec[slot] !== 'none') parts.push(CAT_NAMES[spec[slot]])
   return parts.join(' · ')
 }
@@ -265,7 +270,7 @@ export function mutationLabel(value: CatMutation): string {
 export function catDiff(prev: CatSpec, next: CatSpec): string | null {
   for (const slot of MUTABLE_SLOTS) {
     if (prev[slot] === next[slot]) continue
-    if (slot === 'expression') return `表情变成${CAT_NAMES[next.expression]}`
+    if (slot === 'eyes' || slot === 'expression') return `${CAT_SLOT_NAMES[slot]}变成${CAT_NAMES[next[slot]]}`
     const from = prev[slot]
     const to = next[slot]
     if (to === 'none') return `${CAT_NAMES[from]}消失了` // 规则上不再发生，留作兜底

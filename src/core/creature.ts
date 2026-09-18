@@ -3,6 +3,7 @@
 // 用户可以随时「回炉重造」：当前生物存进历史，重新变回一颗蛋。
 
 import { PIXEL_CAT_RULES, catForCreature, hatchCat, isCatSpec, mutateCat, type CatSpec } from './pixelcat'
+import { ART_IDENTITY, artPlanForCat, isCatArtIdentity, type CatArtIdentity } from './catArt'
 
 export const BODIES = ['round', 'egg', 'blob', 'droplet'] as const
 export const COLORS = ['coral', 'sage', 'periwinkle', 'amber', 'lilac', 'seafoam', 'blush', 'slate'] as const
@@ -44,6 +45,8 @@ export interface Creature {
   cat: CatSpec
   /** 长出这只猫用的规则版本（pixelcat.ts 的 PIXEL_CAT_RULES） */
   catRules: string
+  /** 画这只猫用的美术包身份，将来换包时能知道它是按哪版画的 */
+  catArt: CatArtIdentity
 }
 
 export interface RetiredCreature extends Creature {
@@ -72,13 +75,33 @@ export function randomTraits(rnd: () => number): CreatureTraits {
 export function hatch(id: string, now: number, rnd: () => number): Creature {
   return {
     id, traits: randomTraits(rnd), personality: pick(PERSONALITIES, rnd), bornAt: now, lastMutatedAt: now, mutations: 0,
-    cat: hatchCat(rnd), catRules: PIXEL_CAT_RULES,
+    cat: hatchCat(rnd), catRules: PIXEL_CAT_RULES, catArt: ART_IDENTITY,
   }
 }
 
-/** 老存档没有 cat 字段（或存的值已不合法）：按 id + 异变次数用当前规则推导一次，之后就以存档为准 */
+/**
+ * 老存档的形象迁移。按代价从小到大依次尝试：
+ *   1. 已经合法且画得出来 → 原样返回，不动一只已经长好的猫。
+ *   2. 只是缺了后加的性状（`body`／`eyes`），或表情是已下线的 `tongue-tip` → **就地补齐**。
+ *      补出来的都落在「6 毛色 × 标准体型 × 圆眼 × 两种表情」里，而像素包完整覆盖这个范围，
+ *      所以这条路总能成功，猫的花纹与已长出的部件全部保留。
+ *   3. 实在补不动（存了不认识的部件等）→ 按 id + 异变次数重新推导一只。
+ */
 export function ensureCat<T extends Creature>(c: T): T {
-  return isCatSpec(c.cat) && typeof c.catRules === 'string' ? c : { ...c, cat: catForCreature(c), catRules: PIXEL_CAT_RULES }
+  const withArt = isCatArtIdentity(c.catArt) ? c : { ...c, catArt: ART_IDENTITY }
+  if (isCatSpec(withArt.cat) && typeof withArt.catRules === 'string' && artPlanForCat(withArt.cat)) return withArt
+
+  const raw = (withArt.cat ?? {}) as Partial<CatSpec> & Record<string, unknown>
+  const patched = {
+    ...raw,
+    body: raw.body ?? 'standard',
+    eyes: raw.eyes ?? 'round',
+    // 'tongue-tip' 是接像素包时下线的表情，老存档里可能还有；用 string 比较避免类型层面被判为不可能
+    expression: (raw.expression as string) === 'tongue-tip' || raw.expression === undefined ? 'small-fangs' : raw.expression,
+  } as CatSpec
+  if (isCatSpec(patched) && artPlanForCat(patched)) return { ...withArt, cat: patched, catRules: PIXEL_CAT_RULES }
+
+  return { ...withArt, cat: catForCreature(c), catRules: PIXEL_CAT_RULES }
 }
 
 /** 异变：SVG 特征随机换一个槽；像素猫按只进不退规则推进一步。两者都从存档里的当前值出发，不重放历史 */
@@ -90,7 +113,7 @@ export function mutate(c: Creature, now: number, rnd: () => number): Creature {
   const withCat = ensureCat(c)
   return {
     ...withCat, traits: { ...c.traits, [key]: next }, lastMutatedAt: now, mutations: c.mutations + 1,
-    cat: mutateCat(withCat.cat, rnd), catRules: PIXEL_CAT_RULES,
+    cat: mutateCat(withCat.cat, rnd), catRules: PIXEL_CAT_RULES, catArt: ART_IDENTITY,
   }
 }
 

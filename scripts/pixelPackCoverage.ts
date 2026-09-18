@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { CAT_SLOT_OPTIONS, MUTABLE_SLOTS, MUTATION_SLOTS, upgradesFor, type CatSlot } from '../src/core/pixelcat'
+import { CAT_SLOT_OPTIONS, MUTATION_SLOTS, upgradesFor } from '../src/core/pixelcat'
 import { openPack, packIslands, type AnyPhenotype } from '../src/core/pixelpack'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -85,11 +85,11 @@ for (const t of pack.extraTraits) extraOptions.set(t, [...new Set(cov.map((c) =>
 /** nutri 的一步成长：可变槽位里，表情横向换、异变位只进不退 */
 function nextStates(p: P): Array<{ slot: string; to: string; next: P }> {
   const out: Array<{ slot: string; to: string; next: P }> = []
-  for (const slot of MUTABLE_SLOTS as readonly CatSlot[]) {
-    const options = slot === 'expression'
-      ? CAT_SLOT_OPTIONS.expression.filter((v) => v !== p.expression)
-      : upgradesFor(slot, p[slot])
-    for (const to of options) out.push({ slot, to, next: { ...p, [slot]: to } })
+  for (const slot of MUTATION_SLOTS) {
+    for (const to of upgradesFor(slot, p[slot])) out.push({ slot, to, next: { ...p, [slot]: to } })
+  }
+  for (const to of CAT_SLOT_OPTIONS.expression.filter((v) => v !== p.expression)) {
+    out.push({ slot: 'expression', to, next: { ...p, expression: to } })
   }
   // 横向性状（眼型等）也是「一步变化」，同样要看落点是否还在覆盖内
   for (const [t, opts] of extraOptions) for (const to of opts.filter((v) => v !== p[t])) out.push({ slot: t, to, next: { ...p, [t]: to } })

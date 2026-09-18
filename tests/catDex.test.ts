@@ -4,7 +4,7 @@ import { dexOwned, dexTotals, emptyDex, isCatDex, recordSpec, seedDex } from '..
 import { CAT_LINES, MUTATION_SLOTS, catForCreature, isFullyGrown, mutateCat, type CatSpec } from '../src/core/pixelcat'
 import { makeRng } from '../src/core/rng'
 
-const base: CatSpec = { coat: 'orange-white', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+const base: CatSpec = { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
 const maxed: CatSpec = { ...base, crown: 'halo', ears: 'fin-ears', neck: 'frill-neck', back: 'dragon-wings', tailTip: 'flame-tail' }
 
 describe('称号配方', () => {
@@ -59,7 +59,7 @@ describe('图鉴账本', () => {
     const angel = { ...base, crown: 'halo', back: 'feathered-wings' } as CatSpec
     dex = recordSpec(dex, { ...base, crown: 'halo' }, angel)
     expect(dex.titles['angel']).toBe(1)
-    dex = recordSpec(dex, angel, { ...angel, expression: 'tongue-tip' })
+    dex = recordSpec(dex, angel, { ...angel, expression: 'small-fangs' })
     expect(dex.titles['angel']).toBe(1)
   })
   it('dexTotals 随美术阵容走，不写死', () => {

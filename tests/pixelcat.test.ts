@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import manifest from '../src/assets/pixelcat/manifest.json'
-import { CAT_COATS, CAT_SLOT_OPTIONS, CAT_TIER, GROWTH_DECAY, MUTABLE_SLOTS, MUTATION_SLOTS, catDiff, catForCreature, catKey, describeCat, growthSteps, hatchCat, isCatSpec, isFullyGrown, layersFor, lineOf, maxGrowthSteps, mutateCat, renderOps, slotLadder, slotStep, tierRank, upgradeChance, upgradesFor, type CatSpec } from '../src/core/pixelcat'
+import { CAT_COATS, CAT_SLOT_OPTIONS, CAT_TIER, GROWTH_DECAY, LATERAL_SLOTS, MUTABLE_SLOTS, MUTATION_SLOTS, catDiff, catForCreature, catKey, describeCat, growthSteps, hatchCat, isCatSpec, isFullyGrown, lineOf, maxGrowthSteps, mutateCat, slotLadder, slotStep, tierRank, upgradeChance, upgradesFor, type CatSpec } from '../src/core/pixelcat'
+import { layersFor, renderOps } from '../src/core/pixelcatPlush'
 import { makeRng } from '../src/core/rng'
 
 const ASSETS = join(__dirname, '..', 'src', 'assets', 'pixelcat')
@@ -77,7 +78,7 @@ describe('像素猫：异变只进不退', () => {
     }
   })
 
-  it('养到满级后所有异变位都是该位置的最高品质，之后只有表情在换', () => {
+  it('养到满级后所有异变位都是该位置的最高品质，之后只有横向性状在换', () => {
     const id = 'maxed'
     const late = catForCreature({ id, mutations: 400 })
     for (const slot of MUTATION_SLOTS) {
@@ -89,7 +90,8 @@ describe('像素猫：异变只进不退', () => {
       const a = catForCreature({ id, mutations: k - 1 })
       const b = catForCreature({ id, mutations: k })
       const changed = MUTABLE_SLOTS.filter((s) => a[s] !== b[s])
-      expect(changed).toEqual(['expression'])
+      expect(changed).toHaveLength(1)
+      expect(LATERAL_SLOTS as readonly string[]).toContain(changed[0])
     }
   })
 
@@ -125,7 +127,7 @@ describe('像素猫：异变只进不退', () => {
   it('同链优先：背部沿翼链逐阶升，颈部沿鬃链升', () => {
     expect(lineOf('back', 'feathered-wings')).toBe('wing')
     expect(lineOf('crown', 'halo')).toBe('light')
-    let spec = { coat: 'calico', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'small-wings', tailTip: 'none' } as CatSpec
+    let spec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'small-wings', tailTip: 'none' } as CatSpec
     const seen: string[] = []
     const rnd = makeRng(11)
     for (let i = 0; i < 80 && upgradesFor('back', spec.back).length; i++) {
@@ -140,7 +142,7 @@ describe('像素猫：异变只进不退', () => {
     const count: Record<string, number> = { N: 0, R: 0, L: 0 }
     for (let i = 0; i < 2000; i++) {
       const rnd = makeRng(1000 + i)
-      const base: CatSpec = { coat: 'calico', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+      const base: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
       const next = mutateCat(base, rnd)
       for (const slot of MUTATION_SLOTS) if (next[slot] !== 'none') count[CAT_TIER[next[slot]]]++
     }
@@ -150,24 +152,31 @@ describe('像素猫：异变只进不退', () => {
   })
 
   it('成长节奏：首笔必升级，之后升级概率随已升阶数递减', () => {
-    const empty: CatSpec = { coat: 'calico', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+    const empty: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
     expect(upgradeChance(empty)).toBe(1)
     const grown: CatSpec = { ...empty, crown: 'halo', back: 'dragon-wings', neck: 'frill-neck' }
     expect(growthSteps(grown)).toBe(2 + 3 + 2)
     expect(upgradeChance(grown)).toBeCloseTo(1 / (1 + 7 / GROWTH_DECAY), 6)
   })
 
-  it('满级后每笔仍有可见变化（换表情），且不再动异变位', () => {
-    const maxed: CatSpec = { coat: 'calico', expression: 'parted-mouth', crown: 'halo', ears: 'fin-ears', neck: 'frill-neck', back: 'dragon-wings', tailTip: 'flame-tail' }
+  it('满级后每笔仍有可见变化（换眼型或表情），且不再动异变位与身份性状', () => {
+    const maxed: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'halo', ears: 'fin-ears', neck: 'frill-neck', back: 'dragon-wings', tailTip: 'flame-tail' }
     expect(isFullyGrown(maxed)).toBe(true)
     const rnd = makeRng(5)
     let spec = maxed
-    for (let i = 0; i < 30; i++) {
+    const changedSlots = new Set<string>()
+    for (let i = 0; i < 40; i++) {
       const next = mutateCat(spec, rnd)
-      expect(next.expression).not.toBe(spec.expression)
+      const changed = LATERAL_SLOTS.filter((s) => next[s] !== spec[s])
+      expect(changed).toHaveLength(1) // 每笔恰好换一个横向性状
+      changedSlots.add(changed[0])
       for (const slot of MUTATION_SLOTS) expect(next[slot]).toBe(maxed[slot])
+      expect(next.coat).toBe(maxed.coat)
+      expect(next.body).toBe(maxed.body)
       spec = next
     }
+    // 两个横向性状都应该被用到，不是只在表情里来回切
+    expect([...changedSlots].sort()).toEqual(['expression', 'eyes'])
   })
 })
 
@@ -183,17 +192,17 @@ describe('像素猫：渲染计划与素材', () => {
     for (const coat of CAT_COATS) {
       for (const expression of CAT_SLOT_OPTIONS.expression) {
         for (const crown of CAT_SLOT_OPTIONS.crown) for (const back of CAT_SLOT_OPTIONS.back) {
-          const spec: CatSpec = { coat, expression, crown, ears: 'fin-ears', neck: 'frill-neck', back, tailTip: 'flame-tail' }
+          const spec: CatSpec = { coat, body: 'standard', eyes: 'round', expression, crown, ears: 'fin-ears', neck: 'frill-neck', back, tailTip: 'flame-tail' }
           for (const id of layersFor(spec)) expect(layers.has(id), id).toBe(true)
         }
-        const spec: CatSpec = { coat, expression, crown: 'none', ears: 'none', neck: 'small-lion-mane', back: 'none', tailTip: 'forked-tail-tip' }
+        const spec: CatSpec = { coat, body: 'standard', eyes: 'round', expression, crown: 'none', ears: 'none', neck: 'small-lion-mane', back: 'none', tailTip: 'forked-tail-tip' }
         for (const id of layersFor(spec)) expect(layers.has(id), id).toBe(true)
       }
     }
   })
 
   it('层序与 RandomPet 渲染器一致：背、额顶在身体后；抠耳再画耳到身体层；抠尾再画尾到后层；颈部最后', () => {
-    const ops = renderOps({ coat: 'calico', expression: 'parted-mouth', crown: 'antlers', ears: 'fin-ears', neck: 'small-lion-mane', back: 'small-wings', tailTip: 'forked-tail-tip' })
+    const ops = renderOps({ coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'antlers', ears: 'fin-ears', neck: 'small-lion-mane', back: 'small-wings', tailTip: 'forked-tail-tip' })
     expect(ops.map((o) => (o.kind === 'draw' ? `draw:${o.target}:${o.layer}` : `clear:${o.region}`))).toEqual([
       'draw:frame:small-wings',
       'draw:frame:antlers',
@@ -207,16 +216,16 @@ describe('像素猫：渲染计划与素材', () => {
   })
 
   it('普通小猫只有一张主体图层，没有清除操作', () => {
-    const ops = renderOps({ coat: 'tuxedo', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' })
+    const ops = renderOps({ coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' })
     expect(ops).toEqual([{ kind: 'draw', layer: 'tuxedo-small-fangs', target: 'subject' }])
   })
 })
 
 describe('像素猫：文案', () => {
-  const base: CatSpec = { coat: 'rosetted', expression: 'tongue-tip', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+  const base: CatSpec = { coat: 'rosetted', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
   it('describeCat 列出花纹与在身的异变', () => {
-    expect(describeCat(base)).toBe('金豹点')
-    expect(describeCat({ ...base, crown: 'halo', tailTip: 'flame-tail' })).toBe('金豹点 · 光环 · 焰尾')
+    expect(describeCat(base)).toBe('金豹点 · 标准 · 圆眼')
+    expect(describeCat({ ...base, crown: 'halo', tailTip: 'flame-tail' })).toBe('金豹点 · 标准 · 圆眼 · 光环 · 焰尾')
   })
   it('catDiff 说清这次变了什么：长出 / 同级横换 / 升级进化，稀有传说带品质', () => {
     expect(catDiff(base, base)).toBeNull()
@@ -224,7 +233,8 @@ describe('像素猫：文案', () => {
     expect(catDiff(base, { ...base, neck: 'frill-neck' })).toBe('长出了颈膜（稀有）')
     expect(catDiff({ ...base, crown: 'dragon-horns' }, { ...base, crown: 'antlers' })).toBe('小龙角换成了鹿角')
     expect(catDiff({ ...base, back: 'small-wings' }, { ...base, back: 'dragon-wings' })).toBe('小翅膀进化成了龙翼（传说）')
-    expect(catDiff(base, { ...base, expression: 'small-fangs' })).toBe('表情变成小牙')
+    expect(catDiff(base, { ...base, expression: 'parted-mouth' })).toBe('表情变成微张嘴')
+    expect(catDiff(base, { ...base, eyes: 'sleepy-almond' })).toBe('眼型变成半眯眼')
   })
 })
 
@@ -238,7 +248,7 @@ describe('像素猫：hatchCat 与 isCatSpec', () => {
     }
   })
   it('isCatSpec 只认当前选项池里的值', () => {
-    const ok: CatSpec = { coat: 'calico', expression: 'tongue-tip', crown: 'halo', ears: 'fin-ears', neck: 'none', back: 'dragon-wings', tailTip: 'flame-tail' }
+    const ok: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'fin-ears', neck: 'none', back: 'dragon-wings', tailTip: 'flame-tail' }
     expect(isCatSpec(ok)).toBe(true)
     expect(isCatSpec({ ...ok, coat: 'sphynx' })).toBe(false)
     expect(isCatSpec({ ...ok, back: undefined })).toBe(false)
