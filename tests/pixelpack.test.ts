@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canonicalJson, catalogRevisionInput, findCoverage, generatablePhenotypes, isPhenotypeV2, openPack, phenotypeKey, phenotypeKeyV2, phenotypeOf, phenotypeV2Of, pixelArtKey, pixelArtKeyV2, planPixelArt, packIslands, planPixelArtV2, planPixelArtV3, type Phenotype, type PhenotypeV2, type PixelCatalog, type PixelCatalogV2, type PixelCatalogV3 } from '../src/core/pixelpack'
+import { canonicalJson, catalogRevisionInput, findCoverage, generatablePhenotypes, isPhenotypeV2, openPack, phenotypeKey, phenotypeKeyV2, phenotypeOf, phenotypeV2Of, pixelArtKey, pixelArtKeyV2, planPixelArt, compactOf, coverageEquivalent, hatchableIslands, isCoveredCompact, islandsFromProfiles, packIslands, planFromCompact, planPixelArtV2, planPixelArtV3, type Phenotype, type PhenotypeV2, type PixelCatalog, type PixelCatalogV2, type PixelCatalogV3, type PixelProfileV3 } from '../src/core/pixelpack'
 import { blankRgba, composePlan, type Rgba } from '../src/core/pixelize'
 import type { CatSpec } from '../src/core/pixelcat'
 
@@ -237,5 +237,93 @@ describe('岛：按身份性状切分，岛内横向性状必须闭合', () => {
     const islands = packIslands(pack)
     expect(islands.find((i) => i.coat === 'calico')!.closed).toBe(true)
     expect(islands.find((i) => i.coat === 'orange-white')!.closed).toBe(false)
+  })
+})
+
+describe('压缩形态：只在格子补满时才允许', () => {
+  const ph = (over: Partial<PhenotypeV2> = {}): PhenotypeV2 => ({
+    schemaVersion: 'feline-phenotype-v2', body: 'standard', coat: 'orange-white', eyes: 'round',
+    expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none', ...over,
+  })
+  /** 一个只有 crown 与 neck 有映射的 profile：完整格 = 2 crown × 2 neck = 4 */
+  const profile: PixelProfileV3 = {
+    id: 'std', body: 'standard', coat: 'orange-white', eyes: 'round', expression: 'small-fangs',
+    steps: [
+      { slot: 'back' as const, target: 'frame' as const, resources: {}, clear: [], occlusion: [] },
+      { slot: 'crown' as const, target: 'frame' as const, resources: { 'dragon-horns': 'horns' }, clear: [], occlusion: [] },
+      { slot: 'body' as const, target: 'subject' as const, resources: { 'small-fangs': 'body' }, clear: [], occlusion: [] },
+      { slot: 'ears' as const, target: 'subject' as const, resources: {}, clear: [], occlusion: [] },
+      { slot: 'tailTip' as const, target: 'frame' as const, resources: {}, clear: [], occlusion: [] },
+      { slot: 'neck' as const, target: 'subject' as const, resources: { 'small-lion-mane': 'mane' }, clear: [], occlusion: [] },
+    ],
+  }
+  const full = [ph(), ph({ crown: 'dragon-horns' }), ph({ neck: 'small-lion-mane' }), ph({ crown: 'dragon-horns', neck: 'small-lion-mane' })]
+  const build = (phenos: PhenotypeV2[]): PixelCatalogV3 => ({
+    ...catalog, schemaVersion: 'pixel-art-catalog-v3', artVersion: 'z', profiles: [profile],
+    coverage: phenos.map((p, i) => ({ id: `c${i}`, label: `c${i}`, phenotype: p, profileId: 'std', review: 'approved' as const, rgbaSha256: 'x' })),
+    generatable: phenos.map((_, i) => `c${i}`),
+  })
+
+  it('格子补满时显式 coverage 与推导集合等价', () => {
+    const eq = coverageEquivalent(build(full))
+    expect(eq.ok).toBe(true)
+    expect(eq.explicit).toBe(4)
+    expect(eq.derived).toBe(4)
+  })
+  it('格子有空洞时不等价，并指出仅推导有的那些（压缩会误判为已覆盖）', () => {
+    const eq = coverageEquivalent(build(full.slice(0, 2)))
+    expect(eq.ok).toBe(false)
+    expect(eq.explicit).toBe(2)
+    expect(eq.derived).toBe(4)
+    expect(eq.onlyDerived.length).toBeGreaterThan(0)
+    expect(eq.onlyExplicit).toEqual([])
+  })
+  it('compactOf 去掉 coverage/generatable/evidence，保留渲染必需的部分', () => {
+    const c = compactOf(build(full))
+    expect('coverage' in c).toBe(false)
+    expect('generatable' in c).toBe(false)
+    expect('evidence' in c).toBe(false)
+    expect(c.profiles).toHaveLength(1)
+    expect(Object.keys(c.resources).length).toBeGreaterThan(0)
+    expect(JSON.stringify(c).length).toBeLessThan(JSON.stringify(build(full)).length)
+  })
+  it('planFromCompact 与 planPixelArtV3 对已覆盖组合给出相同计划', () => {
+    const cat = build(full)
+    const c = compactOf(cat)
+    for (const p of full) {
+      expect(planFromCompact(c, p)).toEqual(planPixelArtV3(cat, p)!.ops)
+    }
+  })
+  it('planFromCompact 对没有映射的部件返回 null（不拼凑）', () => {
+    const c = compactOf(build(full))
+    expect(planFromCompact(c, ph({ back: 'dragon-wings' }))).toBeNull()
+    expect(planFromCompact(c, ph({ eyes: 'sleepy-almond' }))).toBeNull()
+    expect(isCoveredCompact(c, ph())).toBe(true)
+    expect(isCoveredCompact(c, ph({ crown: 'halo' }))).toBe(false)
+  })
+  it('islandsFromProfiles / hatchableIslands：闭合看矩阵，可孵化还要横向落点 ≥2', () => {
+    const one = compactOf(build(full))
+    expect(islandsFromProfiles(one)[0].closed).toBe(true) // 单格矩阵天然闭合
+    expect(hatchableIslands(one)).toHaveLength(0) // 1 表情 + 1 眼型 = 2 < 4
+    const four = compactOf({
+      ...build(full),
+      profiles: [
+        profile,
+        { ...profile, id: 'b', eyes: 'sleepy-almond' },
+        { ...profile, id: 'c', expression: 'parted-mouth', steps: profile.steps.map((s) => (s.slot === 'body' ? { ...s, resources: { 'parted-mouth': 'body' } } : s)) },
+        { ...profile, id: 'd', eyes: 'sleepy-almond', expression: 'parted-mouth', steps: profile.steps.map((s) => (s.slot === 'body' ? { ...s, resources: { 'parted-mouth': 'body' } } : s)) },
+      ],
+    })
+    expect(islandsFromProfiles(four)[0].closed).toBe(true)
+    expect(hatchableIslands(four)).toHaveLength(1)
+  })
+  it('矩阵缺角时不闭合，且报出缺的格子', () => {
+    const three = compactOf({
+      ...build(full),
+      profiles: [profile, { ...profile, id: 'b', eyes: 'sleepy-almond' }, { ...profile, id: 'c', expression: 'parted-mouth' }],
+    })
+    const [island] = islandsFromProfiles(three)
+    expect(island.closed).toBe(false)
+    expect(island.missing).toContain('orange-white/standard/sleepy-almond/parted-mouth')
   })
 })

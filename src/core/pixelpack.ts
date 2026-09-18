@@ -390,3 +390,135 @@ export function packIslands(pack: PackAdapter): PackIsland[] {
   }
   return islands.sort((a, b) => a.coat.localeCompare(b.coat) || a.body.localeCompare(b.body))
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// 压缩形态：nutri 是单文件应用，装不下完整目录（1.3.1 的 catalog.json 有 1.6MB，
+// 其中 coverage 数组占 1.09MB；将来补齐 6 毛色会到 3.8MB 以上）。
+//
+// 但 coverage 在"格子补满"的目录里，**恰好等于按 profile 槽位映射做笛卡尔积**的结果。
+// 实测：1.3.0 与 1.3.1 显式 coverage 与推导集合完全一致；而格子有空洞的 1.2.1 不一致
+// （显式 32 vs 推导 100）——所以这个等价性**必须在构建期逐条校验**，不能假定。
+// 校验通过后运行时只装 profiles + resources，约 19KB（原 1140KB 的 1.7%）。
+//
+// 注意：这不是 Codex 拒绝过的「profile 完备」契约变更。目录那边仍然逐条登记、逐条带
+// rgbaSha256、逐条可回放；这里只是消费端在**校验过等价之后**的本地压缩。
+// ──────────────────────────────────────────────────────────────────────────
+
+/** 压缩目录：去掉 coverage／generatable／evidence，只留渲染必需的部分 */
+export type CompactCatalog = Omit<PixelCatalogV3, 'coverage' | 'generatable' | 'evidence'>
+
+export function compactOf(catalog: PixelCatalogV3): CompactCatalog {
+  const { coverage: _c, generatable: _g, evidence: _e, ...rest } = catalog
+  return rest
+}
+
+/** 某 profile 下各异变槽位可选的值（含 none） */
+function slotChoices(profile: PixelProfileV3): Record<string, string[]> {
+  const out: Record<string, string[]> = {}
+  for (const st of profile.steps) if (st.slot !== 'body') out[st.slot] = ['none', ...Object.keys(st.resources)]
+  return out
+}
+
+const MUTATION_SLOT_ORDER = ['crown', 'ears', 'neck', 'back', 'tailTip'] as const
+
+/**
+ * 构建期安全检查：显式 coverage 是否恰好等于按 profile 推导的笛卡尔积。
+ * 不等价就不允许压缩——格子有空洞时，推导会把未登记的组合当成已覆盖。
+ */
+export function coverageEquivalent(catalog: PixelCatalogV3): { ok: boolean; explicit: number; derived: number; onlyExplicit: string[]; onlyDerived: string[] } {
+  const pack = openPack(catalog)
+  const explicit = new Set(pack.coverage().map((c) => pack.keyOf(c.phenotype)))
+  const derived = new Set<string>()
+  for (const profile of catalog.profiles) {
+    const choices = slotChoices(profile)
+    const walk = (i: number, acc: Record<string, string>) => {
+      if (i === MUTATION_SLOT_ORDER.length) {
+        derived.add(phenotypeKeyV2({
+          schemaVersion: 'feline-phenotype-v2', body: profile.body, coat: profile.coat,
+          eyes: profile.eyes, expression: profile.expression, ...acc,
+        } as PhenotypeV2))
+        return
+      }
+      const slot = MUTATION_SLOT_ORDER[i]
+      for (const v of choices[slot] ?? ['none']) walk(i + 1, { ...acc, [slot]: v })
+    }
+    walk(0, {})
+  }
+  const onlyExplicit = [...explicit].filter((k) => !derived.has(k))
+  const onlyDerived = [...derived].filter((k) => !explicit.has(k))
+  return { ok: onlyExplicit.length === 0 && onlyDerived.length === 0, explicit: explicit.size, derived: derived.size, onlyExplicit: onlyExplicit.slice(0, 5), onlyDerived: onlyDerived.slice(0, 5) }
+}
+
+/** 运行时的覆盖判定：找到四项全等的 profile，且每个非 none 的部件都在该步的资源里 */
+export function findProfileCompact(compact: CompactCatalog, p: PhenotypeV2): PixelProfileV3 | null {
+  const profile = compact.profiles.find((x) => x.body === p.body && x.coat === p.coat && x.eyes === p.eyes && x.expression === p.expression)
+  if (!profile) return null
+  for (const st of profile.steps) {
+    const selected = st.slot === 'body' ? p.expression : p[st.slot]
+    if (selected === 'none') continue
+    if (!(selected in st.resources)) return null
+  }
+  return profile
+}
+
+export function isCoveredCompact(compact: CompactCatalog, p: PhenotypeV2): boolean {
+  return findProfileCompact(compact, p) !== null
+}
+
+/** 运行时合成计划：与 planPixelArtV3 同语义，只是覆盖判定改为按 profile 推导 */
+export function planFromCompact(compact: CompactCatalog, p: PhenotypeV2): PixelOp[] | null {
+  const profile = findProfileCompact(compact, p)
+  if (!profile) return null
+  const ops: PixelOp[] = []
+  for (const s of profile.steps) {
+    const selected = s.slot === 'body' ? p.expression : p[s.slot]
+    if (selected === 'none') continue
+    const layer = s.resources[selected]
+    if (!layer || !compact.resources[layer]) return null
+    const rendering: PixelVariantRendering = s.variants?.[selected] ?? { target: s.target, clear: s.clear, occlusion: s.occlusion }
+    if (rendering.clear.length) ops.push({ kind: 'clear', polygons: rendering.clear })
+    ops.push({ kind: 'draw', layer, target: rendering.target, occlusion: rendering.occlusion })
+  }
+  return ops
+}
+
+/**
+ * 运行时的岛报告：只看 profiles。格子补满是压缩形态的前提，所以岛是否闭合
+ * 只取决于 (eyes × expression) 是否成完整矩阵。
+ */
+export function islandsFromProfiles(compact: CompactCatalog): PackIsland[] {
+  const groups = new Map<string, PixelProfileV3[]>()
+  for (const p of compact.profiles) {
+    const key = `${p.coat}::${p.body}`
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(p)
+  }
+  const allEyes = new Set(compact.profiles.map((p) => p.eyes))
+  const allExpr = new Set(compact.profiles.map((p) => p.expression))
+  const islands: PackIsland[] = []
+  for (const [key, profiles] of groups) {
+    const [coat, body] = key.split('::')
+    const eyes = [...new Set(profiles.map((p) => p.eyes))].sort()
+    const expressions = [...new Set(profiles.map((p) => p.expression))].sort()
+    const have = new Set(profiles.map((p) => `${p.eyes}::${p.expression}`))
+    const missing: string[] = []
+    for (const e of eyes) for (const x of expressions) if (!have.has(`${e}::${x}`)) missing.push(`${coat}/${body}/${e}/${x}`)
+    const states = profiles.reduce((n, p) => n + Object.values(slotChoices(p)).reduce((m, c) => m * c.length, 1), 0)
+    islands.push({
+      coat, body, states, eyes, expressions,
+      closed: missing.length === 0,
+      full: eyes.length === allEyes.size && expressions.length === allExpr.size,
+      missing: missing.slice(0, 8),
+    })
+  }
+  return islands.sort((a, b) => a.coat.localeCompare(b.coat) || a.body.localeCompare(b.body))
+}
+
+/**
+ * 可孵化的岛：闭合，且横向取值够多。
+ * 「够多」= 表情数 + 眼型数 ≥ 4，即每个状态至少有 2 个横向落点——
+ * 只有 1 个落点时，横向变化会变成机械交替 A→B→A→B，读起来不像"变化"。
+ */
+export function hatchableIslands(compact: CompactCatalog): PackIsland[] {
+  return islandsFromProfiles(compact).filter((i) => i.closed && i.expressions.length + i.eyes.length >= 4)
+}
