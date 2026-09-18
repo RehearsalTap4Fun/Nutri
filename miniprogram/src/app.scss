@@ -276,3 +276,151 @@ page {
 .bar-over {
   background: var(--warn);
 }
+
+/* ── 分析页 ── */
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 200px;
+  margin: 12px 0 20px;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.bar-stack {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  background: var(--bg);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bar-bin {
+  width: 100%;
+  background: var(--accent);
+  border-radius: 12px;
+}
+
+.bar-dim {
+  background: var(--line);
+}
+
+.bar-today {
+  background: var(--ink);
+}
+
+.bar-label {
+  font-size: 22px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.share {
+  display: flex;
+  height: 28px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  margin: 8px 0 16px;
+}
+
+.share-seg {
+  height: 100%;
+}
+
+.share-p { background: #8ed462; }
+.share-f { background: #ffd23f; }
+.share-c { background: #9ccfe8; }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.legend-item {
+  font-size: 24px;
+  color: var(--muted);
+}
+
+.dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin-right: 10px;
+  vertical-align: -2px;
+}
+
+.dot-p { background: #8ed462; }
+.dot-f { background: #ffd23f; }
+.dot-c { background: #9ccfe8; }
+
+.finding {
+  border-left: 8px solid var(--line);
+  padding: 4px 0 4px 22px;
+  margin-bottom: 26px;
+}
+
+.finding:last-child {
+  margin-bottom: 0;
+}
+
+.finding-bad { border-left-color: var(--warn); }
+.finding-good { border-left-color: var(--accent); }
+.finding-info { border-left-color: #9ccfe8; }
+
+.finding-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.finding-detail {
+  font-size: 24px;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.finding-action {
+  font-size: 24px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.chart-wrap {
+  position: relative;
+  margin: 8px 0 16px;
+}
+
+.chart-canvas {
+  width: 100%;
+}
+
+.chart-unit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 20px;
+  color: var(--muted);
+}
+
+.chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border-radius: 20px;
+  margin: 8px 0 16px;
+}

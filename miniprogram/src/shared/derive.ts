@@ -8,6 +8,7 @@ import type { Dish, LogEntry, MealSlot, Nutrients, Profile, Targets } from '@cor
 import { MEAL_SLOTS } from '@core/types'
 import { computeTargets } from '@core/energy'
 import { analyze, dayStat } from '@core/analysis'
+import type { Analysis } from '@core/analysis'
 import { planDay } from '@core/planner'
 import type { DayPlan } from '@core/planner'
 import { addDays } from '@core/dates'
@@ -20,6 +21,10 @@ export interface Derived {
   plan: DayPlan | null
   /** 当天已吃的合计与各餐分项 */
   stat: ReturnType<typeof dayStat> | null
+  /** 近 7 天的窗口统计、结论与自适应 TDEE */
+  analysis: Analysis | null
+  /** 未启用自适应时的基础目标，用来对照 */
+  baseTargets: Targets | null
 }
 
 export function allDishesOf(s: AppState): Dish[] {
@@ -35,7 +40,9 @@ export function dishMapOf(s: AppState): Map<string, Dish> {
 /** 与网页版 App.tsx 同一套推导顺序：基础目标 → 分析 → 自适应目标 → 当日推荐 */
 export function derive(s: AppState, date: string, now = new Date()): Derived {
   const profile = s.profile
-  if (!profile) return { profile: null, targets: null, plan: null, stat: null }
+  if (!profile) {
+    return { profile: null, targets: null, plan: null, stat: null, analysis: null, baseTargets: null }
+  }
 
   const dishMap = dishMapOf(s)
   const dishes = allDishesOf(s)
@@ -69,5 +76,5 @@ export function derive(s: AppState, date: string, now = new Date()): Derived {
     eatenToday: eaten,
   })
 
-  return { profile, targets, plan, stat }
+  return { profile, targets, plan, stat, analysis, baseTargets }
 }
