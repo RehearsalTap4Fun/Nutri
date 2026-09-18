@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import Taro, { useRouter } from '@tarojs/taro'
 import { View, Text, Input, Button, ScrollView } from '@tarojs/components'
-import type { DishCategory, LogEntry, MealSlot } from '@core/types'
+import type { DishCategory, MealSlot } from '@core/types'
 import { MEAL_SLOTS } from '@core/types'
 import { dishNutrientsFor, servingGrams } from '@core/nutrition'
 import { todayStr } from '@core/dates'
@@ -9,8 +9,8 @@ import { searchFoods } from '@webui/foodSearch'
 import type { FoodPick } from '@webui/foodSearch'
 import { CAT_LABEL, SLOT_LABEL, defaultTimeForSlot, portionText } from '@webui/format'
 import { frequentBySlot } from '@core/recent'
-import { uid } from '../../shared/state'
 import { useAppState } from '../../shared/useAppState'
+import { logEntry } from '../../shared/log'
 import { allDishesOf, dishMapOf } from '../../shared/derive'
 
 const CATS: Array<DishCategory | 'all'> = ['all', 'staple', 'protein', 'veg', 'soup', 'breakfast', 'snack', 'fruit', 'combo']
@@ -47,13 +47,11 @@ export default function Log() {
 
   const save = () => {
     if (!picked) return
-    const entry: LogEntry = {
-      id: uid(),
+    const r = logEntry(update, {
       date,
       slot,
       time: defaultTimeForSlot(slot),
       portion,
-      updatedAt: Date.now(),
       ...(picked.kind === 'dish'
         ? { dishId: picked.dish.id }
         : {
@@ -65,10 +63,14 @@ export default function Log() {
               dairyG: picked.food.dairyG,
             },
           }),
-    }
-    update((s) => ({ ...s, entries: [...s.entries, entry] }))
-    Taro.showToast({ title: `已记 ${pickedName}`, icon: 'none' })
-    setTimeout(() => Taro.navigateBack(), 500)
+    })
+    const note = r.hatched
+      ? '蛋孵出来了'
+      : r.titles.length
+        ? `解锁称号「${r.titles[0]}」`
+        : r.change || `已记 ${pickedName}`
+    Taro.showToast({ title: note, icon: 'none' })
+    setTimeout(() => Taro.navigateBack(), 700)
   }
 
   return (

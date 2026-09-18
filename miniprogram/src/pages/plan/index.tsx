@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import Taro from '@tarojs/taro'
 import { View, Text, Button } from '@tarojs/components'
-import type { LogEntry, MealSlot } from '@core/types'
+import type { MealSlot } from '@core/types'
 import { todayStr } from '@core/dates'
 import { SLOT_LABEL, defaultTimeForSlot, portionText } from '@webui/format'
 import { servingGrams } from '@core/nutrition'
-import { uid } from '../../shared/state'
 import { useAppState } from '../../shared/useAppState'
+import { logEntry } from '../../shared/log'
 import { derive, dishMapOf } from '../../shared/derive'
 
 export default function Plan() {
@@ -34,17 +34,13 @@ export default function Plan() {
   /** 一键补记：把推荐的这道菜按推荐份量直接记下来 */
   const logIt = (slot: MealSlot, dishId: string, portion: number) => {
     const name = dishMap.get(dishId)?.name || dishId
-    const entry: LogEntry = {
-      id: uid(),
-      date,
-      slot,
-      time: defaultTimeForSlot(slot),
-      dishId,
-      portion,
-      updatedAt: Date.now(),
-    }
-    update((s) => ({ ...s, entries: [...s.entries, entry] }))
-    Taro.showToast({ title: `已记 ${name}`, icon: 'none' })
+    const r = logEntry(update, { date, slot, time: defaultTimeForSlot(slot), dishId, portion })
+    const note = r.hatched
+      ? '蛋孵出来了'
+      : r.titles.length
+        ? `解锁称号「${r.titles[0]}」`
+        : r.change || `已记 ${name}`
+    Taro.showToast({ title: note, icon: 'none' })
   }
 
   const reshuffle = () => {

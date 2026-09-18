@@ -424,3 +424,51 @@ page {
   border-radius: 20px;
   margin: 8px 0 16px;
 }
+
+/* ── 健康小管家 ── */
+
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.cat-canvas {
+  flex: none;
+}
+
+.cat-slot,
+.cat-egg {
+  flex: none;
+  width: 128px;
+  height: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 4px dashed var(--line);
+  border-radius: 40px;
+}
+
+.cat-egg-mark {
+  font-size: 48px;
+  color: var(--muted);
+}
+
+.cat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cat-desc {
+  font-size: 28px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.cat-titles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}

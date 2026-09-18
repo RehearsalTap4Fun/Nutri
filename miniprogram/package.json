@@ -14,7 +14,8 @@
     "build": "taro build --type weapp",
     "dev:h5": "taro build --type h5 --watch",
     "build:h5": "taro build --type h5",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "pixelpack": "node scripts/genPixelPack.mjs"
   },
   "browserslist": [
     "iOS >= 9",
