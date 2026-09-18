@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- 饮食日记 · 微信小程序头像
+       与 PWA 图标同一套语言（米色底、苹果绿不规则色块、墨色岸线、白碗），
+       但按微信的显示条件重做：主体放大填满圆形安全区、墨线加粗、去掉小尺寸下看不见的碗脚。 -->
+  <rect width="512" height="512" fill="#F5F1E4"/>
+  <!-- 外接圆归心并留 20px 余量：微信在下拉任务栏、启动页会把头像裁成圆形，
+       裁切半径 256，本图最远像素半径 236。 -->
+  <g stroke="#2C2E2A" stroke-linejoin="round" stroke-linecap="round"
+     transform="translate(-3.5 6) translate(256 256) scale(0.9908) translate(-256 -256)">
+    <path d="M70 148C100 74 202 48 300 68C402 88 474 160 466 258C458 360 388 456 274 470C162 484 64 414 48 320C34 242 44 176 70 148Z"
+          fill="#8ED462" stroke-width="16"/>
+    <path d="M114 268H398C398 362 334 424 256 424C178 424 114 362 114 268Z"
+          fill="#FFFFFF" stroke-width="18"/>
+    <path d="M212 238C212 208 236 202 236 170" fill="none" stroke-width="20"/>
+    <path d="M300 238C300 208 324 202 324 170" fill="none" stroke-width="20"/>
+    <circle cx="398" cy="120" r="40" fill="#FFD23F" stroke-width="16"/>
+  </g>
+</svg>
