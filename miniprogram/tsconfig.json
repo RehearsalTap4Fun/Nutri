@@ -27,7 +27,9 @@
       // 与网页版共用同一份源码，不复制
       "@core/*": ["../src/core/*"],
       "@data/*": ["../src/data/*"],
-      "@store/*": ["../src/store/*"]
+      "@store/*": ["../src/store/*"],
+      // src/ui 里 format.ts 与 foodSearch.ts 是纯函数，没有 DOM 依赖，一并复用
+      "@webui/*": ["../src/ui/*"]
     }
   },
   "include": ["./src", "./types", "./config", "../src/core", "../src/data", "../src/store"],

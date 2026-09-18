@@ -1,13 +1,14 @@
 import path from 'node:path'
-
-/** 与网页版共用的源码目录 */
-const SHARED_SRC = path.resolve(__dirname, '..', '..', 'src')
 import { defineConfig, type UserConfigExport } from '@tarojs/cli'
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin'
 import devConfig from './dev'
 import prodConfig from './prod'
 
+/** 与网页版共用的源码目录 */
+const SHARED_SRC = path.resolve(__dirname, '..', '..', 'src')
+
 // https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数
+
 export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
   const baseConfig: UserConfigExport<'webpack5'> = {
     projectName: 'nutri-miniprogram',
@@ -26,7 +27,8 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
       '@': path.resolve(__dirname, '..', 'src'),
       '@core': path.resolve(SHARED_SRC, 'core'),
       '@data': path.resolve(SHARED_SRC, 'data'),
-      '@store': path.resolve(SHARED_SRC, 'store')
+      '@store': path.resolve(SHARED_SRC, 'store'),
+      '@webui': path.resolve(SHARED_SRC, 'ui')
     },
     compiler: 'webpack5',
     plugins: [
@@ -49,6 +51,10 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
       compile: {
         include: [SHARED_SRC]
       },
+      // Terser 默认按现代语法压缩，会把 babel 已经降级的 `a && a.b` 重新写回
+      // 可选链 `a?.b`，导致开发者工具上传时报
+      // 「invalid file: common.js SyntaxError: Unexpected token .」。
+
       postcss: {
         pxtransform: {
           enable: true,

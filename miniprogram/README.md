@@ -37,6 +37,8 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 - `tsconfig.json` 里的 `paths` 给出 `@core/*`、`@data/*`、`@store/*`，并把这三个目录纳入 `include`
 - `config/index.ts` 里给 webpack 配同名 `alias`，再用 `mini.compile.include` 把这三个目录交给 babel（它们在 `sourceRoot` 之外，默认不会被编译）
 
+另外 `src/ui/format.ts` 与 `src/ui/foodSearch.ts` 虽然放在 `ui` 目录下，但没有任何 DOM 依赖，所以也通过 `@webui/*` 直接复用，没有重写标签表和搜索排序。
+
 现在的实测结果：`npx tsc --noEmit` 在小程序的 tsconfig 下对这三个目录**零报错**，网页版 272 个测试仍全绿，`src/` 一行未改。
 
 ## 小程序侧只写了三样东西
@@ -45,15 +47,22 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 |---|---|
 | `src/shared/state.ts` | 把 `loadState`/`saveState` 换成 `Taro.getStorageSync`/`setStorageSync`，其余（`defaultState`/`normalizeState`/`uid`/`exportJson`）从网页版原样 re-export。附一个极简订阅 store，让四个 tab 看到同一份状态 |
 | `src/shared/derive.ts` | 按 `src/App.tsx` 的同一套顺序调用 `computeTargets` → `analyze` → `planDay`，自己不含业务逻辑 |
-| `src/pages/*` | 四个 tab 的界面 |
+| `src/pages/*` | 四个 tab 加一个记录页的界面 |
 
 整份状态存在一个 key 里，和网页版一致。小程序的存储上限是单 key 1MB、总量 10MB。
 
 ## 现在能跑到哪一步
 
-能用：建档案（性别、出生年份、身高、体重、活动量、目标、饮食风格、餐数），今日页按档案算出热量、三大营养素、基础代谢、总消耗、纤维与钠上限，计划页排出当天三餐并给出每道菜和理由。数字全部来自网页版同一套计算，菜品 569 道、食材 372 种也是同一份数据。
+闭环已经通了：**建档案 → 看目标 → 记一笔 → 数字实时回算 → 推荐跟着调整**。
 
-还没搬：录餐、分析页的三张图表、健康小管家。
+- **我的**：性别、出生年份、身高、体重、活动量、目标、饮食风格、餐数。
+- **今日**：剩余热量与进度条，三大营养素「已吃／目标」，按餐次列出当天每一笔（点一笔可删），下面是基础代谢、总消耗、纤维，高血压模式下额外显示钠。
+- **记一笔**：从 569 道菜里搜，可按分类筛，选份量（½ 到 2 份）后写入。没输入关键词时先给这一餐的常吃与收藏。
+- **计划**：按当天剩余预算排三餐，每道菜给出份量与理由，可以「记下」一键补记，也可以「换一换」重排。
+
+数字全部来自网页版同一套计算，菜品 569 道、食材 372 种是同一份数据。
+
+还没搬：分析页的三张图表、健康小管家。
 
 不打算搬：
 
@@ -65,6 +74,28 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 
 1. **分析页的图表**：网页版是三张手写 SVG。小程序没有 svg 元素，静态图标可以转 base64 走 `image` 组件，但数据驱动的图表只能改用 canvas 重画。
 2. **健康小管家**：合成逻辑（`pixelize.ts` + `catArt.ts` + `pixelpack.ts`，832 行纯数组运算）一行都不用改，要换的只有取像素和出图那几个 canvas 调用，外加 58 张 PNG 的引用方式（`import.meta.glob` 在小程序里没有，要改成静态表）。另外 `image-rendering: pixelated` 在 WXSS 里的支持不稳，是这块的主要风险。
+
+## 一个踩过的坑：上传报 invalid file
+
+开发者工具上传时如果报：
+
+```
+Error: invalid file: common.js, 1:1872
+SyntaxError: Unexpected token .
+```
+
+那是产物里留了**可选链 `?.`**，小程序的代码校验过不了。
+
+原因在 `babel.config.js`：不写 `targets` 时 babel 会去读 `package.json` 的 `browserslist`，脚手架给的默认值（`defaults and fully supports es6-module`）太新，`?.` 会被原样保留。共用的 `core`／`data` 里用了不少可选链，于是全落在 `common.js` 里。
+
+现在 `babel.config.js` 显式写了 `targets: { chrome: '53', ios: '9' }`，`package.json` 的 `browserslist` 也一并调低。改动这两处之后要重新构建并确认产物干净：
+
+```bash
+npm run build
+grep -rE '\?\.[A-Za-z_$([]' dist/*.js dist/pages/*/*.js   # 应当无输出
+```
+
+注意直接 `grep '?\.'` 会误报：压缩后的三元表达式 `x ? .85 : .8` 长得一样。要判断是不是真的可选链，得看 `?.` 后面跟的是标识符还是数字。
 
 ## 后端
 
