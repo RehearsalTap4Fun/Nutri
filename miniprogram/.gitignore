@@ -1,0 +1,11 @@
+dist/
+deploy_versions/
+.temp/
+.rn_temp/
+node_modules/
+.DS_Store
+.swc
+*.local
+
+# 开发者工具的本机私有配置
+project.private.config.json

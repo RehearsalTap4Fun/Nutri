@@ -1,0 +1,167 @@
+/* 设计令牌与网页版 src/styles.css 同源：米色底、墨色字、苹果绿强调、不规则胶囊感的圆角 */
+page {
+  --bg: #f5f1e4;
+  --card: #fffdf6;
+  --ink: #2c2e2a;
+  --muted: #8a8c86;
+  --line: #e4ddc9;
+  --accent: #8ed462;
+  --warn: #e8a33f;
+  --r-card: 28px;
+  --r-pill: 999px;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, 'PingFang SC', sans-serif;
+}
+
+.wrap {
+  padding: 24px 28px 48px;
+}
+
+.card {
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.h1 {
+  font-size: 40px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.h2 {
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 24px;
+  line-height: 1.6;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 2px solid var(--line);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 26px;
+  color: var(--muted);
+}
+
+.value {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.big {
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.macros {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.macro {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 20px;
+  padding: 16px;
+  text-align: center;
+}
+
+.macro .k {
+  font-size: 22px;
+  color: var(--muted);
+}
+
+.macro .v {
+  font-size: 30px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 8px 22px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.btn {
+  margin-top: 24px;
+  background: var(--accent);
+  color: var(--ink);
+  border-radius: var(--r-pill);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 2.6;
+}
+
+.btn-plain {
+  background: var(--card);
+  border: 2px solid var(--line);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 2px solid var(--line);
+}
+
+.field:last-of-type {
+  border-bottom: none;
+}
+
+.field .k {
+  font-size: 28px;
+}
+
+.field .ctl {
+  font-size: 28px;
+  text-align: right;
+  min-width: 240px;
+  color: var(--ink);
+}
+
+.meal {
+  padding: 18px 0;
+  border-bottom: 2px solid var(--line);
+}
+
+.meal:last-child {
+  border-bottom: none;
+}
+
+.meal .slot {
+  font-size: 26px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.meal .dish {
+  font-size: 28px;
+  line-height: 1.7;
+}

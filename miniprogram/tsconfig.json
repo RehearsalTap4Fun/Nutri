@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "skipLibCheck": true,
+    "module": "commonjs",
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "lib",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      // TS5090 leading './'
+      "@/*": ["./src/*"],
+      // 与网页版共用同一份源码，不复制
+      "@core/*": ["../src/core/*"],
+      "@data/*": ["../src/data/*"],
+      "@store/*": ["../src/store/*"]
+    }
+  },
+  "include": ["./src", "./types", "./config", "../src/core", "../src/data", "../src/store"],
+  "compileOnSave": false
+}
