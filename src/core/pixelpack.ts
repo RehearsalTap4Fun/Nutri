@@ -321,3 +321,72 @@ export function planPixelArtV3(catalog: PixelCatalogV3, p: PhenotypeV2): { ops: 
   }
   return { ops, coverage }
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// 「岛」：按身份性状（coat、body）切分的独立区域。
+// nutri 的性状分两类——身份性状（coat／body）一只猫一生不变，横向性状（eyes／expression）随时会换。
+// 所以不同 (coat, body) 之间**不需要互相连通**，但同一个岛内部必须闭合：
+// 岛内任何已覆盖状态的任何横向变化，落点都还在岛内，否则猫一换表情就掉出覆盖。
+// 这条性质让毛色可以一种一种补、每补完一种立刻可用；nutri 只要限制孵化落在闭合的岛上。
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface PackIsland {
+  coat: string
+  body: string
+  /** 岛内已覆盖的状态数 */
+  states: number
+  /** 岛内出现过的横向取值 */
+  eyes: string[]
+  expressions: string[]
+  /** 闭合：岛内每个状态的每个横向变化都落在岛内（按岛自己的取值集合判定） */
+  closed: boolean
+  /** 完整：岛的横向取值覆盖了整个目录的并集（比闭合更强，衡量丰富度） */
+  full: boolean
+  /** 未闭合时具体缺哪些落点（去重后的前若干条，供补图排期） */
+  missing: string[]
+}
+
+/**
+ * 按 (coat, body) 分岛并判定闭合／完整。
+ * 只看横向性状的连通性；部件槽位的连通性由 pixelPackCoverage 单独报告，两者互不替代。
+ */
+export function packIslands(pack: PackAdapter): PackIsland[] {
+  const cov = pack.coverage() as unknown as Array<{ phenotype: Record<string, string> }>
+  const lateral = ['expression', ...pack.extraTraits] // v1 只有 expression；v2/v3 还有 eyes
+  const allValues = new Map<string, Set<string>>()
+  for (const t of lateral) allValues.set(t, new Set(cov.map((c) => c.phenotype[t])))
+
+  const groups = new Map<string, Array<Record<string, string>>>()
+  for (const c of cov) {
+    const key = `${c.phenotype.coat}::${c.phenotype.body}`
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(c.phenotype)
+  }
+
+  const islands: PackIsland[] = []
+  for (const [key, states] of groups) {
+    const [coat, body] = key.split('::')
+    const own = new Map<string, Set<string>>()
+    for (const t of lateral) own.set(t, new Set(states.map((p) => p[t])))
+    const keys = new Set(states.map((p) => pack.keyOf(p as unknown as AnyPhenotype)))
+    const missing = new Set<string>()
+    for (const p of states) {
+      for (const t of lateral) {
+        for (const to of own.get(t)!) {
+          if (to === p[t]) continue
+          const nextKey = pack.keyOf({ ...p, [t]: to } as unknown as AnyPhenotype)
+          if (!keys.has(nextKey)) missing.add(nextKey)
+        }
+      }
+    }
+    islands.push({
+      coat, body, states: states.length,
+      eyes: [...(own.get('eyes') ?? [])].sort(),
+      expressions: [...own.get('expression')!].sort(),
+      closed: missing.size === 0,
+      full: lateral.every((t) => own.get(t)!.size === allValues.get(t)!.size),
+      missing: [...missing].slice(0, 8),
+    })
+  }
+  return islands.sort((a, b) => a.coat.localeCompare(b.coat) || a.body.localeCompare(b.body))
+}

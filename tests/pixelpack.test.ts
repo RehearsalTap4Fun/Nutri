@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canonicalJson, catalogRevisionInput, findCoverage, generatablePhenotypes, isPhenotypeV2, openPack, phenotypeKey, phenotypeKeyV2, phenotypeOf, phenotypeV2Of, pixelArtKey, pixelArtKeyV2, planPixelArt, planPixelArtV2, planPixelArtV3, type Phenotype, type PhenotypeV2, type PixelCatalog, type PixelCatalogV2, type PixelCatalogV3 } from '../src/core/pixelpack'
+import { canonicalJson, catalogRevisionInput, findCoverage, generatablePhenotypes, isPhenotypeV2, openPack, phenotypeKey, phenotypeKeyV2, phenotypeOf, phenotypeV2Of, pixelArtKey, pixelArtKeyV2, planPixelArt, packIslands, planPixelArtV2, planPixelArtV3, type Phenotype, type PhenotypeV2, type PixelCatalog, type PixelCatalogV2, type PixelCatalogV3 } from '../src/core/pixelpack'
 import { blankRgba, composePlan, type Rgba } from '../src/core/pixelize'
 import type { CatSpec } from '../src/core/pixelcat'
 
@@ -191,5 +191,51 @@ describe('pixelpack v3：按性状覆盖渲染层级', () => {
   it('未覆盖的组合返回 null；generatable 只给已验收的', () => {
     expect(planPixelArtV3(catalog3, { ...p2, crown: 'halo' })).toBeNull()
     expect(openPack(catalog3).generatable()).toHaveLength(1)
+  })
+})
+
+describe('岛：按身份性状切分，岛内横向性状必须闭合', () => {
+  const mk = (body: string, eyes: string, expression: string, coat = 'orange-white'): PhenotypeV2 =>
+    ({ schemaVersion: 'feline-phenotype-v2', body, coat, eyes, expression, crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' })
+  const build = (phenos: PhenotypeV2[]): PixelCatalogV3 => ({
+    ...catalog, schemaVersion: 'pixel-art-catalog-v3', artVersion: 'x',
+    profiles: phenos.map((p, i) => ({ id: `p${i}`, body: p.body, coat: p.coat, eyes: p.eyes, expression: p.expression, steps: catalog.profiles[0].steps })),
+    coverage: phenos.map((p, i) => ({ id: `c${i}`, label: `c${i}`, phenotype: p, profileId: `p${i}`, review: 'approved' as const, rgbaSha256: 'x' })),
+    generatable: phenos.map((_, i) => `c${i}`),
+  })
+  it('单一横向取值的岛天然闭合（没得换就掉不出去），但不完整', () => {
+    const pack = openPack(build([mk('standard', 'round', 'small-fangs'), mk('standard', 'round', 'parted-mouth', 'calico')]))
+    const islands = packIslands(pack)
+    expect(islands).toHaveLength(2)
+    for (const i of islands) { expect(i.closed).toBe(true); expect(i.full).toBe(false) }
+  })
+  it('岛内横向取值不成矩阵就不闭合，并报出缺失落点', () => {
+    // standard 有两种表情，但 sleepy 只有一种 → 换表情会掉出去
+    const pack = openPack(build([
+      mk('standard', 'round', 'small-fangs'), mk('standard', 'round', 'parted-mouth'), mk('standard', 'sleepy-almond', 'small-fangs'),
+    ]))
+    const [island] = packIslands(pack)
+    expect(island.closed).toBe(false)
+    expect(island.full).toBe(true) // 两种表情、两种眼型都出现过，但不成矩阵
+    expect(island.missing.some((m) => m.includes('sleepy-almond') && m.includes('parted-mouth'))).toBe(true)
+  })
+  it('横向取值成完整矩阵时闭合且完整', () => {
+    const pack = openPack(build([
+      mk('standard', 'round', 'small-fangs'), mk('standard', 'round', 'parted-mouth'),
+      mk('standard', 'sleepy-almond', 'small-fangs'), mk('standard', 'sleepy-almond', 'parted-mouth'),
+    ]))
+    const [island] = packIslands(pack)
+    expect(island.closed).toBe(true)
+    expect(island.full).toBe(true)
+    expect(island.states).toBe(4)
+  })
+  it('不同毛色互不影响：一种毛色不闭合不会拖累另一种', () => {
+    const pack = openPack(build([
+      mk('standard', 'round', 'small-fangs'), mk('standard', 'round', 'parted-mouth'), mk('standard', 'sleepy-almond', 'small-fangs'),
+      mk('standard', 'round', 'small-fangs', 'calico'),
+    ]))
+    const islands = packIslands(pack)
+    expect(islands.find((i) => i.coat === 'calico')!.closed).toBe(true)
+    expect(islands.find((i) => i.coat === 'orange-white')!.closed).toBe(false)
   })
 })

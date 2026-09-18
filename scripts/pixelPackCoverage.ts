@@ -7,6 +7,7 @@
  * 支持 pixel-art-catalog v1 与 v2；v2 的 eyes 在 nutri 成长规则里尚未建模，按横向性状处理（取值域来自目录）。
  *
  *   npx tsx scripts/pixelPackCoverage.ts --missing        # 另一种模式：按 profile 列出「完整格里还缺哪些组合」
+ *   npx tsx scripts/pixelPackCoverage.ts --islands        # 按「岛」(coat, body) 报告闭合／完整，决定哪些毛色可孵化
  * 用于对照 Codex 的零新图补洞批次：每个 profile 的完整格 = 各槽位已有映射的笛卡尔积。
  *
  * 口径：以目录里每个已覆盖表现型为起点，枚举 nutri `mutateCat` 允许的全部下一步（只进不退、
@@ -16,7 +17,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { CAT_SLOT_OPTIONS, MUTABLE_SLOTS, MUTATION_SLOTS, upgradesFor, type CatSlot } from '../src/core/pixelcat'
-import { openPack, type AnyPhenotype } from '../src/core/pixelpack'
+import { openPack, packIslands, type AnyPhenotype } from '../src/core/pixelpack'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const RP = resolve(process.env.RANDOMPET_DIR ?? join(ROOT, '..', 'RandomPet-master'))
@@ -52,6 +53,25 @@ function reportMissing(pack: ReturnType<typeof openPack>): void {
 const raw: unknown = JSON.parse(readFileSync(join(PACK, 'catalog.json'), 'utf8'))
 const pack = openPack(raw)
 if (args.includes('--missing')) { reportMissing(pack); process.exit(0) }
+if (args.includes('--islands')) {
+  const islands = packIslands(pack)
+  console.log('「岛」= (coat, body)：身份性状一生不变、岛间不需连通；岛内横向性状（表情／眼型）必须闭合')
+  console.log('')
+  console.log('coat / body'.padEnd(36) + '状态'.padStart(5) + '  ' + '表情'.padEnd(24) + '眼型'.padEnd(20) + '闭合 完整')
+  for (const i of islands) {
+    console.log(
+      `${i.coat}/${i.body}`.padEnd(36) + String(i.states).padStart(5) + '  ' +
+      i.expressions.join(',').padEnd(22) + (i.eyes.join(',') || '-').padEnd(18) +
+      (i.closed ? '  是' : '  否') + (i.full ? '   是' : '   否'),
+    )
+    for (const m of i.missing) console.log('      缺落点 ' + m)
+  }
+  const closed = islands.filter((i) => i.closed)
+  console.log('')
+  console.log(`闭合的岛 ${closed.length}/${islands.length}（可孵化）· 完整的岛 ${islands.filter((i) => i.full).length}/${islands.length}`)
+  console.log(`可孵化的毛色：${[...new Set(closed.map((i) => i.coat))].join(', ') || '（无）'}`)
+  process.exit(0)
+}
 const catalog = pack.catalog
 const cov = pack.coverage()
 const covered = new Map(cov.map((c) => [pack.keyOf(c.phenotype), c]))
