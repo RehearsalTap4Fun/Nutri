@@ -92,16 +92,27 @@ const cloudFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     )
   }
 
+  const ok = result.status >= 200 && result.status < 300
+  // 409 是版本冲突，客户端要靠它走「再拉一次再合并」的分支，不能在这里抛。
+  // 其余错误状态只给一个状态码不够查，把服务端正文一起带出来。
+  if (!ok && result.status !== 409) {
+    throw new SyncError(`同步服务返回 ${result.status}：${result.text || '（无正文）'}`, 'server')
+  }
   return {
-    ok: result.status >= 200 && result.status < 300,
+    ok,
     status: result.status,
     json: async () => JSON.parse(result.text),
     text: async () => result.text,
   } as unknown as Response
 }) as typeof fetch
 
-/** apiBase 留空，路径就是 `/sync/<id>`，正好是云函数放行的形状 */
-const OPTS = { fetchImpl: cloudFetch, apiBase: '' }
+/**
+ * 传 `'/'` 而不是 `''`。
+ * `syncOnce` 里写的是 `opts.apiBase || './api'`，空字符串是 falsy，会被当成没传，
+ * 路径就成了 `./api/sync/<id>`，云函数的白名单正则不认，直接回 400。
+ * `'/'` 是 truthy，末尾斜杠又会被 `replace(/\/$/, '')` 去掉，最终正好是 `/sync/<id>`。
+ */
+const OPTS = { fetchImpl: cloudFetch, apiBase: '/' }
 
 export interface SyncOutcome {
   state: AppState

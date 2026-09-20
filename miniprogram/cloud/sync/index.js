@@ -53,7 +53,8 @@ exports.main = async (event) => {
   const path = String(event && event.path ? event.path : '')
   // 只放行同步接口，避免这个云函数被当成任意转发器
   if (!/^\/sync\/[a-f0-9]{64}(\?.*)?$/.test(path)) {
-    return { status: 400, text: JSON.stringify({ error: '路径不合法' }) }
+    // 把实际收到的路径带回去，客户端拼错时一眼能看出来
+    return { status: 400, text: JSON.stringify({ error: `路径不合法：${path}` }) }
   }
   if (!['GET', 'PUT', 'DELETE'].includes(method)) {
     return { status: 405, text: JSON.stringify({ error: '方法不允许' }) }
