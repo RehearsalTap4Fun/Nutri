@@ -93,13 +93,19 @@ export default function Me() {
     setSyncing(true)
     Taro.showLoading({ title: '同步中' })
     try {
-      const r = await runSync(getLatest(), code)
+      const before = getLatest()
+      const r = await runSync(before, code)
       update(() => r.state)
       Taro.hideLoading()
-      Taro.showToast({
-        title: r.pulledChanges ? '已拉到云端的改动' : r.pushed ? '已上传' : '已是最新',
-        icon: 'none',
-      })
+      const added = r.state.entries.length - before.entries.length
+      const note = r.pulledChanges
+        ? added > 0
+          ? `拉到 ${added} 条新记录`
+          : '已拉到云端的改动'
+        : r.pushed
+          ? '本机数据已上传（云端原先没有）'
+          : '两边本来就一样'
+      Taro.showToast({ title: note, icon: 'none', duration: 2500 })
     } catch (e) {
       Taro.hideLoading()
       Taro.showModal({

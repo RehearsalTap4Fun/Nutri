@@ -186,6 +186,7 @@ export async function diagnose(code: string): Promise<DiagnoseStep[]> {
     return steps
   }
 
+  let rec: { version: number; blob: string | null } | null = null
   try {
     const r = await callCloud('GET', `/sync/${id}?t=${Date.now()}`)
     if (r.status === 0) {
@@ -194,14 +195,51 @@ export async function diagnose(code: string): Promise<DiagnoseStep[]> {
         ok: false,
         detail: `云函数跑起来了，但连不上服务器：${r.error || '未知原因'}`,
       })
-    } else {
-      steps.push({ name: '云函数访问同步服务', ok: true, detail: `服务器返回 ${r.status}` })
+      return steps
     }
+    steps.push({ name: '云函数访问同步服务', ok: true, detail: `服务器返回 ${r.status}` })
+    if (r.status >= 200 && r.status < 300) rec = JSON.parse(r.text)
   } catch (e) {
     steps.push({
       name: '调用云函数',
       ok: false,
       detail: e instanceof Error ? e.message : String(e),
+    })
+    return steps
+  }
+
+  // 这一步最能说明问题：云端这个同步码下到底有没有东西
+  if (!rec || !rec.blob) {
+    steps.push({
+      name: '云端这个码下的数据',
+      ok: false,
+      detail:
+        '空的。这个同步码在云端还没有任何数据——多半是它和网页版用的不是同一个码，' +
+        '去网页版「我的」页复制那边的同步码填进来。',
+    })
+    return steps
+  }
+
+  try {
+    const { decryptJson } = await import('@sync/crypto')
+    const { deriveKeys } = await import('@sync/crypto')
+    const st = decryptJson<{
+      entries?: unknown[]
+      weights?: unknown[]
+      profile?: unknown
+    }>(deriveKeys(code), rec.blob)
+    steps.push({
+      name: '云端这个码下的数据',
+      ok: true,
+      detail: `版本 ${rec.version}，${(st.entries || []).length} 条饮食记录、${
+        (st.weights || []).length
+      } 条体重，档案${st.profile ? '有' : '没有'}`,
+    })
+  } catch (e) {
+    steps.push({
+      name: '解开云端数据',
+      ok: false,
+      detail: `解不开：同步码不对，或数据损坏。原文：${e instanceof Error ? e.message : String(e)}`,
     })
   }
 
