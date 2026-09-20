@@ -28,6 +28,7 @@ npm run check        # 扫产物里小程序不接受的新语法（上传前必
 npm run typecheck    # 类型检查（含共用的 core/data/store/sync）
 npm run pixelpack    # 重新生成像素猫图层（像素包更新后跑）
 npm run tabicons     # 重新生成 tabBar 图标（改图标或配色后跑）
+npm run landedge     # 重新生成陆地岸线图（改陆地色后跑）
 npm run dev:h5       # 编译成 H5，本机快速看效果
 ```
 
@@ -99,6 +100,10 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 **canvas 里读不到 CSS 变量**，`LineChart.tsx` 和 `PixelCat.tsx` 各自硬编码了一份颜色，改 token 时要跟着改。
 
 tabBar 图标由 `npm run tabicons` 生成，路径直接抄自网页版 `src/ui/icons.tsx`，两端是同一组图标。小程序 tabBar 只吃位图，所以同一份 SVG 用两种颜色各渲染一张。
+
+**手绘岸线走图片。** 陆地下沿在网页版是一段 SVG 路径，小程序没有 svg 元素；用不规则圆角近似过，但圆角只能给平滑曲线，手绘的起伏丢了。现在由 `npm run landedge` 把同一段路径渲染成一条 750×135 的窄带（超标时另有珊瑚色岸线那版），只横向拉伸，起伏不走形。
+
+两个坑：**WXSS 的 `background-image` 不能引用包内本地图片**，所以用 `Image` 组件绝对定位铺在下沿，不走 CSS 背景；另外 sharp 的 `density` 会让 SVG 按更高分辨率渲染，不显式 `resize` 会出一张 6250 宽的图，真机上白占内存。图里的绿必须和 `--land` 逐字节一致，否则接缝可见。
 
 ## 图表是怎么画的
 

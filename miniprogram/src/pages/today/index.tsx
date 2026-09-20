@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import Taro from '@tarojs/taro'
-import { View, Text, Button } from '@tarojs/components'
+import { View, Text, Button, Image } from '@tarojs/components'
 import type { LogEntry, MealSlot } from '@core/types'
 import { MEAL_SLOTS } from '@core/types'
 import { entryNutrients, entryName } from '@core/nutrition'
@@ -188,6 +188,13 @@ export default function Today() {
   return (
     <View className="wrap">
       <View className="land">
+        {/* 岸线：网页版是一段 SVG 路径，小程序没有 svg 元素；
+            WXSS 的 background-image 又不能引用包内图片，所以用 Image 铺在下沿 */}
+        <Image
+          className="land-edge"
+          src={over ? '/assets/land/land-edge-over.png' : '/assets/land/land-edge.png'}
+          mode="scaleToFill"
+        />
         <View className="land-top">
           <View className="lake-wrap">
             <View className="lake" style={{ transform: `rotate(-7deg) scale(${lakeScale})` }} />

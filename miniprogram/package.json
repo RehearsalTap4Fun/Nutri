@@ -17,7 +17,8 @@
     "build:h5": "taro build --type h5",
     "typecheck": "tsc --noEmit",
     "pixelpack": "node scripts/genPixelPack.mjs",
-    "tabicons": "node scripts/genTabIcons.mjs"
+    "tabicons": "node scripts/genTabIcons.mjs",
+    "landedge": "node scripts/genLandEdge.mjs"
   },
   "browserslist": [
     "iOS >= 9",

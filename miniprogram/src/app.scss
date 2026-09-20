@@ -927,14 +927,23 @@ page {
    网页版的陆地边缘是一段 SVG 路径，小程序没有 svg 元素，
    这里用不规则圆角近似同一个手绘轮廓。 */
 .land {
-  /* 顶到屏幕边缘：抵消 .wrap 的内边距 */
-  margin: -24px -32px 0;
-  padding: 40px 32px 44px;
+  position: relative;
+  /* 顶到屏幕边缘：抵消 .wrap 的内边距。下边距给岸线让位 */
+  margin: -24px -32px 135px;
+  padding: 40px 32px 20px;
   background: var(--land);
   color: var(--lobe-ink);
-  /* 下沿两角不等，近似网页版那段手绘岸线 */
-  border-bottom-left-radius: 80px 56px;
-  border-bottom-right-radius: 120px 72px;
+}
+
+/* 岸线窄带接在陆地下面。高度固定，只横向拉伸，起伏不会走形 */
+.land-edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  width: 100%;
+  height: 135px;
+  display: block;
 }
 
 .land-top {
