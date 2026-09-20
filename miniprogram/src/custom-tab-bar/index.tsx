@@ -16,6 +16,8 @@ import { useState } from 'react'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 
+import './index.scss'
+
 const TABS = [
   { key: 'today', path: '/pages/today/index', label: '今日', icon: 'today' },
   { key: 'plan', path: '/pages/plan/index', label: '计划', icon: 'plan' },
@@ -23,14 +25,20 @@ const TABS = [
   { key: 'me', path: '/pages/me/index', label: '我的', icon: 'me' },
 ]
 
+/** 从页面栈里取当前路由。组件自己的 router 不可靠，页面栈是准的 */
+function currentKey(): string {
+  const pages = Taro.getCurrentPages()
+  const route = pages.length ? pages[pages.length - 1].route || '' : ''
+  const hit = TABS.find((t) => route.indexOf(`pages/${t.key}/`) >= 0)
+  return hit ? hit.key : TABS[0].key
+}
+
 export default function CustomTabBar() {
-  const [active, setActive] = useState('')
+  // 首帧就要有选中态，别等 useDidShow
+  const [active, setActive] = useState(currentKey)
 
   useDidShow(() => {
-    const inst = Taro.getCurrentInstance()
-    const path = inst.router ? inst.router.path : ''
-    const hit = TABS.find((t) => path && path.indexOf(t.key) >= 0)
-    if (hit) setActive(hit.key)
+    setActive(currentKey())
   })
 
   const go = (t: (typeof TABS)[number]) => {

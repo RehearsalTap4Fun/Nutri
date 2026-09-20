@@ -1,0 +1,83 @@
+/* 自定义 tabBar 的样式必须放在这里。
+   它是独立的自定义组件，默认 styleIsolation 是 isolated，
+   app.scss 里的全局样式和 CSS 变量都到不了，所以颜色在这里写字面值。
+   改 app.scss 的 token 时记得同步这几个。 */
+$bg: #f5f1e4;
+$ink: #2c2e2a;
+$ink-2: #5a5d58;
+$land: #8ed462;
+$stroke: rgba(44, 46, 42, 0.92);
+
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  padding: 12px 28px calc(20px + env(safe-area-inset-bottom));
+  background: $bg;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* 导航上方那道岸线，米色从内容上漫过来 */
+.nav-shore {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  width: 100%;
+  height: 24px;
+  display: block;
+}
+
+.nav-inner {
+  display: flex;
+  width: 100%;
+  height: 112px;
+  box-sizing: border-box;
+  /* 不规则胶囊：这套语言的签名，别改成等圆角 */
+  border-radius: 68px 60px 72px 56px / 60px 72px 56px 68px;
+  background: $bg;
+  border: 3px solid $stroke;
+  padding: 0 12px;
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: $ink-2;
+}
+
+.nav-btn-on {
+  color: $ink;
+}
+
+/* 选中项：图标底下垫一块陆地绿 */
+.nav-ico {
+  width: 76px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 32px 28px 34px 26px / 28px 34px 26px 32px;
+}
+
+.nav-btn-on .nav-ico {
+  background: $land;
+}
+
+.nav-img {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+.nav-lbl {
+  font-size: 20px;
+  line-height: 1.3;
+  margin-top: 2px;
+}
