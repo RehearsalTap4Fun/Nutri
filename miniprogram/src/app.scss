@@ -629,3 +629,61 @@ page {
   line-height: 1.6;
   color: var(--warn);
 }
+
+/* ── 喝水 ── */
+
+.cups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 18px 0 14px;
+}
+
+.cup {
+  width: 84px;
+  height: 84px;
+  border-radius: 28px;
+  border: 3px solid var(--line);
+  background: var(--bg);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+
+.cup-lit {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.cup-thirsty {
+  border-color: var(--warn);
+}
+
+.cup-hour {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.cup-lit .cup-hour {
+  color: var(--ink);
+}
+
+.mode-desc {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid var(--line);
+}
+
+.mode-desc .entry-sub {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.disclaimer {
+  display: block;
+  margin-top: 14px;
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--muted);
+}

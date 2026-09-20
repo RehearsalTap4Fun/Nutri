@@ -9,6 +9,11 @@ import { SLOT_LABEL, entryPortionText, showsSodium } from '@webui/format'
 import { describeCat, growthSteps, isFullyGrown, maxGrowthSteps } from '@core/pixelcat'
 import { CAT_TITLE_MAP, titlesFor } from '@core/catTitles'
 import { PixelCat } from '../../components/PixelCat'
+import { Water } from '../../components/Water'
+import { Vitals } from '../../components/Vitals'
+import { waterOnDate, fluidFromDrinks } from '@core/water'
+import type { VitalEntry } from '@core/types'
+import { uid } from '../../shared/state'
 import { useAppState } from '../../shared/useAppState'
 import { derive, dishMapOf } from '../../shared/derive'
 
@@ -66,6 +71,44 @@ export default function Today() {
   const go = (slot: MealSlot) =>
     Taro.navigateTo({ url: `/pages/log/index?slot=${slot}&date=${date}` })
 
+  const conds = profile.conditions || []
+  const showBp = conds.includes('hypertension')
+  const showGlucose = conds.includes('diabetes')
+  const drankMl = waterOnDate(state.water, date)
+  const fluidMl = fluidFromDrinks(state.entries, dishMap, date)
+  const hour = new Date().getHours()
+
+  /** 把当天饮水总量设成 ml：用一条当天的记录承载，点杯子来回改都只动这一条 */
+  const setWater = (ml: number) => {
+    update((s) => {
+      const others = s.water.filter((w) => w.date !== date)
+      if (ml <= 0) {
+        const dropped = s.water.filter((w) => w.date === date).map((w) => w.id)
+        return {
+          ...s,
+          water: others,
+          tombstones: [
+            ...s.tombstones,
+            ...dropped.map((id) => ({ coll: 'water' as const, id, at: Date.now() })),
+          ],
+        }
+      }
+      const mine = s.water.find((w) => w.date === date)
+      const rec = { id: mine ? mine.id : uid(), date, ml, updatedAt: Date.now() }
+      return { ...s, water: [...others, rec] }
+    })
+  }
+
+  const addVital = (v: Omit<VitalEntry, 'id'>) =>
+    update((s) => ({ ...s, vitals: [...s.vitals, { ...v, id: uid() }] }))
+
+  const removeVital = (id: string) =>
+    update((s) => ({
+      ...s,
+      vitals: s.vitals.filter((v) => v.id !== id),
+      tombstones: [...s.tombstones, { coll: 'vitals' as const, id, at: Date.now() }],
+    }))
+
   const creature = state.creature
   const grown = creature ? growthSteps(creature.cat) : 0
   const maxGrown = maxGrowthSteps()
@@ -107,6 +150,22 @@ export default function Today() {
             </View>
           </View>
         </View>
+      </View>
+
+      <View className="card">
+        <View className="h2">喝水</View>
+        <Water
+          totalMl={drankMl}
+          targetMl={t.waterMl}
+          isToday={date === todayStr()}
+          hour={hour}
+          onSet={setWater}
+        />
+        {fluidMl > 0 ? (
+          <Text className="entry-sub">
+            另外从饮品里摄入约 {Math.round(fluidMl)} ml，不计入上面的杯数。
+          </Text>
+        ) : null}
       </View>
 
       <View className="card">
@@ -208,7 +267,7 @@ export default function Today() {
             {n ? Math.round(n.fiber) : 0}/{Math.round(t.fiber)} g
           </Text>
         </View>
-        {showsSodium(profile.conditions) ? (
+        {showsSodium(conds) ? (
           <View className="row">
             <Text className="label">钠</Text>
             <Text className="value">
@@ -217,6 +276,26 @@ export default function Today() {
           </View>
         ) : null}
       </View>
+
+      {showBp ? (
+        <View className="card">
+          <View className="h2">血压</View>
+          <Vitals kind="bp" entries={state.vitals} date={date} onAdd={addVital} onRemove={removeVital} />
+        </View>
+      ) : null}
+
+      {showGlucose ? (
+        <View className="card">
+          <View className="h2">血糖</View>
+          <Vitals
+            kind="glucose"
+            entries={state.vitals}
+            date={date}
+            onAdd={addVital}
+            onRemove={removeVital}
+          />
+        </View>
+      ) : null}
     </View>
   )
 }

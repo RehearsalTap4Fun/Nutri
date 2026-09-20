@@ -1,9 +1,6 @@
 import type { Condition, Sex } from '../core/types'
-import { CONDITIONS } from '../core/types'
-import { CONDITION_DESC, CONDITION_DISCLAIMER, CONDITION_LABEL, TRIMESTER_LABEL } from '../core/conditions'
+import { CONDITION_DESC, CONDITION_DISCLAIMER, CONDITION_LABEL, TRIMESTER_LABEL, toggleCondition, visibleConditions } from '../core/conditions'
 import { Fold } from './bits'
-
-const MATERNAL: Condition[] = ['pregnancy', 'lactation']
 
 /**
  * 营养模式选择器：芯片多选、孕程分段、说明与免责声明折叠。
@@ -15,12 +12,10 @@ export function ModesPicker({ sex, conditions, trimester, onChange }: {
   trimester?: 1 | 2 | 3
   onChange: (conditions: Condition[], trimester?: 1 | 2 | 3) => void
 }) {
-  const visible = CONDITIONS.filter((c) => sex === 'female' || !MATERNAL.includes(c))
+  // 可见范围与互斥规则放在 core，小程序用同一份
+  const visible = visibleConditions(sex)
   const toggle = (c: Condition) => {
-    let next = conditions.includes(c) ? conditions.filter((x) => x !== c) : [...conditions, c]
-    // 孕期与哺乳期互斥
-    if (c === 'pregnancy' && next.includes('pregnancy')) next = next.filter((x) => x !== 'lactation')
-    if (c === 'lactation' && next.includes('lactation')) next = next.filter((x) => x !== 'pregnancy')
+    const next = toggleCondition(conditions, c)
     onChange(next, next.includes('pregnancy') ? (trimester || 2) : undefined)
   }
   return (

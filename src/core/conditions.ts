@@ -1,7 +1,8 @@
 // 特殊人群模式的规则：推荐时的排除与加权、规划说明、分析建议。
 // 依据：中国居民膳食指南(2022)、中国居民膳食营养素参考摄入量(2023)、中国高血压防治指南、
 // 中国 2 型糖尿病防治指南医学营养治疗部分、DASH 饮食。均为一般性建议，不替代医嘱。
-import type { Condition, Dish, LogEntry, Profile, Targets } from './types'
+import type { Condition, Dish, LogEntry, Profile, Sex, Targets } from './types'
+import { CONDITIONS } from './types'
 import { INGREDIENT_MAP } from '../data/ingredients'
 import { dishNutrients, macroKcalShare } from './nutrition'
 import type { Finding, WindowStats } from './analysis'
@@ -19,6 +20,22 @@ export const CONDITION_DESC: Record<Condition, string> = {
   gerd: '低脂少量多餐，排除辛辣、油炸、咖啡浓茶、酒精与碳酸饮料，番茄柑橘类降权，晚餐要早',
   training: '蛋白每公斤 2 g 分到每餐，优选瘦肉蛋白；「今日」可标训练日，当天 +300 千卡碳水',
 }
+/** 只对女性显示的模式。两端共用，避免一端看得到另一端看不到 */
+export const MATERNAL_CONDITIONS: Condition[] = ['pregnancy', 'lactation']
+
+/** 按性别过滤出可选的模式 */
+export function visibleConditions(sex: Sex): Condition[] {
+  return CONDITIONS.filter((c) => sex === 'female' || !MATERNAL_CONDITIONS.includes(c))
+}
+
+/** 切换一个模式，处理孕期与哺乳期互斥。返回新的模式列表 */
+export function toggleCondition(conditions: Condition[], c: Condition): Condition[] {
+  let next = conditions.includes(c) ? conditions.filter((x) => x !== c) : [...conditions, c]
+  if (c === 'pregnancy' && next.includes('pregnancy')) next = next.filter((x) => x !== 'lactation')
+  if (c === 'lactation' && next.includes('lactation')) next = next.filter((x) => x !== 'pregnancy')
+  return next
+}
+
 export const TRIMESTER_LABEL: Record<1 | 2 | 3, string> = { 1: '孕早期(1~13周)', 2: '孕中期(14~27周)', 3: '孕晚期(28周起)' }
 
 export const CONDITION_DISCLAIMER =

@@ -1,13 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Taro from '@tarojs/taro'
 import { View, Text, Picker, Input, Button } from '@tarojs/components'
-import type { ActivityLevel, DietStyle, Goal, Profile, Sex } from '@core/types'
+import type { ActivityLevel, Condition, DietStyle, Goal, Profile, Sex } from '@core/types'
+import {
+  CONDITION_DESC,
+  CONDITION_DISCLAIMER,
+  CONDITION_LABEL,
+  TRIMESTER_LABEL,
+  toggleCondition,
+  visibleConditions,
+} from '@core/conditions'
 import { ageOf, bmi, bmiLabel } from '@core/energy'
 import { profileProblems } from '@core/profile'
 import { retire } from '@core/creature'
 import { describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
 import { getLatest, useAppState } from '../../shared/useAppState'
 import { diagnose, dropRemote, newSyncCode, normalizeSyncCode, runSync } from '../../shared/sync'
+import { getAutoSyncStatus, resetAutoSyncFingerprint, watchAutoSync } from '../../shared/autoSync'
 import { CatDexCard } from '../../components/CatDex'
 import { PixelCat } from '../../components/PixelCat'
 
@@ -95,16 +104,32 @@ export default function Me() {
   }
   const problems = p ? profileProblems(p) : []
 
+  // 可见范围与孕期/哺乳期互斥都走 core 的同一份实现，和网页版一致
+  const conds: Condition[] = (p && p.conditions) || []
+  const visibleConds = visibleConditions(p ? p.sex : 'male')
+  const toggleCond = (c: Condition) => {
+    const next = toggleCondition(conds, c)
+    setProfile({
+      conditions: next,
+      pregnancyTrimester: next.includes('pregnancy') ? p?.pregnancyTrimester || 2 : undefined,
+    })
+  }
+
+  const [autoStatus, setAutoStatus] = useState(getAutoSyncStatus())
+  useEffect(() => watchAutoSync(setAutoStatus), [])
+
   const [codeInput, setCodeInput] = useState('')
   const [syncing, setSyncing] = useState(false)
   const sync = state.settings.sync
 
-  const setSync = (next: { code: string; enabled: boolean }) =>
-    update((s) => ({
+  const setSync = (next: { code: string; enabled: boolean }) => {
+    resetAutoSyncFingerprint()
+    return update((s) => ({
       ...s,
       settings: { ...s.settings, sync: next },
       meta: { ...s.meta, settingsAt: Date.now() },
     }))
+  }
 
   const doSync = async (code: string) => {
     if (syncing) return
@@ -343,6 +368,47 @@ export default function Me() {
       </View>
 
       <View className="card">
+        <View className="h2">特殊人群模式</View>
+        <Text className="muted">
+          选了之后目标、推荐与分析都会跟着变。高血压会显示血压记录，糖尿病会显示血糖记录。
+        </Text>
+        <View className="cats">
+          {visibleConds.map((c) => (
+            <Text
+              key={c}
+              className={conds.includes(c) ? 'chip chip-on' : 'chip'}
+              onClick={() => toggleCond(c)}
+            >
+              {CONDITION_LABEL[c]}
+            </Text>
+          ))}
+        </View>
+        {conds.includes('pregnancy') ? (
+          <View className="cats">
+            {([1, 2, 3] as const).map((tri) => (
+              <Text
+                key={tri}
+                className={p.pregnancyTrimester === tri ? 'chip chip-on' : 'chip'}
+                onClick={() => setProfile({ pregnancyTrimester: tri })}
+              >
+                {TRIMESTER_LABEL[tri]}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+        {conds.length > 0 ? (
+          <View className="mode-desc">
+            {conds.map((c) => (
+              <Text className="entry-sub" key={c}>
+                {CONDITION_LABEL[c]}：{CONDITION_DESC[c]}
+              </Text>
+            ))}
+            <Text className="disclaimer">{CONDITION_DISCLAIMER}</Text>
+          </View>
+        ) : null}
+      </View>
+
+      <View className="card">
         <View className="h2">健康小管家</View>
         {creature ? (
           <View>
@@ -379,6 +445,14 @@ export default function Me() {
             <View className="field">
               <Text className="k">同步码</Text>
               <Text className="ctl code">{sync.code}</Text>
+            </View>
+            <View className="row">
+              <Text className="label">自动同步</Text>
+              <Text className="value">
+                {autoStatus
+                  ? `${autoStatus.ok ? '' : '失败：'}${autoStatus.detail}`
+                  : '开着，改动后几秒自动上传'}
+              </Text>
             </View>
             <Button
               className="btn btn-plain"

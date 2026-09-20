@@ -49,3 +49,35 @@ describe('档案校验', () => {
     expect(p.map((x) => x.field).sort()).toEqual(['birthYear', 'heightCm', 'weightKg'])
   })
 })
+
+import { toggleCondition, visibleConditions } from '../src/core/conditions'
+
+describe('人群模式（两端共用）', () => {
+  it('孕期哺乳期只对女性可选', () => {
+    expect(visibleConditions('female')).toContain('pregnancy')
+    expect(visibleConditions('female')).toContain('lactation')
+    expect(visibleConditions('male')).not.toContain('pregnancy')
+    expect(visibleConditions('male')).not.toContain('lactation')
+  })
+
+  it('备孕/多囊对两种性别都可选', () => {
+    expect(visibleConditions('male')).toContain('preconception')
+    expect(visibleConditions('female')).toContain('preconception')
+  })
+
+  it('其余模式不受性别影响', () => {
+    for (const c of ['hypertension', 'diabetes', 'gout', 'elderly', 'training'] as const) {
+      expect(visibleConditions('male')).toContain(c)
+    }
+  })
+
+  it('孕期与哺乳期互斥', () => {
+    expect(toggleCondition(['lactation'], 'pregnancy')).toEqual(['pregnancy'])
+    expect(toggleCondition(['pregnancy'], 'lactation')).toEqual(['lactation'])
+  })
+
+  it('再点一次是取消，且不误伤别的模式', () => {
+    expect(toggleCondition(['pregnancy', 'gout'], 'pregnancy')).toEqual(['gout'])
+    expect(toggleCondition(['gout'], 'diabetes').sort()).toEqual(['diabetes', 'gout'])
+  })
+})
