@@ -21,6 +21,7 @@ import { budgetFocus, remainOf, suggestForBudget } from '@core/budget'
 import { guessSlot, portionText } from '@webui/format'
 import { servingGrams } from '@core/nutrition'
 import { SignalChips } from '../../components/bits'
+import { SwipeRow } from '../../components/SwipeRow'
 import { CanIEat } from '../../components/CanIEat'
 import { useState } from 'react'
 import { Water } from '../../components/Water'
@@ -68,21 +69,19 @@ export default function Today() {
   const target = Math.round(t.kcal)
   const remain = target - eaten
   const over = remain < 0
-  // 水塘大小随剩余热量变化：吃得越多塘越小。范围掐在 0.55~1.1 之间，免得缩成一点或撑出格子
-  const lakeScale = Math.max(0.55, Math.min(1.1, remain > 0 ? 0.55 + (remain / target) * 0.55 : 0.55))
+  // 水塘 = 还能吃的份额。公式照抄网页版：按已吃比例开平方根映射，
+  // 前段下降更快、后段变缓，正常进食阶段就能看出塘在变小；超标则塘没了。
+  const eatenRatio = remain > 0 ? Math.max(0, Math.min(1, 1 - remain / target)) : 1
+  const lakeScale = remain > 0 ? Math.max(0.58, Math.min(1, 1 - 0.42 * Math.sqrt(eatenRatio))) : 0
 
+  /** 左滑露出删除已经是明确动作，不再叠一层确认弹窗 */
   const removeEntry = (id: string) => {
-    Taro.showModal({
-      title: '删掉这一笔？',
-      success: (r) => {
-        if (!r.confirm) return
-        update((s) => ({
-          ...s,
-          entries: s.entries.filter((e) => e.id !== id),
-          tombstones: [...s.tombstones, { coll: 'entries' as const, id, at: Date.now() }],
-        }))
-      },
-    })
+    update((s) => ({
+      ...s,
+      entries: s.entries.filter((e) => e.id !== id),
+      tombstones: [...s.tombstones, { coll: 'entries' as const, id, at: Date.now() }],
+    }))
+    Taro.showToast({ title: '已删除', icon: 'none' })
   }
 
   const go = (slot: MealSlot) =>
@@ -358,7 +357,7 @@ export default function Today() {
         )}
       </View>
 
-      {MEAL_SLOTS.filter((s) => s !== 'snack' || profile.mealsPerDay === 4 || bySlot.snack.length > 0).map(
+      {MEAL_SLOTS.filter((sl) => t.slotShare[sl] > 0 || bySlot[sl].length > 0).map(
         (slot) => {
           const list = bySlot[slot]
           const kcal = list.reduce((a, e) => a + entryNutrients(e, dishMap).kcal, 0)
@@ -377,18 +376,20 @@ export default function Today() {
                 <Text className="lobe-sub">还没记录</Text>
               ) : (
                 list.map((e) => (
-                  <View className="entry" key={e.id} onClick={() => removeEntry(e.id)}>
-                    <View>
-                      <View className="entry-name">{entryName(e, dishMap)}</View>
-                      <View className="entry-sub">
-                        {entryPortionText(e, dishMap)}
-                        {e.time ? ` · ${e.time}` : ''}
+                  <SwipeRow key={e.id} onDelete={() => removeEntry(e.id)}>
+                    <View className="entry">
+                      <View>
+                        <View className="entry-name">{entryName(e, dishMap)}</View>
+                        <View className="entry-sub">
+                          {entryPortionText(e, dishMap)}
+                          {e.time ? ` · ${e.time}` : ''}
+                        </View>
                       </View>
+                      <Text className="entry-kcal">
+                        {Math.round(entryNutrients(e, dishMap).kcal)}
+                      </Text>
                     </View>
-                    <Text className="entry-kcal">
-                      {Math.round(entryNutrients(e, dishMap).kcal)}
-                    </Text>
-                  </View>
+                  </SwipeRow>
                 ))
               )}
             </View>
