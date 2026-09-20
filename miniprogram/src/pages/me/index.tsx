@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Taro from '@tarojs/taro'
-import { View, Text, Picker, Input, Button } from '@tarojs/components'
+import { View, Text, Picker, Input, Button, Textarea } from '@tarojs/components'
 import type { ActivityLevel, Condition, DietStyle, Goal, Profile, Sex } from '@core/types'
 import {
   CONDITION_DESC,
@@ -15,8 +15,13 @@ import { profileProblems } from '@core/profile'
 import { retire } from '@core/creature'
 import { describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
 import { getLatest, useAppState } from '../../shared/useAppState'
+import { derive } from '../../shared/derive'
+import { todayStr } from '@core/dates'
 import { diagnose, dropRemote, newSyncCode, normalizeSyncCode, runSync } from '../../shared/sync'
 import { getAutoSyncStatus, resetAutoSyncFingerprint, watchAutoSync } from '../../shared/autoSync'
+import { exportJson, importJson } from '@store/storage'
+import { shortCite, targetBasis } from '@core/sources'
+import { Fold } from '../../components/bits'
 import { CatDexCard } from '../../components/CatDex'
 import { PixelCat } from '../../components/PixelCat'
 
@@ -74,6 +79,9 @@ export default function Me() {
       meta: { ...s.meta, profileAt: Date.now() },
     }))
 
+  // 目标依据那一节要用到算好的目标
+  const d = useMemo(() => derive(state, todayStr()), [state])
+
   const idx = useMemo(
     () => ({
       sex: p ? SEX.findIndex(([v]) => v === p.sex) : 0,
@@ -117,6 +125,50 @@ export default function Me() {
 
   const [autoStatus, setAutoStatus] = useState(getAutoSyncStatus())
   useEffect(() => watchAutoSync(setAutoStatus), [])
+
+  const [importText, setImportText] = useState('')
+  const [ioMode, setIoMode] = useState<'none' | 'import'>('none')
+
+  /** 导出：小程序没有下载，复制到剪贴板是唯一可行的出口 */
+  const doExport = () => {
+    const text = exportJson(state)
+    Taro.setClipboardData({
+      data: text,
+      success: () =>
+        Taro.showModal({
+          title: '已复制到剪贴板',
+          content: `${state.entries.length} 条记录、${state.weights.length} 条体重。粘贴到备忘录或文件里保存。不含 API key 与同步码。`,
+          showCancel: false,
+        }),
+    })
+  }
+
+  const doImport = () => {
+    if (!importText.trim()) {
+      Taro.showToast({ title: '先粘贴要导入的内容', icon: 'none' })
+      return
+    }
+    try {
+      const next = importJson(importText)
+      Taro.showModal({
+        title: '确认导入？',
+        content: `将覆盖本机数据，导入 ${next.entries.length} 条记录、${next.weights.length} 条体重。`,
+        success: (r) => {
+          if (!r.confirm) return
+          update(() => next)
+          setImportText('')
+          setIoMode('none')
+          Taro.showToast({ title: '已导入', icon: 'none' })
+        },
+      })
+    } catch (e) {
+      Taro.showModal({
+        title: '导入失败',
+        content: e instanceof Error ? e.message : String(e),
+        showCancel: false,
+      })
+    }
+  }
 
   const [codeInput, setCodeInput] = useState('')
   const [syncing, setSyncing] = useState(false)
@@ -246,6 +298,10 @@ export default function Me() {
 
   const age = ageOf(p.birthYear)
   const b = bmi(p.weightKg, p.heightCm)
+  // 目标依据逐项列出规则与出处，算法与网页版共用
+  const basisRows = d.targets
+    ? targetBasis(p, d.targets, { adaptive: state.settings.useAdaptiveTdee })
+    : []
 
   return (
     <View className="wrap">
@@ -500,6 +556,62 @@ export default function Me() {
       </View>
 
       <CatDexCard creature={creature} history={state.creatureHistory} dex={state.creatureDex} />
+
+      <View className="card">
+        <View className="h2">目标依据</View>
+        <Fold summary="这些目标怎么来的">
+          {basisRows.map((r) => (
+            <View className="basis-row" key={r.metric}>
+              <View className="slot-head">
+                <Text className="basis-metric">{r.metric}</Text>
+                <Text className="basis-value">{r.value}</Text>
+              </View>
+              <Text className="basis-rule">{r.rule}</Text>
+              <Text className="basis-src">依据：{shortCite(r.sources)}</Text>
+            </View>
+          ))}
+          <Text className="basis-src">数值为估算，不构成医疗建议。</Text>
+        </Fold>
+      </View>
+
+      <View className="card">
+        <View className="h2">数据</View>
+        <Text className="muted">
+          {sync.enabled
+            ? '已开云同步，另一台设备用同步码接入即可；导出仍可做备份。'
+            : '只存在这台手机上，换设备前先导出，或开云同步。'}
+        </Text>
+        <View className="row">
+          <Text className="label">现有</Text>
+          <Text className="value">
+            {state.entries.length} 条记录 · {state.weights.length} 条体重
+          </Text>
+        </View>
+        <Button className="btn btn-plain" onClick={doExport}>
+          导出到剪贴板
+        </Button>
+        <Button
+          className="btn btn-plain"
+          onClick={() => setIoMode(ioMode === 'import' ? 'none' : 'import')}
+        >
+          {ioMode === 'import' ? '取消导入' : '导入'}
+        </Button>
+        {ioMode === 'import' ? (
+          <View>
+            <Textarea
+              className="io-text"
+              value={importText}
+              placeholder="把导出的内容粘贴到这里"
+              maxlength={-1}
+              onInput={(e) => setImportText(e.detail.value)}
+            />
+            <Button className="btn" onClick={doImport}>
+              确认导入
+            </Button>
+          </View>
+        ) : null}
+        <Text className="entry-sub">导出内容不含 API key 与同步码。</Text>
+      </View>
 
       <View className="card">
         <View className="h2">关于这一版</View>

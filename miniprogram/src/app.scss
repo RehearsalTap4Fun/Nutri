@@ -1663,3 +1663,55 @@ page {
   box-shadow: none;
   color: var(--lobe-ink-land);
 }
+
+/* ── 目标依据 ── */
+.basis-row {
+  padding: 16px 0;
+  border-bottom: 2px solid var(--hair);
+}
+
+.basis-row:last-of-type {
+  border-bottom: none;
+}
+
+.basis-metric {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.basis-value {
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+
+.basis-rule {
+  display: block;
+  font-size: 24px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.basis-src {
+  display: block;
+  font-size: 20px;
+  color: var(--faint);
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+/* ── 导入的粘贴框 ── */
+.io-text {
+  width: 100%;
+  height: 280px;
+  box-sizing: border-box;
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 3px var(--hair);
+  border-radius: var(--r-chip);
+  font-size: 22px;
+  font-family: Menlo, Consolas, monospace;
+  line-height: 1.5;
+}
