@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro'
 import { View, Text, Picker, Input, Button } from '@tarojs/components'
 import type { ActivityLevel, DietStyle, Goal, Profile, Sex } from '@core/types'
 import { ageOf, bmi, bmiLabel } from '@core/energy'
+import { profileProblems } from '@core/profile'
 import { retire } from '@core/creature'
 import { describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
 import { getLatest, useAppState } from '../../shared/useAppState'
@@ -76,6 +77,23 @@ export default function Me() {
 
   const creature = state.creature
   const fullyGrown = creature ? isFullyGrown(creature.cat) : false
+
+  type NumField = 'birthYear' | 'heightCm' | 'weightKg'
+  // 数字输入用草稿：逐字保存会把打到一半的「17」存成身高，网页版那边就直接卡住保存按钮
+  const [draft, setDraft] = useState<Record<NumField, string | null>>({
+    birthYear: null,
+    heightCm: null,
+    weightKg: null,
+  })
+  const commit = (field: NumField) => {
+    const raw = draft[field]
+    setDraft((d) => ({ ...d, [field]: null }))
+    if (raw === null || raw.trim() === '') return
+    const v = Number(raw)
+    if (!Number.isFinite(v)) return
+    setProfile({ [field]: v } as Partial<Profile>)
+  }
+  const problems = p ? profileProblems(p) : []
 
   const [codeInput, setCodeInput] = useState('')
   const [syncing, setSyncing] = useState(false)
@@ -226,11 +244,9 @@ export default function Me() {
           <Input
             className="ctl"
             type="number"
-            value={String(p.birthYear)}
-            onInput={(e) => {
-              const v = Number(e.detail.value)
-              if (v >= 1900 && v <= new Date().getFullYear()) setProfile({ birthYear: v })
-            }}
+            value={draft.birthYear !== null ? draft.birthYear : String(p.birthYear)}
+            onInput={(e) => setDraft((d) => ({ ...d, birthYear: e.detail.value }))}
+            onBlur={() => commit('birthYear')}
           />
         </View>
 
@@ -239,11 +255,9 @@ export default function Me() {
           <Input
             className="ctl"
             type="digit"
-            value={String(p.heightCm)}
-            onInput={(e) => {
-              const v = Number(e.detail.value)
-              if (v > 0) setProfile({ heightCm: v })
-            }}
+            value={draft.heightCm !== null ? draft.heightCm : String(p.heightCm)}
+            onInput={(e) => setDraft((d) => ({ ...d, heightCm: e.detail.value }))}
+            onBlur={() => commit('heightCm')}
           />
         </View>
 
@@ -252,13 +266,21 @@ export default function Me() {
           <Input
             className="ctl"
             type="digit"
-            value={String(p.weightKg)}
-            onInput={(e) => {
-              const v = Number(e.detail.value)
-              if (v > 0) setProfile({ weightKg: v })
-            }}
+            value={draft.weightKg !== null ? draft.weightKg : String(p.weightKg)}
+            onInput={(e) => setDraft((d) => ({ ...d, weightKg: e.detail.value }))}
+            onBlur={() => commit('weightKg')}
           />
         </View>
+
+        {problems.length > 0 ? (
+          <View className="problems">
+            {problems.map((x) => (
+              <Text className="problem" key={x.field}>
+                {x.message}
+              </Text>
+            ))}
+          </View>
+        ) : null}
 
         <View className="field">
           <Text className="k">现在</Text>

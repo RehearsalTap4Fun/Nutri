@@ -3,6 +3,7 @@ import type { ActivityLevel, Allergen, DietStyle, Goal, Profile, Sex } from '../
 import { ModesPicker } from './ModesPicker'
 import { TargetBasis } from './Sources'
 import { bmi, bmiLabel, computeTargets } from '../core/energy'
+import { profileProblems } from '../core/profile'
 import { ACTIVITY_LABEL, ALLERGEN_LABEL, GOAL_LABEL, SEX_LABEL, STYLE_DESC, STYLE_LABEL } from './format'
 
 const ALLERGENS: Allergen[] = ['seafood', 'peanut', 'nuts', 'dairy', 'gluten', 'egg', 'soy']
@@ -18,7 +19,9 @@ export function ProfileForm({ initial, onSave, onCancel }: { initial: Profile | 
     if (k === 'sex' && v === 'male') return { ...next, conditions: (next.conditions || []).filter((c) => c !== 'pregnancy' && c !== 'lactation'), pregnancyTrimester: undefined }
     return next
   })
-  const valid = p.heightCm >= 120 && p.heightCm <= 230 && p.weightKg >= 30 && p.weightKg <= 250 && p.birthYear >= 1920 && p.birthYear <= new Date().getFullYear() - 10
+  // 取值范围与小程序共用同一份判定，两端不会出现一边存得下、另一边救不回来
+  const problems = useMemo(() => profileProblems(p), [p])
+  const valid = problems.length === 0
   const preview = useMemo(() => (valid ? computeTargets(p) : null), [p, valid])
   const b = bmi(p.weightKg, p.heightCm)
   const conds = p.conditions || []
@@ -94,6 +97,12 @@ export function ProfileForm({ initial, onSave, onCancel }: { initial: Profile | 
           <div className="kv"><span>水果 · 奶类 · 饮水</span><span className="num">{preview.fruitG} g · {preview.dairyG} g · {preview.waterMl} ml</span></div>
           <TargetBasis profile={p} targets={preview} />
           {preview.notes.length > 0 && <div className="stack" style={{ gap: 6, marginTop: 10 }}>{preview.notes.map((n, i) => <div key={i} className="note">{n}</div>)}</div>}
+        </div>
+      )}
+
+      {problems.length > 0 && (
+        <div className="stack" style={{ gap: 4 }}>
+          {problems.map((x) => <div key={x.field} className="note warn">{x.message}</div>)}
         </div>
       )}
 
