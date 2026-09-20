@@ -25,10 +25,11 @@ interface Props {
   unit?: string
 }
 
-const INK = '#2c2e2a'
-const MUTED = '#8a8c86'
-const LINE = '#e4ddc9'
-const ACCENT = '#8ed462'
+// canvas 里拿不到 CSS 变量，只能同步一份。改 app.scss 的 token 时记得跟着改这里。
+const INK = '#2c2e2a'      /* --ink */
+const MUTED = '#6b6e68'    /* --muted */
+const LINE = 'rgba(44, 46, 42, 0.14)'  /* --hair */
+const ACCENT = '#8ed462'   /* --land */
 
 /** getSystemInfoSync 已标记废弃，新基础库用 getWindowInfo */
 function pixelRatio(): number {

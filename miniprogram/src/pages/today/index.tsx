@@ -131,19 +131,19 @@ export default function Today() {
           />
         </View>
         <View className="macros">
-          <View className="macro">
+          <View className="macro macro-p">
             <View className="k">蛋白质</View>
             <View className="v">
               {n ? Math.round(n.protein) : 0}/{Math.round(t.protein)}g
             </View>
           </View>
-          <View className="macro">
+          <View className="macro macro-f">
             <View className="k">脂肪</View>
             <View className="v">
               {n ? Math.round(n.fat) : 0}/{Math.round(t.fat)}g
             </View>
           </View>
-          <View className="macro">
+          <View className="macro macro-c">
             <View className="k">碳水</View>
             <View className="v">
               {n ? Math.round(n.carbs) : 0}/{Math.round(t.carbs)}g
@@ -210,20 +210,18 @@ export default function Today() {
           const list = bySlot[slot]
           const kcal = list.reduce((a, e) => a + entryNutrients(e, dishMap).kcal, 0)
           return (
-            <View className="card" key={slot}>
-              <View className="slot-head">
-                <View className="h2" style={{ marginBottom: 0 }}>
-                  {SLOT_LABEL[slot]}
-                  {list.length > 0 ? (
-                    <Text className="muted">　{Math.round(kcal)} 千卡</Text>
-                  ) : null}
-                </View>
+            <View className={`lobe lobe-${slot}`} key={slot}>
+              <View className="lobe-head">
+                <Text className="lobe-title">{SLOT_LABEL[slot]}</Text>
                 <Text className="add" onClick={() => go(slot)}>
                   记一笔
                 </Text>
               </View>
+              {list.length > 0 ? (
+                <Text className="lobe-sub">共 {Math.round(kcal)} 千卡</Text>
+              ) : null}
               {list.length === 0 ? (
-                <Text className="muted">还没记录</Text>
+                <Text className="lobe-sub">还没记录</Text>
               ) : (
                 list.map((e) => (
                   <View className="entry" key={e.id} onClick={() => removeEntry(e.id)}>

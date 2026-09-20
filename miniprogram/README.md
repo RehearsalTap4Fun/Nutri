@@ -27,6 +27,7 @@ npm run build        # 出包
 npm run check        # 扫产物里小程序不接受的新语法（上传前必跑）
 npm run typecheck    # 类型检查（含共用的 core/data/store/sync）
 npm run pixelpack    # 重新生成像素猫图层（像素包更新后跑）
+npm run tabicons     # 重新生成 tabBar 图标（改图标或配色后跑）
 npm run dev:h5       # 编译成 H5，本机快速看效果
 ```
 
@@ -80,6 +81,24 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 - **说一句话录餐**。个人主体小程序没有「深度合成 / AI 问答」类目，上不了。
 - **条码扫码**。小程序自带扫码，但查询目标 `world.openfoodfacts.org` 没有 ICP 备案，配不进请求白名单。
 - **PWA 那一层**（service worker、安装提示、`location.protocol` 嗅探）。小程序自带包缓存，这些直接删掉。
+
+## 视觉：和网页版同一套语言
+
+`src/app.scss` 顶部的 token 块是从网页版 `src/styles.css` 搬过来的，值一一对应。**改视觉先改那里**，组件只引用 token。
+
+三条容易搞错的地方，第一版全踩了：
+
+1. **卡片不画框**。`.card` 是透明的，没有圆角也没有投影，只靠标题和间距分节。真正的视觉主体是 `.lobe`——平涂色块。做成常见的白卡片堆叠就不是这套语言了。
+2. **不规则圆角是签名**。`--r-lobe` 这类用的是 `a b c d / e f g h` 椭圆语法，手绘感就来自这里，换成等圆角或 `999px` 立刻变味。WXSS 支持这个语法，rpx 换算也正常。
+3. **描边用 `inset box-shadow` 不用 `border`**，因为 border 会占布局盒子，而这套语言里线条是画在色块上的。
+
+餐次各有颜色：早餐太阳黄、午餐陆地绿、晚餐浅陆地、加餐白。色块上的次级文字从对应色相里调（`--lobe-ink-sun` 这些），不用灰。三大宏量是红蓝琥珀三个分离色相，不要用一个绿色糊过去。
+
+尺寸换算：designWidth 750，所以这里的 `1px` 等于网页版的 `0.5px`，网页版 14px 正文在这里写 28px。
+
+**canvas 里读不到 CSS 变量**，`LineChart.tsx` 和 `PixelCat.tsx` 各自硬编码了一份颜色，改 token 时要跟着改。
+
+tabBar 图标由 `npm run tabicons` 生成，路径直接抄自网页版 `src/ui/icons.tsx`，两端是同一组图标。小程序 tabBar 只吃位图，所以同一份 SVG 用两种颜色各渲染一张。
 
 ## 图表是怎么画的
 

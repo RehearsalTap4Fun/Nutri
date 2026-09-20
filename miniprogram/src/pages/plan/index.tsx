@@ -65,16 +65,16 @@ export default function Plan() {
       </View>
 
       {plan.meals.map((m) => (
-        <View className="card" key={m.slot}>
-          <View className="h2">
-            {SLOT_LABEL[m.slot]}
-            <Text className="muted">　目标 {Math.round(m.targetKcal)} 千卡</Text>
+        <View className={`lobe lobe-${m.slot}`} key={m.slot}>
+          <View className="lobe-head">
+            <Text className="lobe-title">{SLOT_LABEL[m.slot]}</Text>
+            <Text className="lobe-sub">目标 {Math.round(m.targetKcal)} 千卡</Text>
           </View>
 
           {plan.eatenSlots.includes(m.slot) ? (
-            <Text className="muted">这一餐已经记录过了</Text>
+            <Text className="lobe-sub">这一餐已经记录过了</Text>
           ) : m.items.length === 0 ? (
-            <Text className="muted">这一餐没排出菜</Text>
+            <Text className="lobe-sub">这一餐没排出菜</Text>
           ) : (
             m.items.map((it, i) => {
               const dish = dishMap.get(it.dishId)
@@ -96,7 +96,7 @@ export default function Plan() {
           )}
 
           {m.notes.map((n, i) => (
-            <View className="entry-sub" key={i}>
+            <View className="lobe-sub" key={i}>
               {n}
             </View>
           ))}

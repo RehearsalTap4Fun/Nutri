@@ -14,15 +14,35 @@ export default defineAppConfig({
     backgroundColor: '#F5F1E4'
   },
   tabBar: {
-    color: '#8a8c86',
+    color: '#5a5d58',
     selectedColor: '#2c2e2a',
     backgroundColor: '#F5F1E4',
     borderStyle: 'white',
     list: [
-      { pagePath: 'pages/today/index', text: '今日' },
-      { pagePath: 'pages/plan/index', text: '计划' },
-      { pagePath: 'pages/analysis/index', text: '分析' },
-      { pagePath: 'pages/me/index', text: '我的' }
+      {
+        pagePath: 'pages/today/index',
+        text: '今日',
+        iconPath: 'assets/tabbar/today-off.png',
+        selectedIconPath: 'assets/tabbar/today-on.png'
+      },
+      {
+        pagePath: 'pages/plan/index',
+        text: '计划',
+        iconPath: 'assets/tabbar/plan-off.png',
+        selectedIconPath: 'assets/tabbar/plan-on.png'
+      },
+      {
+        pagePath: 'pages/analysis/index',
+        text: '分析',
+        iconPath: 'assets/tabbar/analysis-off.png',
+        selectedIconPath: 'assets/tabbar/analysis-on.png'
+      },
+      {
+        pagePath: 'pages/me/index',
+        text: '我的',
+        iconPath: 'assets/tabbar/me-off.png',
+        selectedIconPath: 'assets/tabbar/me-on.png'
+      }
     ]
   }
 })
