@@ -382,7 +382,7 @@ export default function Today() {
               <Icon name="bowl" tone="ink" size={44} />
             </View>
             <Text className="empty-t">这一天还没有记录</Text>
-            <Text className="empty-d">点「记一笔」搜菜名，或去「计划」一键记为已吃。</Text>
+            <Text className="empty-d">点「记一笔」搜菜名，或去「推荐」一键记为已吃。</Text>
             <Text className="add" onClick={() => go(nextSlot)}>记一笔</Text>
           </View>
         ) : null}

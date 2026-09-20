@@ -29,7 +29,7 @@ export default defineAppConfig({
       },
       {
         pagePath: 'pages/plan/index',
-        text: '计划',
+        text: '推荐',
         iconPath: 'assets/tabbar/plan-off.png',
         selectedIconPath: 'assets/tabbar/plan-on.png'
       },

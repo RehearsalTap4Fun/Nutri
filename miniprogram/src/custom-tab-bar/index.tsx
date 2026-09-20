@@ -20,7 +20,7 @@ import './index.scss'
 
 const TABS = [
   { key: 'today', path: '/pages/today/index', label: '今日', icon: 'today' },
-  { key: 'plan', path: '/pages/plan/index', label: '计划', icon: 'plan' },
+  { key: 'plan', path: '/pages/plan/index', label: '推荐', icon: 'plan' },
   { key: 'analysis', path: '/pages/analysis/index', label: '分析', icon: 'analysis' },
   { key: 'me', path: '/pages/me/index', label: '我的', icon: 'me' },
 ]
