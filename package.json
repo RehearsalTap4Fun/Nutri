@@ -13,7 +13,9 @@
     "release": "npm run build && rm -rf release && mkdir -p release/pwa && cp -R dist/. release/pwa/ && cp dist/index.html \"release/饮食日记.html\" && echo \"单机版: release/饮食日记.html · PWA 目录: release/pwa（整目录上传到静态托管）\"",
     "pixelcat": "tsx scripts/pixelCat.ts",
     "pixelpack": "tsx scripts/pixelPackBundle.ts",
-    "gaps": "tsx scripts/auditGaps.ts"
+    "gaps": "tsx scripts/auditGaps.ts",
+    "hitrate": "tsx scripts/searchHitRate.ts",
+    "dishgaps": "tsx scripts/dishGaps.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
