@@ -18,7 +18,7 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
   ], { aliases: ['煎三文鱼', '三文鱼'] }),
   D('we_spaghetti_bolognese', '番茄肉酱意面', 'combo', 'west', 'normal', 'LD', '1盘(约520g)', [
     ['pasta_cooked', 250], ['beef_ground', 80], ['tomato', 120], ['onion', 30], ['ketchup', 20], ['olive_oil', 10], ['cheese', 10], ['garlic', 5], ['salt', 1.5],
-  ], { aliases: ['肉酱意面', '意面', '博洛尼亚'] }),
+  ], { aliases: ['肉酱意面', '意面', '博洛尼亚', '意大利面'] }),
   D('we_carbonara', '奶油培根意面', 'combo', 'west', 'heavy', 'LD', '1盘(约440g)', [
     ['pasta_cooked', 250], ['bacon', 50], ['cream', 60], ['egg', 50], ['cheese', 20], ['olive_oil', 5], ['garlic', 5], ['salt', 1],
   ], { aliases: ['卡邦尼', '培根意面', '白酱意面'] }),
@@ -33,7 +33,7 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
   ], { aliases: ['鸡肉凯撒', '凯撒'] }),
   D('we_chicken_salad_vinaigrette', '鸡胸蔬菜沙拉(油醋汁)', 'combo', 'west', 'light', 'LD', '1份(约400g)', [
     ['chicken_breast', 120], ['lettuce', 100], ['cherry_tomato', 60], ['cucumber', 60], ['sweet_corn_kernels', 30], ['egg', 50], ['vinaigrette', 15],
-  ], { aliases: ['鸡胸沙拉', '减脂沙拉'] }),
+  ], { aliases: ['鸡胸沙拉', '减脂沙拉', '沙拉碗', '蔬菜沙拉'] }),
   D('we_tuna_salad', '金枪鱼沙拉', 'combo', 'west', 'light', 'LD', '1份(约400g)', [
     ['tuna_canned', 100], ['lettuce', 100], ['cherry_tomato', 50], ['cucumber', 50], ['onion', 20], ['sweet_corn_kernels', 30], ['egg', 50], ['vinaigrette', 15],
   ], { aliases: ['吞拿鱼沙拉'] }),
@@ -54,7 +54,7 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
   ], { aliases: ['墨西哥卷', '鸡肉卷', 'taco', '塔可'] }),
   D('we_homemade_burger', '牛肉汉堡(自制)', 'combo', 'west', 'normal', 'LD', '1个(约300g)', [
     ['burger_bun', 80], ['beef_ground', 120], ['cheese', 20], ['lettuce', 20], ['tomato', 30], ['onion', 15], ['ketchup', 15], ['mayonnaise', 10], ['oil', 5],
-  ], { aliases: ['汉堡', '牛肉堡'] }),
+  ], { aliases: ['汉堡', '牛肉堡', '汉堡包'] }),
   D('we_cheese_pizza_2', '芝士披萨2片', 'combo', 'west', 'heavy', 'LD', '2片(约240g)', [
     ['pizza', 240],
   ], { aliases: ['披萨', '比萨'] }),
@@ -176,7 +176,7 @@ export const DISHES_WEST_TAKEOUT: Dish[] = [
   ], { tags: ['rice'], aliases: ['炒饭', '蛋炒饭'] }),
   D('to_shuizhuyu', '水煮鱼(一人份)', 'protein', 'takeout', 'heavy', 'LD', '1份(约390g)', [
     ['fish_freshwater', 200], ['soy_sprouts', 100], ['chili_oil', 20], ['oil', 20], ['doubanjiang', 15], ['sichuan_pepper', 5], ['egg_white', 20], ['starch', 8], ['garlic', 10], ['ginger', 5], ['salt', 1.5],
-  ], { tags: ['spicy'], aliases: ['水煮鱼片', '沸腾鱼'] }),
+  ], { tags: ['spicy'], aliases: ['水煮鱼片', '沸腾鱼', '水煮鱼'] }),
   D('to_kaoyu', '烤鱼一人份(带配菜)', 'protein', 'takeout', 'heavy', 'LD', '1份(约550g)', [
     ['fish_freshwater', 250], ['tofu_sheet', 30], ['lotus_root', 60], ['potato', 60], ['celery', 40], ['glass_noodles_dry', 30], ['hotpot_base', 25], ['oil', 25], ['doubanjiang', 10], ['sichuan_pepper', 3], ['soy_sauce', 8], ['salt', 1],
   ], { tags: ['spicy', 'hotpot'], aliases: ['万州烤鱼', '烤鱼'] }),

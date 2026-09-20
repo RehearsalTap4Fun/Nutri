@@ -28,7 +28,7 @@ export const DISHES_CN_MORE: Dish[] = [
   ], { tags: ['spicy'] }),
   D('cn2_lajiao_chaorou', '辣椒炒肉(湘)', 'protein', 'cn', 'normal', 'LD', '1盘(约230g)', [
     ['pork_shoulder', 110], ['green_pepper', 100], ['garlic', 6], ['soy_sauce', 8], ['oil', 8], ['fermented_bean_curd', 3],
-  ], { tags: ['spicy'] }),
+  ], { tags: ['spicy'], aliases: ['辣椒炒肉', '农家辣椒炒肉', '小炒肉'] }),
   D('cn2_lianou_chaorou', '莲藕炒肉片', 'protein', 'cn', 'normal', 'LD', '1盘(约250g)', [
     ['pork_lean', 80], ['lotus_root', 150], ['oil', 8], ['soy_sauce', 6], ['salt', 1], ['starch', 3], ['scallion', 5],
   ]),
@@ -111,7 +111,7 @@ export const DISHES_CN_MORE: Dish[] = [
   ]),
   D('cn2_paojiao_fengzhua', '泡椒凤爪', 'snack', 'cn', 'normal', 'LDS', '1小份(约120g)', [
     ['chicken_feet', 100], ['chili_fresh', 15], ['vinegar', 10], ['salt', 1.5], ['sugar', 2], ['sichuan_pepper', 0.5],
-  ], { tags: ['spicy'] }),
+  ], { tags: ['spicy'], aliases: ['鸡爪', '卤鸡爪', '凤爪'] }),
   D('cn2_laoya_tang', '老鸭汤', 'soup', 'cn', 'normal', 'LD', '1碗(约450g)', [
     ['duck', 80], ['sour_bamboo', 40], ['ginger', 5], ['water', 300], ['salt', 1.2],
   ]),
@@ -292,7 +292,7 @@ export const DISHES_CN_MORE: Dish[] = [
   ]),
   D('cn2_zongzi', '鲜肉粽', 'staple', 'cn', 'normal', 'BLS', '1个(约180g)', [
     ['glutinous_rice_raw', 80], ['pork_belly', 40], ['soy_sauce', 6], ['salt', 0.5],
-  ]),
+  ], { aliases: ['粽子', '肉粽', '端午粽'] }),
   D('cn2_tangyuan', '黑芝麻汤圆', 'snack', 'cn', 'normal', 'BS', '6个(约150g)', [
     ['glutinous_rice_raw', 60], ['sesame', 20], ['sugar', 15], ['lard', 12],
   ], { tags: ['sweet'] }),

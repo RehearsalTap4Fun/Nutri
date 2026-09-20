@@ -233,7 +233,7 @@ export const DISHES_STAPLES_MORE: Dish[] = [
   D('dr_butter_americano', '黄油美式', 'drink', 'west', 'light', 'BLDS', '1杯(约310ml)', [['black_coffee', 300], ['butter', 10]], { aliases: ['防弹咖啡', '黄油咖啡'], tags: ['caffeine'] }),
   D('dr_latte', '拿铁', 'drink', 'west', 'light', 'BLDS', '1杯(250ml)', [['milk', 200], ['black_coffee', 50]], { aliases: ['牛奶咖啡'], tags: ['caffeine'] }),
   D('dr_oat_latte', '燕麦拿铁', 'drink', 'west', 'light', 'BLDS', '1杯(250ml)', [['oat_milk', 200], ['black_coffee', 50]], { tags: ['caffeine'] }),
-  D('dr_tea', '无糖茶', 'drink', 'cn', 'light', 'BLDS', '1杯(300ml)', [['tea', 300]], { aliases: ['绿茶', '红茶', '乌龙茶'], tags: ['caffeine', 'quick'] }),
+  D('dr_tea', '无糖茶', 'drink', 'cn', 'light', 'BLDS', '1杯(300ml)', [['tea', 300]], { aliases: ['茶', '绿茶', '红茶', '乌龙茶'], tags: ['caffeine', 'quick'] }),
   D('dr_bubble_tea', '珍珠奶茶', 'drink', 'takeout', 'light', 'LDS', '1杯(约410ml)', [
     ['tea', 300], ['creamer', 20], ['sugar', 30], ['tapioca_pearls', 60],
   ], { aliases: ['奶茶', '波霸奶茶'], tags: ['sweet', 'caffeine'] }),

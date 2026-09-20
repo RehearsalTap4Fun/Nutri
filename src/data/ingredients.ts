@@ -306,6 +306,7 @@ export const INGREDIENTS: Ingredient[] = [
   I('black_coffee', '黑咖啡/美式', 'beverage', [2, 0.1, 0, 0, 0, 2]),
   I('tea', '茶(无糖)', 'beverage', [1, 0, 0, 0.2, 0, 1]),
   I('cola', '可乐', 'beverage', [43, 0, 0, 10.6, 0, 4]),
+  I('soda_lemon', '柠檬汽水(雪碧/七喜)', 'beverage', [43, 0, 0, 10.5, 0, 15]),
   I('cola_zero', '无糖可乐', 'beverage', [0, 0, 0, 0, 0, 10]),
   I('orange_juice', '橙汁', 'beverage', [45, 0.7, 0.2, 10.4, 0.2, 1]),
   I('beer', '啤酒', 'beverage', [43, 0.5, 0, 3.6, 0, 4]),

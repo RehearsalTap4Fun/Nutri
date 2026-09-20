@@ -46,7 +46,7 @@ export const DISHES_TAKEOUT_MORE: Dish[] = [
   // ===== 川湘黔滇东北 =====
   D('to2_shuizhu_roupian', '水煮肉片(一人份)', 'combo', 'takeout', 'heavy', 'LD', '1份(约450g)', [
     ['pork_tenderloin', 120], ['soy_sprouts', 80], ['lettuce', 60], ['oil', 30], ['doubanjiang', 15], ['chili_powder', 4], ['sichuan_pepper', 2], ['starch', 8], ['broth', 100],
-  ], { tags: ['spicy'] }),
+  ], { tags: ['spicy'], aliases: ['水煮肉片'] }),
   D('to2_maoxuewang', '毛血旺(无血,一人份)', 'combo', 'takeout', 'heavy', 'LD', '1份(约500g)', [
     ['beef_tripe', 80], ['luncheon_meat', 50], ['soy_sprouts', 100], ['yuba', 20], ['oil', 30], ['hotpot_base', 25], ['broth', 150],
   ], { tags: ['spicy'] }),

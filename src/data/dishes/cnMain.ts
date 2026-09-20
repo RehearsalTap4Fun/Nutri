@@ -7,7 +7,7 @@ export const DISHES_CN_MAIN: Dish[] = [
   // ===== 荤菜 · 猪 =====
   D('cn_hongshaorou', '红烧肉', 'protein', 'cn', 'heavy', 'LD', '1小碗(约160g)', [
     ['pork_belly', 120], ['soy_sauce', 12], ['sugar', 8], ['cooking_wine', 8], ['oil', 5], ['ginger', 5], ['scallion', 5],
-  ], { tags: ['stew', 'sweet'] }),
+  ], { tags: ['stew', 'sweet'], aliases: ['红烧五花肉', '家常红烧肉'] }),
   D('cn_huiguorou', '回锅肉', 'protein', 'cn', 'heavy', 'LD', '1盘(约230g)', [
     ['pork_belly', 100], ['green_pepper', 60], ['scallion', 30], ['doubanjiang', 7.5], ['sweet_bean_sauce', 3], ['oil', 10], ['soy_sauce', 3], ['sugar', 2],
   ], { tags: ['spicy'] }),
@@ -16,7 +16,7 @@ export const DISHES_CN_MAIN: Dish[] = [
   ], { tags: ['spicy', 'sweet'] }),
   D('cn_qingjiao_rousi', '青椒肉丝', 'protein', 'cn', 'normal', 'LD', '1盘(约240g)', [
     ['pork_lean', 100], ['green_pepper', 120], ['oil', 10], ['soy_sauce', 6.5], ['starch', 3], ['salt', 1], ['garlic', 5],
-  ], { tags: ['quick'] }),
+  ], { tags: ['quick'], aliases: ['青椒炒肉', '尖椒肉丝'] }),
   D('cn_tangcu_liji', '糖醋里脊', 'protein', 'cn', 'fried', 'LD', '1盘(约230g)', [
     ['pork_lean', 120], ['starch', 20], ['egg', 20], ['oil', 20], ['sugar', 20], ['vinegar', 15], ['ketchup', 15], ['salt', 1],
   ], { tags: ['sweet'] }),
