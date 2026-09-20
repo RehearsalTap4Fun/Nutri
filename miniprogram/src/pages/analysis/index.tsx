@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import Taro from '@tarojs/taro'
 import { View, Text, Button, Input, Switch } from '@tarojs/components'
 import type { Finding } from '@core/analysis'
-import { isHabitFinding } from '@core/analysis'
+import { isHabitFinding, windowStats } from '@core/analysis'
 import { macroKcalShare } from '@core/nutrition'
 import { addDays, shortDate, todayStr, weekdayLabel, daysBetween } from '@core/dates'
 import { bmi, bmiLabel } from '@core/energy'
@@ -11,6 +11,12 @@ import { useAppState } from '../../shared/useAppState'
 import { derive } from '../../shared/derive'
 import { LineChart } from '../../components/LineChart'
 import type { Point } from '../../components/LineChart'
+import { Variance, VarianceAxis } from '../../components/Variance'
+import type { VarianceTone } from '../../components/Variance'
+import { Fold } from '../../components/bits'
+import { dishMapOf } from '../../shared/derive'
+import { avgWater } from '@core/water'
+import { lastNDays } from '@core/dates'
 
 const r0 = (v: number) => Math.round(v)
 
@@ -48,6 +54,29 @@ export default function Analysis() {
     }))
   }, [recentWeights])
 
+  // 近 4 周达标日历：热量在目标 ±10% 算达标
+  const cal = useMemo(() => {
+    if (!d.targets) return { days: [] as Array<{ date: string; status: string }>, streak: 0, hits: 0 }
+    const w28 = windowStats(state.entries, dishMapOf(state), date, 28, d.targets.kcal)
+    const days = w28.days.map((x) => ({
+      date: x.date,
+      status: !x.logged
+        ? 'none'
+        : Math.abs(x.n.kcal - d.targets!.kcal) <= d.targets!.kcal * 0.1
+          ? 'hit'
+          : 'miss',
+    }))
+    let streak = 0
+    for (let i = days.length - 1; i >= 0; i--) {
+      if (days[i].status === 'hit') streak++
+      else if (i === days.length - 1 && days[i].status === 'none') continue
+      else break
+    }
+    return { days, streak, hits: days.filter((x) => x.status === 'hit').length }
+  }, [state, date, d.targets])
+
+  const waterAvg = useMemo(() => avgWater(state.water, lastNDays(date, 7)), [state.water, date])
+
   if (!d.profile || !d.targets || !d.analysis) {
     return (
       <View className="wrap">
@@ -67,7 +96,8 @@ export default function Analysis() {
   const a = d.analysis
   const w = a.window
   const logged = w.loggedDays.length
-  const showNa = showsSodium(profile.conditions)
+  const conds = profile.conditions || []
+  const showNa = showsSodium(conds)
 
   // 结论按「和数值有关」与「和习惯有关」分两组，警告排前面
   const findings = a.findings.filter((f) => showNa || !f.key.startsWith('sodium_'))
@@ -77,6 +107,14 @@ export default function Analysis() {
 
   const maxKcal = Math.max(t.kcal, ...w.days.map((x) => x.n.kcal), 1)
   const share = macroKcalShare(w.avg)
+  const warnCount = findings.filter((f) => f.severity === 'warn').length
+  const maternal = conds.some((c) => c === 'pregnancy' || c === 'lactation')
+  /** 某个指标的结论决定柱子的颜色，与网页版 sevOf 同义 */
+  const toneOf = (key: string): VarianceTone => {
+    const hit = findings.find((f) => f.key.startsWith(key))
+    if (!hit) return 'none'
+    return hit.severity === 'warn' ? 'warn' : hit.severity === 'good' ? 'good' : 'info'
+  }
 
   const latest = recentWeights[recentWeights.length - 1]
   const b = latest ? bmi(latest.kg, profile.heightCm) : bmi(profile.weightKg, profile.heightCm)
@@ -137,49 +175,82 @@ export default function Analysis() {
       </View>
 
       <View className="card">
-        <View className="h2">三大营养素供能比</View>
-        <View className="share">
-          <View className="share-seg share-p" style={{ flex: String(Math.max(share.protein, 0.01)) }} />
-          <View className="share-seg share-f" style={{ flex: String(Math.max(share.fat, 0.01)) }} />
-          <View className="share-seg share-c" style={{ flex: String(Math.max(share.carbs, 0.01)) }} />
-        </View>
-        <View className="legend">
-          <Text className="legend-item">
-            <Text className="dot dot-p" />蛋白 {r0(share.protein * 100)}%
-          </Text>
-          <Text className="legend-item">
-            <Text className="dot dot-f" />脂肪 {r0(share.fat * 100)}%
-          </Text>
-          <Text className="legend-item">
-            <Text className="dot dot-c" />碳水 {r0(share.carbs * 100)}%
+        <View className="slot-head">
+          <Text className="h2" style={{ marginBottom: 0 }}>近 4 周达标</Text>
+          <Text className="entry-sub">
+            {cal.streak > 0 ? `连续 ${cal.streak} 天` : '还没连上'} · 共 {cal.hits} 天
           </Text>
         </View>
-        <View className="row">
-          <Text className="label">日均蛋白质</Text>
-          <Text className="value">
-            {r0(w.avg.protein)} / {r0(t.protein)} g
+        <View className="cal">
+          {cal.days.map((x) => (
+            <View
+              className={`cal-d cal-${x.status}${x.date === date ? ' cal-today' : ''}`}
+              key={x.date}
+            />
+          ))}
+        </View>
+        <View className="cal-legend">
+          <Text className="cal-legend-i">
+            <Text className="cal-sw" style={{ background: '#8ed462' }} />热量在目标 ±10%
+          </Text>
+          <Text className="cal-legend-i">
+            <Text className="cal-sw" style={{ background: '#ffd23f' }} />有记录但偏离
+          </Text>
+          <Text className="cal-legend-i">
+            <Text className="cal-sw cal-sw-none" />没记录
           </Text>
         </View>
-        <View className="row">
-          <Text className="label">日均膳食纤维</Text>
-          <Text className="value">
-            {r0(w.avg.fiber)} / {r0(t.fiber)} g
+      </View>
+
+      <View className="card">
+        <View className="slot-head">
+          <Text className="h2" style={{ marginBottom: 0 }}>日均 vs 目标</Text>
+          <Text className="entry-sub">
+            {logged === 0 ? '' : warnCount ? `${warnCount} 项要改` : '都在范围内'}
           </Text>
         </View>
-        <View className="row">
-          <Text className="label">日均蔬菜</Text>
-          <Text className="value">
-            {w.avgVegServings.toFixed(1)} / {t.vegServings} 份
-          </Text>
-        </View>
-        {showNa ? (
-          <View className="row">
-            <Text className="label">日均钠</Text>
-            <Text className="value">
-              {r0(w.avg.sodium)} / {r0(t.sodiumMax)} mg
-            </Text>
+        {logged === 0 ? (
+          <Text className="empty">还没有完整记录的日子</Text>
+        ) : (
+          <View>
+            <VarianceAxis />
+            <Variance label="热量" value={w.avg.kcal} target={t.kcal} unit="kcal" color="#6cbf3e" mode="near" tol={maternal ? 0.15 : 0.2} tone={toneOf('kcal')} />
+            <Variance label="蛋白" value={w.avg.protein} target={t.protein} unit="g" color="#e45a3f" mode="atLeast" tol={0.15} tone={toneOf('protein')} />
+            <Variance label="脂肪" value={w.avg.fat} target={t.fat} unit="g" color="#3d8fd6" mode="atMost" tol={0.25} tone={toneOf('fat')} />
+            <Variance label="碳水" value={w.avg.carbs} target={t.carbs} unit="g" color="#b8780a" mode="atMost" tol={0.1} />
+            <Variance label="纤维" value={w.avg.fiber} target={t.fiber} unit="g" color="#6e8f3a" mode="atLeast" tol={0.3} tone={toneOf('fiber')} />
+            <Variance label="蔬菜" value={w.avgVegServings} target={t.vegServings} unit="份" color="#2e7a1f" mode="atLeast" tol={0.4} tone={toneOf('veg')} />
+            <Variance label="水果" value={w.avgFruitG} target={t.fruitG} unit="g" color="#5a5d58" mode="atLeast" tol={Math.max(0.1, 1 - 100 / Math.max(1, t.fruitG))} tone={toneOf('fruit')} />
+            {showNa ? (
+              <Variance label="钠" value={w.avg.sodium} target={t.sodiumMax} unit="mg" color="#5a5d58" mode="atMost" tol={0.2} tone={toneOf('sodium')} />
+            ) : null}
+            {waterAvg.days > 0 ? (
+              <Variance label="饮水" value={waterAvg.avg} target={t.waterMl} unit="ml" color="#4fa6e3" mode="atLeast" tol={0.3} tone={toneOf('water')} />
+            ) : null}
+
+            <View className="legend">
+              <Text className="legend-item"><Text className="dot" style={{ background: '#ece6d3' }} />合适区间</Text>
+              <Text className="legend-item"><Text className="dot" style={{ background: '#8ed462' }} />达标</Text>
+              <Text className="legend-item"><Text className="dot" style={{ background: '#ffd23f' }} />要改</Text>
+            </View>
+
+            <View className="share">
+              <View className="share-p" style={{ width: `${Math.round(share.protein * 100)}%` }} />
+              <View className="share-f" style={{ width: `${Math.round(share.fat * 100)}%` }} />
+              <View className="share-c" style={{ width: `${Math.max(0, Math.round(share.carbs * 100))}%` }} />
+            </View>
+            <View className="legend">
+              <Text className="legend-item"><Text className="dot dot-p" />蛋白 {r0(share.protein * 100)}%</Text>
+              <Text className="legend-item"><Text className="dot dot-f" />脂肪 {r0(share.fat * 100)}%</Text>
+              <Text className="legend-item"><Text className="dot dot-c" />碳水 {r0(share.carbs * 100)}%</Text>
+            </View>
+            <Fold summary="供能比参考范围">
+              <Text>
+                蛋白 15~25%、脂肪 25~35%、碳水 45~60%（中国居民膳食营养素参考摄入量 2023 版）。
+              </Text>
+            </Fold>
           </View>
-        ) : null}
+        )}
       </View>
 
       {metricFindings.length > 0 ? (
