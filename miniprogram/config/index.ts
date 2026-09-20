@@ -38,6 +38,8 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
     },
     copy: {
       patterns: [
+        // 像素猫图层按真实文件进包，运行时用 `/assets/pixelpack/xxx.png` 加载
+        { from: 'src/assets/pixelpack/', to: 'dist/assets/pixelpack/' }
       ],
       options: {
       }

@@ -7,17 +7,24 @@
  *
  * 像素包更新后（`npm run pixelpack` 重新导出）要重跑这个脚本。
  */
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const packDir = join(here, '..', '..', 'src', 'assets', 'pixelpack')
 const outFile = join(here, '..', 'src', 'assets', 'pixelpackData.ts')
+const pngDir = join(here, '..', 'src', 'assets', 'pixelpack')
 
 const files = readdirSync(packDir)
   .filter((f) => f.endsWith('.png'))
   .sort()
+
+// 真机上 canvas 的 createImage 对 base64 的 data URI 支持不可靠（onload 和 onerror 都不回调），
+// 所以主路径是包内真实 PNG 文件，这里把共享目录的图层同步一份到小程序包里。
+rmSync(pngDir, { recursive: true, force: true })
+mkdirSync(pngDir, { recursive: true })
+for (const f of files) copyFileSync(join(packDir, f), join(pngDir, f))
 
 let raw = 0
 const lines = files.map((f) => {
@@ -32,7 +39,16 @@ const body = `/**
  * 重新生成：node scripts/genPixelPack.mjs
  *
  * 共 ${files.length} 张图层，原始 ${(raw / 1024).toFixed(1)} KB。
+ *
+ * 主路径是包内 PNG 文件（LAYER_PATH），这张 base64 表只作为兜底：
+ * 个别机型上包内路径加载不出来时还能画出猫。
  */
+export const LAYER_PATH = '/assets/pixelpack'
+
+export const LAYER_IDS: string[] = [
+${files.map((f) => `  '${f.replace(/\.png$/, '')}',`).join('\n')}
+]
+
 export const LAYER_DATA: Record<string, string> = {
 ${lines.join('\n')}
 }
@@ -40,7 +56,8 @@ ${lines.join('\n')}
 
 writeFileSync(outFile, body)
 const outSize = Buffer.byteLength(body)
-console.log(`${files.length} 张图层 → ${outFile}`)
+console.log(`${files.length} 张 PNG → ${pngDir}`)
+console.log(`base64 兜底表 → ${outFile}`)
 console.log(`原始 ${(raw / 1024).toFixed(1)} KB，生成文件 ${(outSize / 1024).toFixed(1)} KB`)
 
 // 校验：目录声明的每个图层都要在表里，profile 里的每处引用也要解析得到。

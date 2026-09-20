@@ -3,7 +3,73 @@
  * 重新生成：node scripts/genPixelPack.mjs
  *
  * 共 58 张图层，原始 39.8 KB。
+ *
+ * 主路径是包内 PNG 文件（LAYER_PATH），这张 base64 表只作为兜底：
+ * 个别机型上包内路径加载不出来时还能画出猫。
  */
+export const LAYER_PATH = '/assets/pixelpack'
+
+export const LAYER_IDS: string[] = [
+  'layer-00db017bd6155a11',
+  'layer-096351544c2988c0',
+  'layer-0dc4c49bf437b30a',
+  'layer-0f7393eab903d8ec',
+  'layer-10d12c620bc4520f',
+  'layer-14594c832b639de6',
+  'layer-189e6d6ebb01e538',
+  'layer-21c2c2e0bec315f3',
+  'layer-22e5180e5f07027e',
+  'layer-24caec0dbb23a07c',
+  'layer-28f0a9fba22b4bae',
+  'layer-2974f4ca15da4ac3',
+  'layer-2a3301c3bfe82d03',
+  'layer-2dcb1971f5439589',
+  'layer-317bd5989f3d9e30',
+  'layer-342d87b0752a317d',
+  'layer-3489c422e93d7f7a',
+  'layer-3a5a1e3db99f4d22',
+  'layer-3ea3fe08a4019532',
+  'layer-3ea7d5f9d24e6ed2',
+  'layer-4441d1f37a59c04b',
+  'layer-4d3f070180d2b1da',
+  'layer-5661da1cecba0929',
+  'layer-5aaa674e192a211b',
+  'layer-5bded66bade6e39d',
+  'layer-6246afa45e1d3861',
+  'layer-6772e7fa7dfd8a74',
+  'layer-6d8134b5c93d11f7',
+  'layer-6dd2d6e77471af03',
+  'layer-742afec5ccf6b8ce',
+  'layer-7e714c16e7dc96af',
+  'layer-80a7dff6e39f1fc9',
+  'layer-84bf0ee56a2eef86',
+  'layer-84e22b2b4fb1c9d7',
+  'layer-892032f0a47bbdf4',
+  'layer-894649a6f618c8bd',
+  'layer-95540cb48509fe27',
+  'layer-9705184c23b9027b',
+  'layer-99a3492a4188b39e',
+  'layer-a29af10c838a30dc',
+  'layer-a9633de63f4acf17',
+  'layer-ad5eaf902a730023',
+  'layer-b088b28668f5485c',
+  'layer-bd1ab44533f33a3a',
+  'layer-c68b7f3b61d5650f',
+  'layer-ca7e6b84a29268b1',
+  'layer-cb8ad098038cc0de',
+  'layer-cede70e77fa121d1',
+  'layer-da2820c570724624',
+  'layer-deeba5734233692e',
+  'layer-e9cf51f2859a39ba',
+  'layer-ed3a87f6e6dbbe71',
+  'layer-eed43e314ab2e856',
+  'layer-ef8bb6edec1d1543',
+  'layer-f43b645bd12e6f68',
+  'layer-f44fe44a608c50ba',
+  'layer-f8c93e622b23670f',
+  'layer-fec0335aee4cb501',
+]
+
 export const LAYER_DATA: Record<string, string> = {
   'layer-00db017bd6155a11': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAgMAAADXB5lNAAAADFBMVEVMaXHWvbH67+SScW0iXrH/AAAAAXRSTlMAQObYZgAAAAlwSFlzAAAD6AAAA+gBtXtSawAAAZpJREFUOMvlkrFKA0EQhvfuIIWYWAr3BlpZBQxIDnyGvYNFsdVttFFBDNwjpLkUEk2KrHH/U7SyPt/BIxjwBVLZmEKEOHtrLuIbiNvM3ne7//wzO4z9neVlv/ZOvABuYEB7ASoFuF2ARgHSBZgQ8ByUqh6CjLnbeJiDGp5i5nZlKdLQ9ZgkJqXIJCURB8Cb/V6hbUBCwI4Fm7SlBBKdfQvWOtAUfCQvFhyGGDC2XEfnwhhkznUH3Q1W2cMVinIqeMR7m0J4Z06au2cJ/XKhIqlJ3JM6F4hN2mRs3NcwDIu0Y80F+uQbisshXd3iEYyID+T83NQ8VtKCVAxNJ+pQU9wwto6eQNeUCLVnCp6k7wKptU4iAVWdF9ZZVYccuG0APJFHxmFTco2BDwqfRZFVHc3MiVluD7Alzbnq1iXnsl8AX4XR7lH1OE/EwLb2EryVeS2OE9vu0RRhlHl5gt5o/hyCZx5X5QP5+iBiLD+Qgzm416eMvcqPOVhvKXLUFK2bb7DqKhNE/FxOkm1yUM6JUwxELfg1iD/H8d+uLz7ltEugPF8BAAAAAElFTkSuQmCC',
   'layer-096351544c2988c0': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAADFBMVEVMaXHVWin1lYY+LS0tShvmAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAD6AAAA+gBtXtSawAAAIJJREFUWIXtk8sOwyAMBPfx//8cUXpICFUd+ZidI7ADtgwQFkj0oFoKUhIbCmoKNgbKTwRcNuynAp4Vtse6ay3QKrDH/ZLsag8H57hZFGAcvMSvgr95gPcOTsOntoKBt/xXUSwB+yGaT6jkgf0QTgEa2N1f5loBv+nmQwghhBBCeB8HTAoBYppEhHgAAAAASUVORK5CYII=',

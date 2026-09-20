@@ -433,8 +433,24 @@ page {
   gap: 28px;
 }
 
-.cat-canvas {
+.cat-holder {
   flex: none;
+  position: relative;
+}
+
+.cat-canvas {
+  display: block;
+}
+
+.cat-err {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 20px;
+  line-height: 1.4;
+  color: var(--warn);
+  text-align: center;
 }
 
 .cat-slot,

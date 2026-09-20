@@ -1,14 +1,19 @@
 /**
  * 健康小管家的像素猫。
  *
- * 合成逻辑一行都没改：`artPlanForCat` 给出绘制计划，`composePlan` 把 58 张图层里用到的
- * 几张按计划叠成一张 64×64 的 RGBA。这两个函数是纯数组运算，和网页版共用同一份源码。
+ * 合成逻辑一行都没改：`artPlanForCat` 给出绘制计划，`composePlan` 把用到的图层按计划叠成
+ * 一张 64×64 的 RGBA。这两个是纯数组运算，和网页版共用同一份源码。
  *
- * 小程序侧只换了三件事：
- *  - 图层来源从 `import.meta.glob` 换成烤好的 base64 表（见 scripts/genPixelPack.mjs）
- *  - 解码用离屏 Canvas 2D 的 `createImage` + `getImageData`
- *  - 放大不靠 CSS 的 `image-rendering: pixelated`（WXSS 支持不稳），
- *    改成关掉 `imageSmoothingEnabled` 后用 `drawImage` 自己放大，边缘是硬的
+ * 真机上 Canvas 2D 的可用面比模拟器窄，所以这里刻意只用四个最基础的接口：
+ * `drawImage`、`getImageData`、`createImageData`、`putImageData`。
+ *
+ * 具体避开了三样东西（都踩过）：
+ *  - **离屏画布**：`createOffscreenCanvas` 及其 `createImage` 真机行为不一致。
+ *    改成全程复用同一个显示 canvas 节点：先把它调成 64×64 解码图层，最后再调成输出尺寸。
+ *  - **base64 的 data URI**：真机上 `createImage` 加载 data URI 时 onload 和 onerror 可能都不回调，
+ *    画布就一直空着。改成优先加载包内 PNG 文件，失败或超时才回退到 base64。
+ *  - **带缩放的 drawImage 加 `imageSmoothingEnabled`**：关平滑在部分机型上不生效，放大后是糊的。
+ *    改成纯 JS 最近邻展开，再一次性 `putImageData`，边缘一定是硬的。
  */
 import { useEffect, useRef, useState } from 'react'
 import Taro from '@tarojs/taro'
@@ -17,170 +22,19 @@ import { ART_SIZE, artLayersFor, artPlanForCat } from '@core/catArt'
 import type { CatSpecLike } from '@core/catArt'
 import { composePlan } from '@core/pixelize'
 import type { Rgba } from '@core/pixelize'
-import { LAYER_DATA } from '../assets/pixelpackData'
+import { LAYER_DATA, LAYER_PATH } from '../assets/pixelpackData'
 
 interface Props {
   id?: string
   spec: CatSpecLike
-  /** 显示边长，单位与样式里的 px 一致 */
+  /** 显示边长（CSS px） */
   size?: number
-}
-
-/** 离屏画布只建一次：一张用来解码单张图层，一张用来放合成结果 */
-let decodeCanvas: any = null
-let frameCanvas: any = null
-
-function offscreen(): { decode: any; frame: any } | null {
-  const api = Taro as unknown as {
-    createOffscreenCanvas?: (o: { type: string; width: number; height: number }) => any
-  }
-  if (typeof api.createOffscreenCanvas !== 'function') return null
-  if (!decodeCanvas) {
-    decodeCanvas = api.createOffscreenCanvas({ type: '2d', width: ART_SIZE, height: ART_SIZE })
-  }
-  if (!frameCanvas) {
-    frameCanvas = api.createOffscreenCanvas({ type: '2d', width: ART_SIZE, height: ART_SIZE })
-  }
-  if (!decodeCanvas || !frameCanvas) return null
-  return { decode: decodeCanvas, frame: frameCanvas }
 }
 
 /** 图层像素缓存：同一张图层在一次会话里只解码一次 */
 const pixelCache = new Map<string, Rgba>()
-const pending = new Map<string, Promise<Rgba>>()
 
-function loadLayer(layerId: string): Promise<Rgba> {
-  const hit = pixelCache.get(layerId)
-  if (hit) return Promise.resolve(hit)
-  const inflight = pending.get(layerId)
-  if (inflight) return inflight
-
-  const p = new Promise<Rgba>((resolve, reject) => {
-    const off = offscreen()
-    const data = LAYER_DATA[layerId]
-    if (!off || !data) {
-      reject(new Error(`缺少图层 ${layerId}`))
-      return
-    }
-    const ctx = off.decode.getContext('2d')
-    const img = off.decode.createImage()
-    img.onload = () => {
-      ctx.clearRect(0, 0, ART_SIZE, ART_SIZE)
-      ctx.drawImage(img, 0, 0, ART_SIZE, ART_SIZE)
-      const px = new Uint8ClampedArray(ctx.getImageData(0, 0, ART_SIZE, ART_SIZE).data)
-      pixelCache.set(layerId, px)
-      pending.delete(layerId)
-      resolve(px)
-    }
-    img.onerror = () => {
-      pending.delete(layerId)
-      reject(new Error(`图层解码失败 ${layerId}`))
-    }
-    img.src = data
-  })
-  pending.set(layerId, p)
-  return p
-}
-
-/** 合成一只猫，返回 64×64 的 RGBA */
-async function composeCat(spec: CatSpecLike): Promise<Rgba | null> {
-  const ops = artPlanForCat(spec)
-  if (!ops) return null
-  const ids = artLayersFor(ops)
-  const loaded = await Promise.all(ids.map((i) => loadLayer(i)))
-  const table = new Map<string, Rgba>()
-  ids.forEach((i, n) => table.set(i, loaded[n]))
-  return composePlan(ops, (i) => table.get(i)!, ART_SIZE)
-}
-
-export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
-  const lastKey = useRef('')
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    const key = JSON.stringify(spec)
-    if (lastKey.current === key) return
-
-    let cancelled = false
-    let retried = false
-
-    const paint = (rgba: Rgba) => {
-      Taro.createSelectorQuery()
-        .select(`#${id}`)
-        .fields({ node: true, size: true })
-        .exec((res) => {
-          const item = res && res[0]
-          if (!item || !item.node) {
-            if (!retried) {
-              retried = true
-              setTimeout(() => paint(rgba), 60)
-            }
-            return
-          }
-          const off = offscreen()
-          if (!off) {
-            setFailed(true)
-            return
-          }
-          // 先把合成结果放进离屏画布
-          const fctx = off.frame.getContext('2d')
-          const imageData = fctx.createImageData(ART_SIZE, ART_SIZE)
-          imageData.data.set(rgba)
-          fctx.putImageData(imageData, 0, 0)
-
-          // 再关掉平滑放大到显示画布，这样像素边缘是硬的
-          const canvas = item.node
-          const ctx = canvas.getContext('2d')
-          if (!ctx) return
-          const dpr = pixelRatio()
-          const w = item.width
-          const h = item.height
-          canvas.width = Math.round(w * dpr)
-          canvas.height = Math.round(h * dpr)
-          ctx.imageSmoothingEnabled = false
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-          ctx.drawImage(off.frame, 0, 0, ART_SIZE, ART_SIZE, 0, 0, canvas.width, canvas.height)
-
-          lastKey.current = key
-        })
-    }
-
-    composeCat(spec)
-      .then((rgba) => {
-        if (cancelled) return
-        if (!rgba) {
-          setFailed(true)
-          return
-        }
-        setFailed(false)
-        paint(rgba)
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [id, spec])
-
-  if (failed) {
-    return (
-      <View className="cat-slot" style={{ width: `${size}px`, height: `${size}px` }}>
-        <Text className="muted">画不出来</Text>
-      </View>
-    )
-  }
-
-  return (
-    <Canvas
-      type="2d"
-      id={id}
-      className="cat-canvas"
-      style={{ width: `${size}px`, height: `${size}px` }}
-    />
-  )
-}
+const LOAD_TIMEOUT_MS = 2500
 
 /** getSystemInfoSync 已标记废弃，新基础库用 getWindowInfo */
 function pixelRatio(): number {
@@ -190,4 +44,146 @@ function pixelRatio(): number {
     if (r) return r
   }
   return Taro.getSystemInfoSync().pixelRatio || 2
+}
+
+/** 拿到一张能画的图。先试包内文件，再试 base64，各自带超时 */
+function loadImage(canvas: any, layerId: string): Promise<any> {
+  const tryOne = (src: string) =>
+    new Promise<any>((resolve, reject) => {
+      const img = canvas.createImage()
+      let settled = false
+      const done = (ok: boolean) => {
+        if (settled) return
+        settled = true
+        ok ? resolve(img) : reject(new Error(src.slice(0, 24)))
+      }
+      img.onload = () => done(true)
+      img.onerror = () => done(false)
+      setTimeout(() => done(false), LOAD_TIMEOUT_MS)
+      img.src = src
+    })
+
+  return tryOne(`${LAYER_PATH}/${layerId}.png`).catch(() => {
+    const data = LAYER_DATA[layerId]
+    if (!data) throw new Error(`缺图层 ${layerId}`)
+    return tryOne(data)
+  })
+}
+
+/** 最近邻放大。不用 drawImage 缩放，因为关平滑在部分机型上不生效 */
+function scaleRgba(src: Rgba, n: number, k: number): Uint8ClampedArray {
+  if (k === 1) return src
+  const N = n * k
+  const out = new Uint8ClampedArray(N * N * 4)
+  for (let y = 0; y < N; y++) {
+    const sy = (y / k) | 0
+    for (let x = 0; x < N; x++) {
+      const si = ((sy * n + ((x / k) | 0)) << 2)
+      const di = ((y * N + x) << 2)
+      out[di] = src[si]
+      out[di + 1] = src[si + 1]
+      out[di + 2] = src[si + 2]
+      out[di + 3] = src[si + 3]
+    }
+  }
+  return out
+}
+
+export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
+  const lastKey = useRef('')
+  const [err, setErr] = useState('')
+
+  useEffect(() => {
+    const key = JSON.stringify(spec)
+    if (lastKey.current === key) return
+    let cancelled = false
+
+    const ops = artPlanForCat(spec)
+    if (!ops) {
+      setErr('这只猫没有对应的美术')
+      return
+    }
+
+    const withNode = (attempt: number) => {
+      Taro.createSelectorQuery()
+        .select(`#${id}`)
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          if (cancelled) return
+          const item = res && res[0]
+          if (!item || !item.node) {
+            // 首屏 canvas 还没布局完时查不到，隔一会儿再试
+            if (attempt < 5) setTimeout(() => withNode(attempt + 1), 80)
+            else setErr('找不到画布节点')
+            return
+          }
+          void render(item.node, item.width, item.height)
+        })
+    }
+
+    const render = async (canvas: any, cssW: number, cssH: number) => {
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        setErr('拿不到 2d 上下文')
+        return
+      }
+      const N = ART_SIZE
+
+      try {
+        // ── 解码：把画布临时调成 64×64，逐张图层画上去再读像素 ──
+        const ids = artLayersFor(ops)
+        const need = ids.filter((i) => !pixelCache.has(i))
+        if (need.length) {
+          canvas.width = N
+          canvas.height = N
+          for (const layerId of need) {
+            const img = await loadImage(canvas, layerId)
+            if (cancelled) return
+            ctx.clearRect(0, 0, N, N)
+            ctx.drawImage(img, 0, 0, N, N)
+            pixelCache.set(layerId, new Uint8ClampedArray(ctx.getImageData(0, 0, N, N).data))
+          }
+        }
+
+        // ── 合成：纯数组运算，与网页版同一份代码 ──
+        const rgba = composePlan(ops, (i) => pixelCache.get(i)!, N)
+
+        // ── 放大与输出 ──
+        const dpr = pixelRatio()
+        const targetW = Math.max(1, Math.round((cssW || size) * dpr))
+        const k = Math.max(1, Math.round(targetW / N))
+        const out = scaleRgba(rgba, N, k)
+        const side = N * k
+        canvas.width = side
+        canvas.height = side
+        const imageData = ctx.createImageData(side, side)
+        imageData.data.set(out)
+        ctx.putImageData(imageData, 0, 0)
+
+        if (!cancelled) {
+          lastKey.current = key
+          setErr('')
+        }
+      } catch (e) {
+        if (!cancelled) setErr(`图层加载失败：${(e as Error).message}`)
+      }
+    }
+
+    withNode(0)
+    return () => {
+      cancelled = true
+    }
+  }, [id, spec, size])
+
+  return (
+    <View className="cat-holder" style={{ width: `${size}px`, height: `${size}px` }}>
+      <Canvas
+        type="2d"
+        id={id}
+        className="cat-canvas"
+        style={{ width: `${size}px`, height: `${size}px` }}
+      />
+      {err ? <Text className="cat-err">{err}</Text> : null}
+    </View>
+  )
 }

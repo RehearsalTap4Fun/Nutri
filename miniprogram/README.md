@@ -85,13 +85,19 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 
 ## 像素猫是怎么搬过来的
 
-合成逻辑一行没改。`artPlanForCat` 给绘制计划、`composePlan` 把用到的图层叠成一张 64×64 的 RGBA，这两个是纯数组运算，和网页版共用同一份源码。换掉的只有三处：
+合成逻辑一行没改。`artPlanForCat` 给绘制计划、`composePlan` 把用到的图层叠成一张 64×64 的 RGBA，这两个是纯数组运算，和网页版共用同一份源码。
 
-1. **图层来源**。网页版用 `import.meta.glob` 拿 58 张 PNG 的 URL，小程序没有这个能力，webpack 的图片管线对 `sourceRoot` 之外的资源又有一堆边界情况。改成用 `npm run pixelpack` 把它们烤成 base64 静态表（`src/assets/pixelpackData.ts`），58 张原始 39.8 KB，生成文件 56.4 KB。
-2. **解码**。用离屏 `Canvas 2D` 的 `createImage` + `getImageData` 拿到像素，每张图层一次会话只解一次。
-3. **放大**。不用 CSS 的 `image-rendering: pixelated`（WXSS 支持不稳），改成关掉 `imageSmoothingEnabled` 后用 `drawImage` 自己放大，边缘是硬的。
+**真机上 Canvas 2D 的可用面比模拟器窄得多**，第一版在模拟器里正常、真机上猫是空白的。现在这版刻意只用四个最基础的接口：`drawImage`、`getImageData`、`createImageData`、`putImageData`，并避开三样东西，每一样都踩过：
 
-`npm run pixelpack` 带校验：目录声明的图层少一张就退出非零。少一张不会让构建失败，只会让某些猫在运行时画不出来，所以必须在生成这一步拦住。像素包更新后记得重跑。
+| 踩的坑 | 现在的做法 |
+|---|---|
+| 离屏画布 `createOffscreenCanvas`，以及把它当 `drawImage` 的源 | 全程复用同一个显示 canvas 节点：先调成 64×64 解码图层，最后再调成输出尺寸 |
+| base64 的 data URI：真机上 `createImage` 加载它时 onload 和 onerror 可能都不回调，画布就一直空着 | 优先加载包内 PNG 文件 `/assets/pixelpack/<id>.png`，失败或超时 2.5 秒才回退到 base64 |
+| 带缩放的 `drawImage` 配 `imageSmoothingEnabled = false`：关平滑在部分机型上不生效，放大后是糊的 | 纯 JS 最近邻展开，再一次性 `putImageData`，边缘一定是硬的 |
+
+出问题时画布上会压一行小字说明卡在哪一步（找不到节点／拿不到上下文／图层加载失败），不会再是一片空白。
+
+`npm run pixelpack` 做三件事：把共享目录的 58 张 PNG 同步进包、生成 base64 兜底表、校验目录声明的图层是否齐全。少一张不会让构建失败，只会让某些猫在运行时画不出来，所以在生成这一步就拦掉。像素包更新后记得重跑。
 
 ## 待办
 
