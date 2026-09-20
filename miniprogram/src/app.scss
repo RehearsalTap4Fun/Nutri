@@ -547,8 +547,21 @@ page {
   pointer-events: none;
 }
 
+/* 待机：以脚为原点的呼吸，参数与网页版 pixelcat-breathe 一致。
+   作用在 Image 上，不是 canvas —— 原生层的画布做 CSS 动画在真机上不可靠 */
 .cat-img {
   display: block;
+  transform-origin: 50% 100%;
+  animation: pixelcat-breathe 3.4s ease-in-out infinite;
+}
+
+@keyframes pixelcat-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.015, 1.03); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-img { animation: none; }
 }
 
 .cat-err {

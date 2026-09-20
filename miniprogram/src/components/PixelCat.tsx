@@ -18,6 +18,10 @@
  * **画布不出现在版面里。** canvas 即使是 2d 类型，在部分机型上仍走原生层，
  * 会压在自定义导航之类的普通视图上面，z-index 管不住。所以这里把画布挪到屏幕外，
  * 合成完导出成临时文件，版面上显示的是一个普通 `Image`。
+ *
+ * 这样做顺带把待机动画的路修宽了：呼吸是一条作用在元素上的 CSS transform，
+ * 加在普通 Image 上干净可靠，加在原生层的 canvas 上才是真机上容易出岔子的那类。
+ * 以后要做逐帧动画也一样——预先导出几帧再换 src 就行，不必把活画布放回版面。
  */
 import { useEffect, useRef, useState } from 'react'
 import Taro from '@tarojs/taro'
@@ -26,6 +30,7 @@ import { ART_SIZE, artLayersFor, artPlanForCat } from '@core/catArt'
 import type { CatSpecLike } from '@core/catArt'
 import { composePlan } from '@core/pixelize'
 import type { Rgba } from '@core/pixelize'
+import { hashString } from '@core/rng'
 import { LAYER_DATA, LAYER_PATH } from '../assets/pixelpackData'
 
 interface Props {
@@ -206,7 +211,12 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
           className="cat-img"
           src={url}
           mode="scaleToFill"
-          style={{ width: `${size}px`, height: `${size}px` }}
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            // 每只猫错开相位，同屏几只不会一起起伏
+            animationDelay: `${-((hashString(JSON.stringify(spec)) % 340) / 100)}s`,
+          }}
         />
       ) : null}
       {err ? <Text className="cat-err">{err}</Text> : null}
