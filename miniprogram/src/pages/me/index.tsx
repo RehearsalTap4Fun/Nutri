@@ -6,7 +6,7 @@ import { ageOf, bmi, bmiLabel } from '@core/energy'
 import { retire } from '@core/creature'
 import { describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
 import { getLatest, useAppState } from '../../shared/useAppState'
-import { dropRemote, newSyncCode, normalizeSyncCode, runSync } from '../../shared/sync'
+import { diagnose, dropRemote, newSyncCode, normalizeSyncCode, runSync } from '../../shared/sync'
 import { CatDexCard } from '../../components/CatDex'
 import { PixelCat } from '../../components/PixelCat'
 
@@ -131,6 +131,20 @@ export default function Me() {
     setSync({ code: norm, enabled: true })
     setCodeInput('')
     void doSync(norm)
+  }
+
+  const runDiagnose = async () => {
+    Taro.showLoading({ title: '自检中' })
+    try {
+      const steps = await diagnose(sync.code || 'ABCD-EFGH-JKLM-NPQR-STUV-WXYZ')
+      Taro.hideLoading()
+      const text = steps.map((x) => `${x.ok ? '✓' : '✗'} ${x.name}\n    ${x.detail}`).join('\n\n')
+      Taro.showModal({ title: '同步自检', content: text, showCancel: false, confirmText: '知道了' })
+      console.log('[同步自检]', steps)
+    } catch (e) {
+      Taro.hideLoading()
+      Taro.showModal({ title: '自检本身失败了', content: String(e), showCancel: false })
+    }
   }
 
   const disableSync = () => {
@@ -349,6 +363,9 @@ export default function Me() {
             <Button className="btn" loading={syncing} onClick={() => void doSync(sync.code)}>
               立即同步
             </Button>
+            <Button className="btn btn-plain" onClick={() => void runDiagnose()}>
+              同步自检
+            </Button>
             <Button className="btn btn-plain" onClick={disableSync}>
               关闭同步
             </Button>
@@ -372,6 +389,9 @@ export default function Me() {
             </Button>
             <Button className="btn btn-plain" onClick={() => void enableNew()}>
               生成新的同步码
+            </Button>
+            <Button className="btn btn-plain" onClick={() => void runDiagnose()}>
+              同步自检
             </Button>
           </View>
         )}
