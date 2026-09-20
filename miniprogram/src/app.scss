@@ -817,3 +817,211 @@ page {
   88% { transform: rotate(-1.5deg); }
   94% { transform: rotate(1.5deg); }
 }
+
+/* ── 今日页主视觉：陆地 + 水塘。复刻网页版 .land / .lake / .land-meters ──
+   网页版的陆地边缘是一段 SVG 路径，小程序没有 svg 元素，
+   这里用不规则圆角近似同一个手绘轮廓。 */
+.land {
+  /* 顶到屏幕边缘：抵消 .wrap 的内边距 */
+  margin: -24px -32px 0;
+  padding: 40px 32px 44px;
+  background: var(--land);
+  color: var(--lobe-ink);
+  /* 下沿两角不等，近似网页版那段手绘岸线 */
+  border-bottom-left-radius: 80px 56px;
+  border-bottom-right-radius: 120px 72px;
+}
+
+.land-top {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.lake-wrap {
+  position: relative;
+  flex: none;
+  width: 300px;
+  height: 252px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 水塘：不规则圆 + 轻微旋转，大小随剩余热量变化 */
+.lake {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 63% 37% 56% 44% / 46% 66% 34% 54%;
+  background: var(--bg);
+  transition: transform 400ms cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.lake-label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.lake-cap {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.lake-num {
+  font-size: 76px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 2px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.land-facts {
+  flex: 1;
+  min-width: 0;
+}
+
+.land-eaten {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.land-eaten-num {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.land-eaten-of {
+  font-size: 24px;
+  color: var(--lobe-ink-land);
+}
+
+.land-hint {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.hero-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.hero-fact {
+  font-size: 24px;
+  color: var(--lobe-ink-land);
+}
+
+.hero-b {
+  color: var(--ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-bad {
+  color: var(--bad-text);
+}
+
+.land-meters {
+  margin-top: 28px;
+}
+
+/* ── 一条营养素进度 ── */
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 24px;
+}
+
+.meter + .meter {
+  margin-top: 16px;
+}
+
+.meter-lbl {
+  flex: none;
+  width: 112px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin-right: 10px;
+  vertical-align: -1px;
+}
+
+.track {
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  border-radius: 999px;
+  display: flex;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 400ms cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.fill-over {
+  background: var(--bad);
+}
+
+.meter-num {
+  flex: none;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.meter-over {
+  color: var(--bad-text);
+}
+
+.meter-of {
+  color: var(--muted);
+}
+
+/* ── 小管家气泡 ── */
+.bubble {
+  position: relative;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 3px var(--hair);
+  border-radius: 28px;
+  padding: 16px 24px;
+  font-size: 26px;
+  line-height: 1.45;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.bubble-tail {
+  position: absolute;
+  left: -11px;
+  top: 26px;
+  width: 22px;
+  height: 22px;
+  background: var(--surface);
+  border-left: 3px solid var(--hair);
+  border-bottom: 3px solid var(--hair);
+  transform: rotate(45deg);
+}

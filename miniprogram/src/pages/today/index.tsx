@@ -9,6 +9,12 @@ import { SLOT_LABEL, entryPortionText, showsSodium } from '@webui/format'
 import { describeCat, growthSteps, isFullyGrown, maxGrowthSteps } from '@core/pixelcat'
 import { CAT_TITLE_MAP, titlesFor } from '@core/catTitles'
 import { PixelCat } from '../../components/PixelCat'
+import { Meter } from '../../components/Meter'
+import { SpeechBubble } from '../../components/SpeechBubble'
+import { creatureLine } from '@core/creatureTalk'
+import { CONDITION_LABEL } from '@core/conditions'
+import { nowTimeStr } from '@core/dates'
+import { budgetFocus, remainOf } from '@core/budget'
 import { Water } from '../../components/Water'
 import { Vitals } from '../../components/Vitals'
 import { waterOnDate, fluidFromDrinks } from '@core/water'
@@ -51,8 +57,9 @@ export default function Today() {
   const eaten = n ? Math.round(n.kcal) : 0
   const target = Math.round(t.kcal)
   const remain = target - eaten
-  const pct = Math.min(100, Math.round((eaten / target) * 100))
   const over = remain < 0
+  // 水塘大小随剩余热量变化：吃得越多塘越小。范围掐在 0.55~1.1 之间，免得缩成一点或撑出格子
+  const lakeScale = Math.max(0.55, Math.min(1.1, remain > 0 ? 0.55 + (remain / target) * 0.55 : 0.55))
 
   const removeEntry = (id: string) => {
     Taro.showModal({
@@ -115,40 +122,69 @@ export default function Today() {
   const grownPct = Math.round((grown / maxGrown) * 100)
   const fullyGrown = creature ? isFullyGrown(creature.cat) : false
   const catTitles = creature ? titlesFor(creature.cat) : []
+  // 气泡台词与网页版同一个函数，只是输入在这边拼
+  const talk = creature
+    ? creatureLine({
+        isToday: date === todayStr(),
+        now: nowTimeStr(),
+        date,
+        entries: state.entries.filter((e) => e.date === date),
+        n: n || { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, sodium: 0 },
+        targets: t,
+        waterMl: drankMl,
+        showSodium: showsSodium(conds),
+        focus: budgetFocus(remainOf(t, n || { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, sodium: 0 }), t).slice(0, 3),
+        justHatched: creature.mutations === 0,
+        fruitG: d.stat ? d.stat.fruitG : 0,
+        personality: creature.personality,
+      })
+    : ''
 
   return (
     <View className="wrap">
-      <View className="card">
-        <Text className="label">{over ? '今天超出' : '今天还可以吃'}</Text>
-        <View className="big">{Math.abs(remain)}</View>
-        <Text className="muted">
-          目标 {target} 千卡，已记录 {eaten} 千卡
-        </Text>
-        <View className="bar">
-          <View
-            className={over ? 'bar-fill bar-over' : 'bar-fill'}
-            style={{ width: `${pct}%` }}
-          />
+      <View className="land">
+        <View className="land-top">
+          <View className="lake-wrap">
+            <View className="lake" style={{ transform: `rotate(-7deg) scale(${lakeScale})` }} />
+            <View className="lake-label">
+              <Text className="lake-cap">{over ? '已超出' : '还可以吃'}</Text>
+              <Text className="lake-num">{Math.abs(remain)}</Text>
+              <Text className="lake-cap">千卡</Text>
+            </View>
+          </View>
+          <View className="land-facts">
+            <View className="land-eaten">
+              <Text className="land-eaten-num">{eaten}</Text>
+              <Text className="land-eaten-of">/ {target} 千卡 已吃</Text>
+            </View>
+            {over ? <Text className="land-hint">晚点清淡些</Text> : null}
+            <View className="hero-sub">
+              <Text className="hero-fact">
+                蔬菜 <Text className="hero-b">{d.stat ? (d.stat.vegG / 100).toFixed(1) : '0.0'}</Text> 份
+              </Text>
+              <Text className="hero-fact">
+                水果 <Text className="hero-b">{d.stat ? Math.round(d.stat.fruitG) : 0}</Text> g
+              </Text>
+              {showsSodium(conds) ? (
+                <Text className="hero-fact">
+                  钠 <Text className={n && n.sodium > t.sodiumMax ? 'hero-b hero-bad' : 'hero-b'}>
+                    {n ? Math.round(n.sodium) : 0}
+                  </Text> / {Math.round(t.sodiumMax)} mg
+                </Text>
+              ) : null}
+              {conds.map((c) => (
+                <Text className="pill" key={c}>
+                  {CONDITION_LABEL[c]}模式
+                </Text>
+              ))}
+            </View>
+          </View>
         </View>
-        <View className="macros">
-          <View className="macro macro-p">
-            <View className="k">蛋白质</View>
-            <View className="v">
-              {n ? Math.round(n.protein) : 0}/{Math.round(t.protein)}g
-            </View>
-          </View>
-          <View className="macro macro-f">
-            <View className="k">脂肪</View>
-            <View className="v">
-              {n ? Math.round(n.fat) : 0}/{Math.round(t.fat)}g
-            </View>
-          </View>
-          <View className="macro macro-c">
-            <View className="k">碳水</View>
-            <View className="v">
-              {n ? Math.round(n.carbs) : 0}/{Math.round(t.carbs)}g
-            </View>
-          </View>
+        <View className="land-meters">
+          <Meter label="蛋白" value={n ? n.protein : 0} target={t.protein} unit="g" color="#e45a3f" soft="#f9d8d0" />
+          <Meter label="脂肪" value={n ? n.fat : 0} target={t.fat} unit="g" color="#3d8fd6" soft="#d3e6f7" />
+          <Meter label="碳水" value={n ? n.carbs : 0} target={t.carbs} unit="g" color="#b8780a" soft="#f4e4bf" />
+          <Meter label="纤维" value={n ? n.fiber : 0} target={t.fiber} unit="g" color="#6e8f3a" soft="#e3ebcf" />
         </View>
       </View>
 
@@ -174,7 +210,7 @@ export default function Today() {
           <View className="cat-row">
             <PixelCat spec={creature.cat} size={128} />
             <View className="cat-info">
-              <View className="cat-desc">{describeCat(creature.cat)}</View>
+              <SpeechBubble text={talk} />
               {catTitles.length > 0 ? (
                 <View className="cat-titles">
                   {catTitles.map((id) => (
@@ -184,11 +220,9 @@ export default function Today() {
                   ))}
                 </View>
               ) : null}
-              <View className="bar">
-                <View className="bar-fill" style={{ width: `${grownPct}%` }} />
-              </View>
               <Text className="entry-sub">
-                {fullyGrown ? '已经长齐了' : `成长 ${grown} / ${maxGrown} 阶，每记一笔推进一次`}
+                {describeCat(creature.cat)} ·{' '}
+                {fullyGrown ? '已经长齐了' : `成长 ${grown} / ${maxGrown} 阶`}
               </Text>
             </View>
           </View>
