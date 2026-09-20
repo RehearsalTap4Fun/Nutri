@@ -14,6 +14,8 @@ export default defineAppConfig({
     backgroundColor: '#F5F1E4'
   },
   tabBar: {
+    // 自己画：原生 tabBar 改不了形状，做不出网页版那条不规则胶囊浮岛
+    custom: true,
     color: '#5a5d58',
     selectedColor: '#2c2e2a',
     backgroundColor: '#F5F1E4',

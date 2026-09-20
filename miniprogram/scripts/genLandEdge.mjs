@@ -52,4 +52,18 @@ for (const v of variants) {
   const meta = await sharp(file).metadata()
   console.log(`${v.name}.png  ${meta.width}×${meta.height}`)
 }
+// 导航条上方那道浅浅的岸线：米色从内容上方漫过来，路径同样抄自网页版 App.tsx 的 .nav-shore
+const SHORE = 'M0 10V6.5C18 3 34 9 52 5.5C70 2 84 8 100 4.5V10Z'
+const SHORE_W = 750
+const SHORE_H = 75
+const shoreSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10" width="${SHORE_W}" height="${SHORE_H}" preserveAspectRatio="none">
+  <path d="${SHORE}" fill="#f5f1e4"/>
+</svg>`
+const shoreFile = join(outDir, 'nav-shore.png')
+await sharp(Buffer.from(shoreSvg), { density: 600 })
+  .resize(SHORE_W, SHORE_H)
+  .png({ compressionLevel: 9, palette: true })
+  .toFile(shoreFile)
+console.log(`nav-shore.png  ${SHORE_W}×${SHORE_H}`)
+
 console.log(`→ ${outDir}`)
