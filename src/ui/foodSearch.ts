@@ -23,10 +23,15 @@ export function searchFoods(q: string, cat: DishCategory | 'all', dishes: Dish[]
     if (cat !== 'all' && d.cat !== cat) continue
     const name = d.name.toLowerCase()
     let s = 0
+    const aliases = d.aliases?.map((a) => a.toLowerCase())
     if (name === query) s = 100
+    // 别名与查询完全一致时排在「菜名以查询开头」之前：搜「花生」要先出「炒花生(一小把)」，
+    // 而不是「花生猪脚汤」——后者只是碰巧以这两个字开头。
+    else if (aliases?.includes(query)) s = 90
     else if (name.startsWith(query)) s = 80
+    else if (aliases?.some((a) => a.startsWith(query))) s = 70
     else if (name.includes(query)) s = 60
-    else if (d.aliases?.some((a) => a.toLowerCase().includes(query))) s = 40
+    else if (aliases?.some((a) => a.includes(query))) s = 40
     else if (query.length >= 2 && [...query].every((ch) => name.includes(ch))) s = 20
     if (s) scored.push({ s: s + (favorites.includes(d.id) ? 5 : 0) + (recent.includes(d.id) ? 3 : 0), p: { kind: 'dish', dish: d } })
   }
