@@ -5,7 +5,10 @@ import type { LogEntry, MealSlot } from '@core/types'
 import { MEAL_SLOTS } from '@core/types'
 import { entryNutrients, entryName } from '@core/nutrition'
 import { todayStr } from '@core/dates'
-import { SLOT_LABEL, entryPortionText, showsSodium } from '@webui/format'
+import { SLOT_LABEL, entryPortionText, showsSodium, withoutSodiumNotes, defaultTimeForSlot } from '@webui/format'
+import { frequentDishes } from '@core/recent'
+import { logEntry } from '../../shared/log'
+import { allDishesOf } from '../../shared/derive'
 import { describeCat, growthSteps, isFullyGrown, maxGrowthSteps } from '@core/pixelcat'
 import { CAT_TITLE_MAP, titlesFor } from '@core/catTitles'
 import { PixelCat } from '../../components/PixelCat'
@@ -14,7 +17,12 @@ import { SpeechBubble } from '../../components/SpeechBubble'
 import { creatureLine } from '@core/creatureTalk'
 import { CONDITION_LABEL } from '@core/conditions'
 import { nowTimeStr } from '@core/dates'
-import { budgetFocus, remainOf } from '@core/budget'
+import { budgetFocus, remainOf, suggestForBudget } from '@core/budget'
+import { guessSlot, portionText } from '@webui/format'
+import { servingGrams } from '@core/nutrition'
+import { SignalChips } from '../../components/bits'
+import { CanIEat } from '../../components/CanIEat'
+import { useState } from 'react'
 import { Water } from '../../components/Water'
 import { Vitals } from '../../components/Vitals'
 import { waterOnDate, fluidFromDrinks } from '@core/water'
@@ -28,6 +36,8 @@ export default function Today() {
   const date = todayStr()
   const d = useMemo(() => derive(state, date), [state, date])
   const dishMap = useMemo(() => dishMapOf(state), [state])
+  const allDishes = useMemo(() => allDishesOf(state), [state])
+  const recentDishIds = useMemo(() => frequentDishes(state.entries, todayStr()), [state.entries])
 
   const bySlot = useMemo(() => {
     const o = {} as Record<MealSlot, LogEntry[]>
@@ -116,6 +126,43 @@ export default function Today() {
       tombstones: [...s.tombstones, { coll: 'vitals' as const, id, at: Date.now() }],
     }))
 
+  const [showBudget, setShowBudget] = useState(false)
+
+  const zero = { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, sodium: 0 }
+  const eatenN = n || zero
+  // 下一餐：今天按当前时间猜，其余日期取第一个空餐次
+  const nextSlot: MealSlot = (() => {
+    const empty = MEAL_SLOTS.filter((sl) => sl !== 'snack' && bySlot[sl].length === 0)
+    if (date === todayStr()) {
+      const g = guessSlot(nowTimeStr())
+      return empty.includes(g) ? g : empty[0] || 'snack'
+    }
+    return empty[0] || 'snack'
+  })()
+  const focus = budgetFocus(remainOf(t, eatenN), t).slice(0, 3)
+  const budgetPicks =
+    remain > 50
+      ? suggestForBudget({
+          remain: remainOf(t, eatenN),
+          targets: t,
+          slot: nextSlot,
+          dishes: allDishes,
+          profile,
+          favorites: state.favorites,
+          recentIds: recentDishIds,
+        })
+      : []
+  const planNotes = d.plan ? d.plan.notes : []
+
+  const quickLog = (slot: MealSlot, dishId: string, portion = 1) => {
+    const r = logEntry(update, { date, slot, time: defaultTimeForSlot(slot), dishId, portion })
+    const name = dishMap.get(dishId)?.name || dishId
+    Taro.showToast({
+      title: r.hatched ? '蛋孵出来了' : r.change || `已记 ${name}`,
+      icon: 'none',
+    })
+  }
+
   const creature = state.creature
   const grown = creature ? growthSteps(creature.cat) : 0
   const maxGrown = maxGrowthSteps()
@@ -187,6 +234,78 @@ export default function Today() {
           <Meter label="纤维" value={n ? n.fiber : 0} target={t.fiber} unit="g" color="#6e8f3a" soft="#e3ebcf" />
         </View>
       </View>
+
+      {remain > 50 && budgetPicks.length > 0 ? (
+        <View className="card">
+          <View className="slot-head">
+            <Text className="h2" style={{ marginBottom: 0 }}>
+              用剩下的 {remain} 千卡还能吃什么
+            </Text>
+            <Text className="chip" onClick={() => setShowBudget(!showBudget)}>
+              {showBudget ? '收起' : `按${SLOT_LABEL[nextSlot]}挑`}
+            </Text>
+          </View>
+          {showBudget ? (
+            <View>
+              {focus.length > 0 ? (
+                <View className="budget-focus">
+                  <Text className="entry-sub">按缺口挑</Text>
+                  {focus.map((f) => (
+                    <Text className={`focus-tag focus-${f.kind}`} key={f.key}>
+                      {f.label}
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
+              {budgetPicks.map((pk) => (
+                <View className="entry" key={pk.dish.id}>
+                  <View>
+                    <View className="entry-name">
+                      {pk.dish.name}
+                      <Text className="entry-sub">
+                        {' '}
+                        × {portionText(pk.portion, servingGrams(pk.dish))}
+                      </Text>
+                    </View>
+                    <View className="entry-sub">{pk.why}</View>
+                  </View>
+                  <Text className="entry-kcal">{Math.round(pk.n.kcal)}</Text>
+                  <Text
+                    className="add"
+                    onClick={() => {
+                      quickLog(nextSlot, pk.dish.id, pk.portion)
+                      setShowBudget(false)
+                    }}
+                  >
+                    记
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+
+      {planNotes.length > 0 ? (
+        <View className="card">
+          <View className="h2">今天的营养师提醒</View>
+          <SignalChips notes={withoutSodiumNotes(planNotes, showsSodium(conds))} />
+        </View>
+      ) : null}
+
+      <CanIEat
+        dishes={allDishes}
+        dishMap={dishMap}
+        customFoods={state.customFoods}
+        favorites={state.favorites}
+        recentDishIds={recentDishIds}
+        conditions={conds}
+        targets={t}
+        todaySoFar={eatenN}
+        showSodium={showsSodium(conds)}
+        nextSlot={nextSlot}
+        onQuickLog={quickLog}
+      />
 
       <View className="card">
         <View className="h2">喝水</View>

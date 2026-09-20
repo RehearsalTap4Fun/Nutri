@@ -80,3 +80,12 @@ export function showsSodium(conditions: Condition[] | undefined): boolean {
 export function withoutSodiumNotes(notes: string[], show: boolean): string[] {
   return show ? notes : notes.filter((t) => !/钠/.test(t))
 }
+
+/** 提醒句的标题：取第一个逗号前，去掉没闭合的括号和尾标点 */
+export function noteHead(t: string): string {
+  let h = t.split(/[，。：；,]/)[0]
+  const o = h.search(/[（(]/)
+  if (o >= 0 && !/[）)]/.test(h)) h = h.slice(0, o)
+  h = h.replace(/[，。：；、\s]+$/, '').trim()
+  return h || t.slice(0, 12)
+}

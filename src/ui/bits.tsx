@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { IconCheck, IconChevron } from './icons'
+import { noteHead } from './format'
 
 /** 折叠说明：默认只露一行标题，点开才看长文。长段解释一律放这里，正文只留一句。 */
 export function Fold({ summary, children, open = false }: { summary: string; children: ReactNode; open?: boolean }) {
@@ -40,15 +41,6 @@ export function Stats({ items, dense = false }: { items: StatItem[]; dense?: boo
       ))}
     </div>
   )
-}
-
-/** 提醒句的标题：取第一个逗号前，去掉没闭合的括号和尾标点 */
-export function noteHead(t: string): string {
-  let h = t.split(/[，。：；,]/)[0]
-  const o = h.search(/[（(]/)
-  if (o >= 0 && !/[）)]/.test(h)) h = h.slice(0, o)
-  h = h.replace(/[，。：；、\s]+$/, '').trim()
-  return h || t.slice(0, 12)
 }
 
 /** 信号胶囊：营养师提醒只露标题，点开看整句；默认最多露 max 个，其余折成 +N */
