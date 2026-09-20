@@ -488,3 +488,124 @@ page {
   gap: 12px;
   margin-bottom: 12px;
 }
+
+/* ── 图鉴 ── */
+
+.dex-wrap {
+  margin-top: 20px;
+}
+
+.dex-slot {
+  margin-bottom: 22px;
+}
+
+.dex-slot:last-child {
+  margin-bottom: 0;
+}
+
+.dex-slot-name {
+  font-size: 24px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.dex-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.dex-line-name {
+  font-size: 22px;
+  color: var(--muted);
+  flex: none;
+  min-width: 56px;
+}
+
+.dex-cell {
+  flex: none;
+  padding: 8px 20px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line);
+  font-size: 22px;
+}
+
+.dex-own {
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.dex-unknown {
+  color: var(--muted);
+}
+
+.dex-now {
+  border-color: var(--ink);
+  border-width: 3px;
+  font-weight: 600;
+}
+
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 2px solid var(--line);
+}
+
+.title-row:last-child {
+  border-bottom: none;
+}
+
+.title-name {
+  flex: none;
+  min-width: 80px;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.title-locked {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.title-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.title-hint {
+  font-size: 22px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.title-meta {
+  font-size: 20px;
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.hist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin-bottom: 12px;
+}
+
+.hist-item {
+  width: 140px;
+  text-align: center;
+}
+
+.hist-meta {
+  font-size: 20px;
+  color: var(--muted);
+  line-height: 1.5;
+  display: block;
+  margin-top: 8px;
+}

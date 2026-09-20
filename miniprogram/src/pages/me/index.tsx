@@ -1,8 +1,13 @@
 import { useMemo } from 'react'
+import Taro from '@tarojs/taro'
 import { View, Text, Picker, Input, Button } from '@tarojs/components'
 import type { ActivityLevel, DietStyle, Goal, Profile, Sex } from '@core/types'
 import { ageOf, bmi, bmiLabel } from '@core/energy'
+import { retire } from '@core/creature'
+import { describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
 import { useAppState } from '../../shared/useAppState'
+import { CatDexCard } from '../../components/CatDex'
+import { PixelCat } from '../../components/PixelCat'
 
 const SEX: Array<[Sex, string]> = [
   ['male', '男'],
@@ -67,6 +72,27 @@ export default function Me() {
     }),
     [p],
   )
+
+  const creature = state.creature
+  const fullyGrown = creature ? isFullyGrown(creature.cat) : false
+
+  const graduate = () => {
+    if (!creature) return
+    Taro.showModal({
+      title: '让它毕业？',
+      content: '会换一颗新蛋重新养。现在这只进图鉴，长出来的部件和称号都留着。',
+      success: (r) => {
+        if (!r.confirm) return
+        const now = Date.now()
+        update((s) => ({
+          ...s,
+          creature: null,
+          creatureHistory: s.creature ? [...s.creatureHistory, retire(s.creature, now)] : s.creatureHistory,
+        }))
+        Taro.showToast({ title: '已毕业，换一颗新蛋', icon: 'none' })
+      },
+    })
+  }
 
   if (!p) {
     return (
@@ -204,10 +230,39 @@ export default function Me() {
       </View>
 
       <View className="card">
+        <View className="h2">健康小管家</View>
+        {creature ? (
+          <View>
+            <View className="cat-row">
+              <PixelCat id="meCat" spec={creature.cat} size={128} />
+              <View className="cat-info">
+                <View className="cat-desc">{describeCat(creature.cat)}</View>
+                <Text className="entry-sub">
+                  养了 {creature.mutations} 次 · 成长 {growthSteps(creature.cat)} / {maxGrowthSteps()} 阶
+                </Text>
+              </View>
+            </View>
+            <Text className="muted">
+              {fullyGrown
+                ? '已经长齐了。可以让它毕业，换一颗新蛋重新养，长出来的部件都会留在图鉴里。'
+                : '还能继续长。毕业会换一颗新蛋，现在这只进图鉴，不会消失。'}
+            </Text>
+            <Button className="btn btn-plain" onClick={graduate}>
+              让它毕业
+            </Button>
+          </View>
+        ) : (
+          <Text className="muted">还是一颗蛋。去「今日」记下第一笔就会孵化。</Text>
+        )}
+      </View>
+
+      <CatDexCard creature={creature} history={state.creatureHistory} dex={state.creatureDex} />
+
+      <View className="card">
         <View className="h2">关于这一版</View>
         <Text className="muted">
-          这是小程序版的第一个可跑版本。目标计算、三餐推荐、菜品与食材数据，用的都是网页版的同一份源码，没有复制也没有改写。
-          录餐、图表、健康小管家还没搬过来。
+          目标计算、三餐推荐、菜品与食材数据、小管家的成长规则，用的都是网页版的同一份源码，没有复制也没有改写。
+          云同步、喝水与血压血糖记录还没搬过来。
         </Text>
       </View>
     </View>
