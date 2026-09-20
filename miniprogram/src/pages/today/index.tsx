@@ -7,7 +7,7 @@ import { entryNutrients, entryName } from '@core/nutrition'
 import { todayStr } from '@core/dates'
 import { SLOT_LABEL, entryPortionText, showsSodium, withoutSodiumNotes, defaultTimeForSlot } from '@webui/format'
 import { frequentDishes } from '@core/recent'
-import { logEntry } from '../../shared/log'
+import { bumpCreature, logEntry } from '../../shared/log'
 import { allDishesOf } from '../../shared/derive'
 import { describeCat, growthSteps, isFullyGrown, maxGrowthSteps } from '@core/pixelcat'
 import { CAT_TITLE_MAP, titlesFor } from '@core/catTitles'
@@ -96,25 +96,48 @@ export default function Today() {
   const drankMl = waterOnDate(state.water, date)
   const fluidMl = fluidFromDrinks(state.entries, dishMap, date)
 
-  /** 把当天饮水总量设成 ml：用一条当天的记录承载，点杯子来回改都只动这一条 */
+  /**
+   * 把当天饮水总量设成 ml：旧记录打墓碑，新写一条。
+   * **喝水增加时也喂一次小管家**，与网页版一致；点回去减少则不喂。
+   */
   const setWater = (ml: number) => {
-    update((s) => {
-      const others = s.water.filter((w) => w.date !== date)
-      if (ml <= 0) {
-        const dropped = s.water.filter((w) => w.date === date).map((w) => w.id)
-        return {
-          ...s,
-          water: others,
-          tombstones: [
-            ...s.tombstones,
-            ...dropped.map((id) => ({ coll: 'water' as const, id, at: Date.now() })),
-          ],
-        }
+    const prevMl = state.water.filter((w) => w.date === date).reduce((a, w) => a + w.ml, 0)
+    const now = Date.now()
+
+    const writeWater = (s: typeof state) => {
+      const mine = s.water.filter((w) => w.date === date)
+      const rec = {
+        id: uid(),
+        date,
+        time: date === todayStr() ? nowTimeStr() : undefined,
+        ml: Math.round(ml),
+        updatedAt: now,
       }
-      const mine = s.water.find((w) => w.date === date)
-      const rec = { id: mine ? mine.id : uid(), date, ml, updatedAt: Date.now() }
-      return { ...s, water: [...others, rec] }
-    })
+      return {
+        water: [...s.water.filter((w) => w.date !== date), ...(ml > 0 ? [rec] : [])],
+        tombstones: [
+          ...s.tombstones,
+          ...mine.map((w) => ({ coll: 'water' as const, id: w.id, at: now })),
+        ],
+      }
+    }
+
+    if (ml > prevMl) {
+      const r = bumpCreature(update, writeWater)
+      const cups = Math.round(ml / 250)
+      Taro.showToast({
+        title: r.hatched
+          ? '蛋孵出来了'
+          : r.titles.length
+            ? `解锁称号「${r.titles[0]}」`
+            : r.change || `喝到第 ${cups} 杯`,
+        icon: 'none',
+      })
+      return
+    }
+
+    update((s) => ({ ...s, ...writeWater(s) }))
+    Taro.showToast({ title: ml > 0 ? `喝到第 ${Math.round(ml / 250)} 杯` : '今天的饮水清零了', icon: 'none' })
   }
 
   const addVital = (v: Omit<VitalEntry, 'id'>) =>
