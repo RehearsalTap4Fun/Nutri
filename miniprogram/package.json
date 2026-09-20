@@ -18,7 +18,8 @@
     "typecheck": "tsc --noEmit",
     "pixelpack": "node scripts/genPixelPack.mjs",
     "tabicons": "node scripts/genTabIcons.mjs",
-    "landedge": "node scripts/genLandEdge.mjs"
+    "landedge": "node scripts/genLandEdge.mjs",
+    "icons": "node scripts/genIcons.mjs"
   },
   "browserslist": [
     "iOS >= 9",

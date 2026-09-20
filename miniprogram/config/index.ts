@@ -53,7 +53,9 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
         // tabBar 只吃位图，图标由 scripts/genTabIcons.mjs 从网页版同一组 SVG 路径生成
         { from: 'src/assets/tabbar/', to: 'dist/assets/tabbar/' },
         // 陆地岸线，由 scripts/genLandEdge.mjs 从网页版同一段 SVG 路径渲染
-        { from: 'src/assets/land/', to: 'dist/assets/land/' }
+        { from: 'src/assets/land/', to: 'dist/assets/land/' },
+        // 页内小图标，由 scripts/genIcons.mjs 从网页版同一组 SVG 路径生成
+        { from: 'src/assets/icons/', to: 'dist/assets/icons/' }
       ],
       options: {
       }

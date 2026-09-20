@@ -1388,3 +1388,94 @@ page {
   text-align: center;
   line-height: 76px;
 }
+
+.icon {
+  display: inline-block;
+  vertical-align: -4px;
+  flex: none;
+}
+
+/* 空状态：一个不规则的小圆托着图标，复刻网页版 .empty-box */
+.empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 36px 0 24px;
+}
+
+.empty-box .empty-ico {
+  width: 104px;
+  height: 92px;
+  border-radius: 55% 45% 50% 50% / 50% 60% 40% 50%;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-box .empty-t {
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--ink);
+}
+
+.empty-box .empty-d {
+  font-size: 26px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── 今日记录：一张卡片按餐次分小节，餐次前一个彩色圆点 ── */
+.slot + .slot {
+  margin-top: 24px;
+}
+
+.slot-name {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.slot-dot {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 12px;
+  vertical-align: -1px;
+  box-shadow: inset 0 0 0 2px var(--hair);
+}
+
+.slot-dot-breakfast { background: var(--sun); }
+.slot-dot-lunch { background: var(--land); }
+.slot-dot-dinner { background: var(--land-2); }
+.slot-dot-snack { background: var(--surface); }
+
+.slot-kcal {
+  font-weight: 400;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.add-ghost {
+  background: transparent;
+  color: var(--accent);
+  padding: 8px 0;
+}
+
+.qlabel {
+  font-size: 22px;
+  color: var(--faint);
+  margin-right: 12px;
+}
+
+.entry-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-portion {
+  font-size: 24px;
+  color: var(--muted);
+}

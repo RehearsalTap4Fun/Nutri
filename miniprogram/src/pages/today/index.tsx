@@ -22,6 +22,9 @@ import { guessSlot, portionText } from '@webui/format'
 import { servingGrams } from '@core/nutrition'
 import { SignalChips } from '../../components/bits'
 import { SwipeRow } from '../../components/SwipeRow'
+import { Icon } from '../../components/Icon'
+import { frequentBySlot } from '@core/recent'
+import { r0 } from '@webui/format'
 import { CanIEat } from '../../components/CanIEat'
 import { useState } from 'react'
 import { WaterCard } from '../../components/Water'
@@ -160,6 +163,18 @@ export default function Today() {
       icon: 'none',
     })
   }
+
+  const dayCount = MEAL_SLOTS.reduce((a, sl) => a + bySlot[sl].length, 0)
+  // 空餐次的一键补记：该餐次常吃 + 适合该餐次的收藏
+  const quickBySlot = (() => {
+    const byslot = frequentBySlot(state.entries, date)
+    const fits = (id: string, sl: MealSlot) => !!dishMap.get(id)?.slots.includes(sl)
+    const o = {} as Record<MealSlot, string[]>
+    for (const sl of MEAL_SLOTS) {
+      o[sl] = [...new Set([...byslot[sl], ...state.favorites.filter((id) => fits(id, sl))])]
+    }
+    return o
+  })()
 
   const creature = state.creature
   const grown = creature ? growthSteps(creature.cat) : 0
@@ -355,45 +370,83 @@ export default function Today() {
         )}
       </View>
 
-      {MEAL_SLOTS.filter((sl) => t.slotShare[sl] > 0 || bySlot[sl].length > 0).map(
-        (slot) => {
+      <View className="card">
+        <View className="slot-head">
+          <Text className="h2" style={{ marginBottom: 0 }}>今日记录</Text>
+          {dayCount > 0 ? <Text className="entry-sub">{dayCount} 条</Text> : null}
+        </View>
+
+        {dayCount === 0 ? (
+          <View className="empty-box">
+            <View className="empty-ico">
+              <Icon name="bowl" tone="ink" size={44} />
+            </View>
+            <Text className="empty-t">这一天还没有记录</Text>
+            <Text className="empty-d">点「记一笔」搜菜名，或去「计划」一键记为已吃。</Text>
+            <Text className="add" onClick={() => go(nextSlot)}>记一笔</Text>
+          </View>
+        ) : null}
+
+        {MEAL_SLOTS.filter((sl) => t.slotShare[sl] > 0 || bySlot[sl].length > 0).map((slot) => {
           const list = bySlot[slot]
           const kcal = list.reduce((a, e) => a + entryNutrients(e, dishMap).kcal, 0)
+          const quick =
+            list.length === 0
+              ? (quickBySlot[slot] || [])
+                  .map((id) => dishMap.get(id))
+                  .filter((dd): dd is NonNullable<typeof dd> => !!dd)
+                  .slice(0, 3)
+              : []
           return (
-            <View className={`lobe lobe-${slot}`} key={slot}>
-              <View className="lobe-head">
-                <Text className="lobe-title">{SLOT_LABEL[slot]}</Text>
-                <Text className="add" onClick={() => go(slot)}>
-                  记一笔
+            <View className="slot" key={slot}>
+              <View className="slot-head">
+                <Text className="slot-name">
+                  <Text className={`slot-dot slot-dot-${slot}`} />
+                  {SLOT_LABEL[slot]}
+                  {kcal > 0 ? <Text className="slot-kcal"> · {r0(kcal)} 千卡</Text> : null}
+                </Text>
+                <Text className="add add-ghost" onClick={() => go(slot)}>
+                  ＋ 添加
                 </Text>
               </View>
-              {list.length > 0 ? (
-                <Text className="lobe-sub">共 {Math.round(kcal)} 千卡</Text>
+
+              {quick.length > 0 ? (
+                <View className="cats">
+                  <Text className="qlabel">常吃</Text>
+                  {quick.map((dd) => (
+                    <Text className="chip" key={dd.id} onClick={() => quickLog(slot, dd.id)}>
+                      ＋{dd.name}
+                    </Text>
+                  ))}
+                </View>
               ) : null}
-              {list.length === 0 ? (
-                <Text className="lobe-sub">还没记录</Text>
-              ) : (
-                list.map((e) => (
+
+              {list.map((e) => {
+                const en = entryNutrients(e, dishMap)
+                return (
                   <SwipeRow key={e.id} onDelete={() => removeEntry(e.id)}>
                     <View className="entry">
-                      <View>
-                        <View className="entry-name">{entryName(e, dishMap)}</View>
+                      <View className="entry-main">
+                        <View className="entry-name">
+                          {entryName(e, dishMap)}
+                          <Text className="entry-portion"> × {entryPortionText(e, dishMap)}</Text>
+                          {e.lowSalt ? <Text className="pill">少盐</Text> : null}
+                          {e.lowOil ? <Text className="pill">少油</Text> : null}
+                        </View>
                         <View className="entry-sub">
-                          {entryPortionText(e, dishMap)}
-                          {e.time ? ` · ${e.time}` : ''}
+                          {e.time ? `${e.time} · ` : ''}蛋白 {r0(en.protein)} · 脂肪 {r0(en.fat)} · 碳水{' '}
+                          {r0(en.carbs)} g
                         </View>
                       </View>
-                      <Text className="entry-kcal">
-                        {Math.round(entryNutrients(e, dishMap).kcal)}
-                      </Text>
+                      <Text className="entry-kcal">{r0(en.kcal)}</Text>
                     </View>
                   </SwipeRow>
-                ))
-              )}
+                )
+              })}
             </View>
           )
-        },
-      )}
+        })}
+      </View>
 
       <View className="card">
         <View className="h2">今天的目标是怎么来的</View>
