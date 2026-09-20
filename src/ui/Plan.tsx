@@ -8,6 +8,7 @@ import { dishNutrientsFor, entryName, entryNutrients, scale, servingGrams, sum }
 import { COOK_LABEL, SLOT_LABEL, entryPortionText, portionText, r0, withoutSodiumNotes } from './format'
 import { IconClose } from './icons'
 import { Fold, SignalChips, Stats } from './bits'
+import { mealWhy } from '../core/mealWhy'
 
 // 推荐理由整句太长且每道菜重复，收成一个小标签；整句留在 title 里
 const REASON_TAGS: Array<[RegExp, string]> = [[/蛋白/, '高蛋白'], [/粗粮/, '粗粮'], [/主食|碳水/, '低碳'], [/清淡|盐|钠/, '清淡'], [/油/, '少油'], [/蔬菜|菜/, '加菜'], [/水果/, '加水果'], [/外卖/, '外卖优选']]
@@ -16,7 +17,10 @@ function reasonTag(r: string): string {
   return r.length > 6 ? r.slice(0, 6) : r
 }
 
-export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMeal, onDislike, isToday, showSodium = false, date, planFor, onRerollWeek, onPickDate }: {
+export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMeal, onDislike, isToday, showSodium = false, date, planFor, onRerollWeek, onPickDate, adjustments, profile }: {
+  /** 「这一餐为什么这么排」要用：近 7 天结论与档案 */
+  adjustments: import('../core/analysis').Adjustments
+  profile: import('../core/types').Profile
   /** 只有高血压模式显示钠 */
   showSodium?: boolean
   /** 当前日期与一周视图 */
@@ -117,7 +121,7 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
         }
         const m = plan.meals.find((x) => x.slot === slot)
         if (!m) return null
-        return <MealCard key={slot} meal={m} dishMap={dishMap} onReroll={() => onReroll(m.slot)} onLog={() => onLogMeal(m)} onDislike={onDislike} showSodium={showSodium} />
+        return <MealCard key={slot} meal={m} dishMap={dishMap} onReroll={() => onReroll(m.slot)} onLog={() => onLogMeal(m)} onDislike={onDislike} showSodium={showSodium} why={mealWhy({ meal: m, targets, adjustments, profile, redistributed: plan.eatenSlots.length > 0 })} />
       })}
 
       {view === 'day' && allEaten && <div className="card"><div className="empty">今天的餐都记录了，明天再来看推荐</div></div>}
@@ -137,7 +141,7 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
   )
 }
 
-function MealCard({ meal, dishMap, onReroll, onLog, onDislike, showSodium }: { meal: MealPlan; dishMap: Map<string, Dish>; onReroll: () => void; onLog: () => void; onDislike: (id: string) => void; showSodium: boolean }) {
+function MealCard({ meal, dishMap, onReroll, onLog, onDislike, showSodium, why }: { meal: MealPlan; dishMap: Map<string, Dish>; onReroll: () => void; onLog: () => void; onDislike: (id: string) => void; showSodium: boolean; why: string[] }) {
   const [logged, setLogged] = useState(false)
   return (
     <div className={`card lobe lobe-${meal.slot}`}>
@@ -168,6 +172,11 @@ function MealCard({ meal, dishMap, onReroll, onLog, onDislike, showSodium }: { m
         {meal.items.length > 0 && <button className="btn primary sm" disabled={logged} onClick={() => { onLog(); setLogged(true) }}>{logged ? '已记录' : '照这个吃，记为已吃'}</button>}
       </div>
       {withoutSodiumNotes(meal.notes, showSodium).map((t, i) => <p key={i} className="small muted" style={{ marginTop: 6 }}>{t}</p>)}
+      {why.length > 0 && (
+        <Fold summary="这一餐为什么这么排">
+          {why.map((t, i) => <p key={i}>{t}</p>)}
+        </Fold>
+      )}
     </div>
   )
 }

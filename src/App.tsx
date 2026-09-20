@@ -3,7 +3,7 @@ import type { Dish, LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WaterEnt
 import { fluidFromDrinks } from './core/water'
 import { MEAL_SLOTS } from './core/types'
 import { computeTargets } from './core/energy'
-import { analyze, dayStat } from './core/analysis'
+import { analyze, dayStat, NO_ADJUST } from './core/analysis'
 import { planDay } from './core/planner'
 import { remainOf, suggestForBudget } from './core/budget'
 import { frequentBySlot, frequentDishes } from './core/recent'
@@ -415,7 +415,7 @@ export default function App() {
           <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} dishes={allDishes} customFoods={state.customFoods} favorites={state.favorites} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickBySlot={quickBySlot} recentDishIds={recentDishIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} onDislike={dislikeDish} water={dayWater} fluidMl={fluidMl} onSetWater={setWater} creature={state.creature} findings={analysis?.findings ?? []} />
         )}
         {tab === 'plan' && plan && targets && (
-          <PlanView showSodium={showNa} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} />
+          <PlanView adjustments={analysis?.adjustments ?? NO_ADJUST} profile={profile} showSodium={showNa} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} />
         )}
         {tab === 'analysis' && analysis && targets && (
           <AnalysisView vitals={state.vitals} onAddVital={addVital} onRemoveVital={removeVital} analysis={analysis} targets={targets} weights={state.weights} entries={state.entries} water={state.water} onAddWeight={addWeight} useAdaptive={state.settings.useAdaptiveTdee} onToggleAdaptive={setAdaptive} date={date} profile={profile} dishMap={dishMap} />

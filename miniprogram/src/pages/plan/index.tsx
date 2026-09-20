@@ -20,6 +20,7 @@ import {
 import { useAppState } from '../../shared/useAppState'
 import { logEntry } from '../../shared/log'
 import { derive, dishMapOf } from '../../shared/derive'
+import { mealWhy } from '@core/mealWhy'
 import { Fold } from '../../components/bits'
 import { Icon } from '../../components/Icon'
 
@@ -209,6 +210,20 @@ export default function Plan() {
                 {tx}
               </Text>
             ))}
+
+            <Fold summary="这一餐为什么这么排">
+              {mealWhy({
+                meal: m,
+                targets: d.targets!,
+                adjustments: d.analysis!.adjustments,
+                profile: d.profile!,
+                redistributed: plan.eatenSlots.length > 0,
+              }).map((why, i) => (
+                <Text className="why-line" key={i}>
+                  {why}
+                </Text>
+              ))}
+            </Fold>
           </View>
         )
       })}

@@ -1718,3 +1718,26 @@ page {
 }
 
 
+
+/* 「这一餐为什么这么排」的逐条 */
+.why-line {
+  display: block;
+  font-size: 22px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.why-line:last-child {
+  margin-bottom: 0;
+}
+
+/* 色块里的折叠标题要在彩底上看得清 */
+.lobe .fold-summary {
+  color: var(--lobe-ink);
+}
+
+.lobe .fold-body,
+.lobe .why-line {
+  color: var(--lobe-ink);
+  opacity: 0.85;
+}
