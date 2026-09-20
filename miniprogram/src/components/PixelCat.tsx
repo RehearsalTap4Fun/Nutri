@@ -14,10 +14,14 @@
  *    画布就一直空着。改成优先加载包内 PNG 文件，失败或超时才回退到 base64。
  *  - **带缩放的 drawImage 加 `imageSmoothingEnabled`**：关平滑在部分机型上不生效，放大后是糊的。
  *    改成纯 JS 最近邻展开，再一次性 `putImageData`，边缘一定是硬的。
+ *
+ * **画布不出现在版面里。** canvas 即使是 2d 类型，在部分机型上仍走原生层，
+ * 会压在自定义导航之类的普通视图上面，z-index 管不住。所以这里把画布挪到屏幕外，
+ * 合成完导出成临时文件，版面上显示的是一个普通 `Image`。
  */
 import { useEffect, useRef, useState } from 'react'
 import Taro from '@tarojs/taro'
-import { Canvas, View, Text } from '@tarojs/components'
+import { Canvas, View, Text, Image } from '@tarojs/components'
 import { ART_SIZE, artLayersFor, artPlanForCat } from '@core/catArt'
 import type { CatSpecLike } from '@core/catArt'
 import { composePlan } from '@core/pixelize'
@@ -92,6 +96,7 @@ function scaleRgba(src: Rgba, n: number, k: number): Uint8ClampedArray {
 export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
   const lastKey = useRef('')
   const [err, setErr] = useState('')
+  const [url, setUrl] = useState('')
 
   useEffect(() => {
     const key = JSON.stringify(spec)
@@ -160,7 +165,24 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
         imageData.data.set(out)
         ctx.putImageData(imageData, 0, 0)
 
+        // 导出成临时文件，版面上用 Image 显示，画布本身留在屏幕外
+        const file = await new Promise<string>((resolve, reject) => {
+          Taro.canvasToTempFilePath({
+            canvas,
+            x: 0,
+            y: 0,
+            width: side,
+            height: side,
+            destWidth: side,
+            destHeight: side,
+            fileType: 'png',
+            success: (r) => resolve(r.tempFilePath),
+            fail: (e) => reject(new Error(e && e.errMsg ? e.errMsg : '导出失败')),
+          })
+        })
+
         if (!cancelled) {
+          setUrl(file)
           lastKey.current = key
           setErr('')
         }
@@ -177,12 +199,16 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
 
   return (
     <View className="cat-holder" style={{ width: `${size}px`, height: `${size}px` }}>
-      <Canvas
-        type="2d"
-        id={id}
-        className="cat-canvas"
-        style={{ width: `${size}px`, height: `${size}px` }}
-      />
+      {/* 合成用的画布，挪到屏幕外，不参与版面也不会压住导航 */}
+      <Canvas type="2d" id={id} className="cat-stage" style={{ width: `${size}px`, height: `${size}px` }} />
+      {url ? (
+        <Image
+          className="cat-img"
+          src={url}
+          mode="scaleToFill"
+          style={{ width: `${size}px`, height: `${size}px` }}
+        />
+      ) : null}
       {err ? <Text className="cat-err">{err}</Text> : null}
     </View>
   )

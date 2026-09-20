@@ -4,10 +4,13 @@
  * 小程序没有 svg 元素，网页版那三张手写 SVG 图里，柱状图和占比条用普通视图就能画，
  * 只有折线必须走 canvas。这里用的是新版 `Canvas 2D`（`type="2d"`），接口与浏览器一致，
  * 旧的 `wx.createCanvasContext` 那套不用。
+ *
+ * **画布不出现在版面里。** canvas 在部分机型上走原生层，会压住自定义导航这类普通视图，
+ * z-index 管不住。所以画布挪到屏幕外，画完导出成临时文件，版面上显示的是普通 `Image`。
  */
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Taro from '@tarojs/taro'
-import { Canvas, View, Text } from '@tarojs/components'
+import { Canvas, View, Text, Image } from '@tarojs/components'
 
 export interface Point {
   /** 横轴位置，单位是「距最早一天的天数」 */
@@ -43,6 +46,16 @@ function pixelRatio(): number {
 
 export function LineChart({ id, points, height = 180, guide, unit = '' }: Props) {
   const drawn = useRef('')
+  const [url, setUrl] = useState('')
+  // 画布挪到屏幕外后量不到宽度，用屏幕宽减去页面左右内边距估一个
+  const [stageW, setStageW] = useState(320)
+
+  useEffect(() => {
+    // 页面左右各 32rpx 内边距，换算成逻辑像素
+    const info = Taro.getWindowInfo ? Taro.getWindowInfo() : Taro.getSystemInfoSync()
+    const w = (info.windowWidth || 375) - 32
+    setStageW(w > 0 ? w : 320)
+  }, [])
 
   useEffect(() => {
     if (points.length < 2) return
@@ -70,8 +83,9 @@ export function LineChart({ id, points, height = 180, guide, unit = '' }: Props)
         if (!ctx) return
 
         const dpr = pixelRatio()
-        const w = item.width
-        const h = item.height
+        // 屏幕外的节点理论上仍有尺寸，量不到就用估算值兜底
+        const w = item.width || stageW
+        const h = item.height || height
         canvas.width = w * dpr
         canvas.height = h * dpr
         ctx.scale(dpr, dpr)
@@ -166,11 +180,26 @@ export function LineChart({ id, points, height = 180, guide, unit = '' }: Props)
         ctx.textAlign = 'right'
         ctx.fillText(points[points.length - 1].label, w - padR, h - padB + 6)
 
-        drawn.current = sig
+        // 导出成临时文件，版面上用 Image 显示
+        Taro.canvasToTempFilePath({
+          canvas,
+          x: 0,
+          y: 0,
+          width: canvas.width,
+          height: canvas.height,
+          destWidth: canvas.width,
+          destHeight: canvas.height,
+          fileType: 'png',
+          success: (r) => {
+            setUrl(r.tempFilePath)
+            drawn.current = sig
+          },
+          fail: () => undefined,
+        })
         })
     }
     run()
-  }, [id, points, guide])
+  }, [id, points, guide, stageW])
 
   if (points.length < 2) {
     return (
@@ -182,12 +211,20 @@ export function LineChart({ id, points, height = 180, guide, unit = '' }: Props)
 
   return (
     <View className="chart-wrap">
+      {/* 画图用的画布，挪到屏幕外，不参与版面也不会压住导航 */}
       <Canvas
         type="2d"
         id={id}
-        className="chart-canvas"
-        style={{ height: `${height}px` }}
+        className="chart-stage"
+        style={{ width: `${stageW}px`, height: `${height}px` }}
       />
+      {url ? (
+        <Image className="chart-img" src={url} mode="widthFix" style={{ width: '100%' }} />
+      ) : (
+        <View className="chart-empty" style={{ height: `${height}px` }}>
+          <Text className="muted">正在画…</Text>
+        </View>
+      )}
       {unit ? <Text className="chart-unit">{unit}</Text> : null}
     </View>
   )

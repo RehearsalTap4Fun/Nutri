@@ -114,7 +114,9 @@ tabBar 图标由 `npm run tabicons` 生成，路径直接抄自网页版 `src/ui
 - **柱状图**（近 7 天热量）和**占比条**（三大营养素）用普通 `View` 加百分比高度就行，比 canvas 更清晰，也不用处理设备像素比和节点查询。
 - **折线图**（体重趋势）走 `src/components/LineChart.tsx`，用的是新版 `Canvas 2D`（`type="2d"`），接口与浏览器一致，不用旧的 `wx.createCanvasContext`。
 
-这个组件里有两处是踩过坑才加的：按设备像素比放大画布（否则真机上糊），以及节点查不到时隔 60ms 重试一次（首屏 canvas 还没布局完时 `createSelectorQuery` 会返回空）。像素猫以后也走这条路。
+这个组件里有几处是踩过坑才加的：按设备像素比放大画布（否则真机上糊），节点查不到时隔 60ms 重试一次（首屏 canvas 还没布局完时 `createSelectorQuery` 会返回空）。
+
+**最要紧的一条：画布不能留在版面里。** canvas 即使是 `type="2d"`，在部分机型上仍走原生层，会压住自定义导航这类普通视图，**z-index 管不住**。所以折线图和像素猫的画布都用 `position: fixed; left: -9999px` 挪到屏幕外，画完用 `canvasToTempFilePath` 导出临时文件，版面上显示的是普通 `Image`。
 
 **另一个坑：hook 不能写在提前返回之后。** 分析页一开始把体重相关的 `useMemo` 写在了 `if (!profile) return` 下面，档案从无到有时 hook 数量会变，React 直接抛 `Rendered more hooks than during the previous render`。现在所有 hook 都在提前返回之前。
 

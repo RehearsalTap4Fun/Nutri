@@ -497,7 +497,17 @@ page {
   margin: 12px 0 20px;
 }
 
-.chart-canvas { width: 100%; }
+/* 画图用画布：同样挪到屏幕外，理由见 .cat-stage */
+.chart-stage {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  pointer-events: none;
+}
+
+.chart-img {
+  display: block;
+}
 
 .chart-unit {
   position: absolute;
@@ -528,7 +538,18 @@ page {
   position: relative;
 }
 
-.cat-canvas { display: block; }
+/* 合成用画布：挪到屏幕外。canvas 在部分机型上走原生层，
+   留在版面里会压住自定义导航，z-index 管不住 */
+.cat-stage {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  pointer-events: none;
+}
+
+.cat-img {
+  display: block;
+}
 
 .cat-err {
   position: absolute;
