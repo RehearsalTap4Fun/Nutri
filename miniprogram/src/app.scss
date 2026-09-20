@@ -1634,3 +1634,32 @@ page {
   transform: translateX(-50%);
   color: var(--ink-2);
 }
+
+/* 推荐里「不想吃」的叉，点击区要够大 */
+.entry-x {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 色块里的 pill 换成描边，免得两层浅绿糊在一起 */
+.lobe .pill {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--lobe-ink);
+  color: var(--lobe-ink);
+  margin-left: 12px;
+}
+
+.lobe-plain .pill,
+.lobe-snack .pill {
+  box-shadow: inset 0 0 0 2px var(--hair);
+}
+
+.lobe .pill-good {
+  background: var(--land-2);
+  box-shadow: none;
+  color: var(--lobe-ink-land);
+}
