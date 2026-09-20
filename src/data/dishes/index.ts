@@ -9,6 +9,7 @@ import { DISHES_CONVENIENCE_MORE } from './convenience2'
 import { DISHES_CN_HOME } from './cnHome'
 import { DISHES_CN_HOME2 } from './cnHome2'
 import { DISHES_CHAIN } from './chain'
+import { DISHES_STREET_CHAIN } from './streetAndChain'
 
 // 各分组文件在此汇总；新增分组时在下方 concat
 export const DISHES: Dish[] = [
@@ -22,6 +23,7 @@ export const DISHES: Dish[] = [
   ...DISHES_CN_HOME,
   ...DISHES_CN_HOME2,
   ...DISHES_CHAIN,
+  ...DISHES_STREET_CHAIN,
 ]
 
 export const DISH_MAP: Map<string, Dish> = new Map(DISHES.map((d) => [d.id, d]))

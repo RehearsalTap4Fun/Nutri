@@ -62,6 +62,7 @@ export const INGREDIENTS: Ingredient[] = [
   I('sweet_potato', '红薯', 'tuber', [90, 1.1, 0.2, 21, 1.6, 28]),
   I('purple_sweet_potato', '紫薯', 'tuber', [106, 1.8, 0.3, 24.4, 1.6, 30]),
   I('sweet_potato_noodle', '红薯粉条(干)', 'tuber', [338, 0.5, 0.1, 84.2, 0.6, 10]), // 蚂蚁上树/酸辣粉，干重
+  I('potato_noodle', '土豆粉(熟)', 'tuber', [130, 0.5, 0.2, 31, 0.6, 15]), // 与红薯粉条不同：现煮，含水量高
   I('taro', '芋头', 'tuber', [81, 2.2, 0.2, 18.1, 2.6, 33]), // 纤维: 台湾食药署,
   I('yam', '山药', 'tuber', [57, 1.9, 0.2, 12.4, 0.8, 19]),
   I('konjac', '魔芋', 'tuber', [12, 0.1, 0, 3, 3, 10]),
@@ -173,6 +174,7 @@ export const INGREDIENTS: Ingredient[] = [
   I('beef_steak', '牛排(西冷)', 'meat', [210, 20, 14, 0, 0, 55]),
   I('lamb', '羊肉', 'meat', [203, 19, 14.1, 0, 0, 81]),
   I('lamb_ribs', '羊排', 'meat', [309, 16, 27, 0.2, 0, 65]), // 脂肪明显高于笼统的「羊肉」
+  I('donkey_meat', '驴肉', 'meat', [116, 21.5, 3.2, 0.4, 0, 46]), // 驴肉火烧；高蛋白低脂，接近牛瘦肉
   I('cured_pork', '腊肉', 'meat', [498, 11.8, 48.8, 2.9, 0, 764]), // 钠取成分表常见值；广式/湘式腊肉可达 2000 以上
   I('chinese_sausage', '腊肠/香肠', 'meat', [508, 24.1, 40.7, 11.2, 0, 2300]),
   I('ham_deli', '火腿片', 'meat', [110, 17, 3, 2, 0, 1100]),
@@ -334,6 +336,7 @@ export const INGREDIENTS: Ingredient[] = [
   I('nuts_mixed', '混合坚果', 'processed', [600, 18, 52, 20, 7, 100], ['nuts', 'peanut']),
   I('seaweed_snack', '海苔(即食)', 'processed', [420, 30, 20, 30, 20, 1800]),
   I('jelly', '果冻', 'processed', [60, 0, 0, 15, 0, 20]),
+  I('grass_jelly', '仙草冻', 'processed', [38, 0.2, 0, 9.4, 0.5, 8]), // 烧仙草的主料
   I('candy', '糖果', 'processed', [390, 0, 0, 97, 0, 30]),
   // ===== USDA SR Legacy 提取的补充食材（见 ingredientsUsda.ts） =====
   // ---- 台湾食药署 / 中国食物成分表 / 日本八訂 来源的条目（多为替换 USDA「近似」替代或补库里没有的食材）

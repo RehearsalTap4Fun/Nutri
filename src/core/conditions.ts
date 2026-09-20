@@ -87,6 +87,7 @@ const PURINE_MEDIUM = new Set([
   'eel', 'saury', 'cod', 'tilapia', 'catfish', 'mackerel', 'croaker', 'surimi', 'fish_crucian',
   // 2026-09-20 P1 补录
   'eel_rice_field', 'snakehead', 'lamb_ribs', 'cured_pork', 'duck_leg',
+  'donkey_meat',
 ])
 // 明确低嘌呤的畜禽鱼贝：血制品嘌呤极低(~10 mg)，痛风患者反而可用作蛋白源，不能按肉降权。
 // 存在的意义是给 tests/conditionSets.test.ts 的结构守卫一个「已确认豁免」出口——
