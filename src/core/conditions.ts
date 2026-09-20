@@ -41,24 +41,90 @@ export const TRIMESTER_LABEL: Record<1 | 2 | 3, string> = { 1: '孕早期(1~13�
 export const CONDITION_DISCLAIMER =
   '特殊人群模式基于《中国居民膳食指南(2022)》、DRIs(2023)、高血压与糖尿病防治指南中的一般性膳食建议，只做日常饮食的辅助参考，不能替代产检医生、内分泌科或临床营养科的个体化方案。用药、血糖血压监测请遵医嘱；出现任何不适以就医为先。'
 
-const PICKLED_OR_CURED = new Set(['pickled_mustard', 'sauerkraut', 'kimchi', 'pickled_chili', 'preserved_veg', 'salted_duck_egg', 'century_egg', 'chinese_sausage', 'bacon', 'luncheon_meat', 'ham_deli', 'hot_dog', 'dried_shrimp', 'fermented_bean_curd', 'sour_bamboo', 'beef_jerky', 'duck_neck_braised'])
-const REFINED_STAPLE = new Set(['congee', 'glutinous_rice_raw', 'rice_cake', 'youtiao', 'bread_white', 'cereal_flakes', 'tapioca_pearls', 'glass_noodles_dry', 'rice_noodles_cooked'])
-const WHOLE_GRAIN = new Set(['brown_rice_cooked', 'oats', 'bread_whole', 'corn', 'sweet_potato', 'quinoa_cooked', 'yam', 'millet_porridge', 'red_beans_dry', 'mung_beans_dry', 'chickpeas_cooked', 'lentils_cooked', 'soybeans_dry'])
+const PICKLED_OR_CURED = new Set(['cured_pork', 'radish_dried', 'preserved_mustard', 'chopped_chili', 'pickled_mustard', 'sauerkraut', 'kimchi', 'pickled_chili', 'preserved_veg', 'salted_duck_egg', 'century_egg', 'chinese_sausage', 'bacon', 'luncheon_meat', 'ham_deli', 'hot_dog', 'dried_shrimp', 'fermented_bean_curd', 'sour_bamboo', 'beef_jerky', 'duck_neck_braised'])
+const REFINED_STAPLE = new Set(['sweet_potato_noodle', 'rice_noodle_flat', 'congee', 'glutinous_rice_raw', 'rice_cake', 'youtiao', 'bread_white', 'cereal_flakes', 'tapioca_pearls', 'glass_noodles_dry', 'rice_noodles_cooked'])
+const WHOLE_GRAIN = new Set(['brown_rice_cooked', 'oats', 'bread_whole', 'corn', 'sweet_potato',
+  'quinoa_cooked', 'yam', 'millet_porridge', 'red_beans_dry', 'mung_beans_dry', 'chickpeas_cooked',
+  'lentils_cooked', 'soybeans_dry',
+  // 补登记：全谷原料与杂豆。玉米片已在 REFINED_STAPLE，格兰诺拉糖太高，魔芋不是谷物，均不收。
+  'whole_wheat_flour', 'rice_brown_raw', 'cornmeal', 'barley_cooked',
+  'fava_beans', 'fava_beans_fresh', 'kidney_beans_cooked', 'black_beans_cooked',
+  'black_rice', 'millet_raw', 'purple_sweet_potato'])
 const SUGARY = new Set(['sugar', 'brown_sugar', 'honey', 'syrup', 'cola', 'orange_juice', 'creamer', 'tapioca_pearls', 'yakult', 'sweet_soy_milk', 'ice_cream', 'chocolate', 'cake', 'candy', 'jelly', 'biscuits', 'mooncake', 'egg_tart', 'sports_drink', 'yogurt', 'raisins', 'red_dates'])
-const DAIRY = new Set(['milk', 'milk_skim', 'yogurt', 'greek_yogurt', 'cheese'])
+// 计入「奶类摄入量」的乳制品。炼乳、黄油、淡奶油、冰淇淋不算——它们是糖/脂肪载体，
+// 计进来会让孕期 500 g 奶类目标被甜食刷满。
+// 注：dairyGrams 按原始克重累加，全脂奶粉 25 g 实际相当于约 200 g 液态奶，此处只按 25 g 计，
+// 属已知的低估（没有冲调倍数机制）；但计入总比完全不计好。
+const DAIRY = new Set(['milk', 'milk_skim', 'milk_lowfat', 'yogurt', 'yogurt_plain', 'greek_yogurt', 'cheese', 'milk_powder_whole'])
 const HIGH_MERCURY_HINT = new Set(['tuna_canned'])
 const RAW_KEYWORDS = ['寿司', '刺身', '生鱼', '溏心', '醉', '生腌', '生蚝', '三分熟']
 // 嘌啉分级（每 100 g 嘌啉 >150 mg 视为高）：内脏、贝壳类、虾蟹、鱿鱼、干制海鲜、浓肉汤与火锅底、卤味
-const PURINE_HIGH = new Set(['pork_liver', 'clam', 'crab', 'crayfish', 'shrimp', 'dried_shrimp', 'squid', 'fish_sea', 'fish_balls', 'beef_balls', 'duck_neck_braised', 'hotpot_base', 'yuba', 'soybeans_dry'])
+// 注：牛肚(~132)、鸡胗(~138)、扇贝(~77)、鲍鱼(~124) 名义上不到 150，但集合里既有的 clam(~136)、
+// shrimp(~137)、squid(~127)、crab(~82) 已把实际门槛拉到 ~80，同类同判；痛风是健康警示，宁可偏保守。
+const PURINE_HIGH = new Set([
+  'pork_liver', 'clam', 'crab', 'crayfish', 'shrimp', 'dried_shrimp', 'squid', 'fish_sea',
+  'fish_balls', 'beef_balls', 'duck_neck_braised', 'hotpot_base', 'yuba', 'soybeans_dry',
+  // 内脏：嘌啉最高的一类，原先只登记了猪肝
+  'pork_kidney', 'pork_heart', 'pork_intestine', 'beef_tripe', 'chicken_liver', 'chicken_gizzard',
+  // 贝类与头足：原先只登记了蛤蜊
+  'oyster', 'mussel', 'scallop', 'abalone', 'octopus',
+  // 其他高嘌啉海产
+  'sardine_canned', 'shrimp_shell_on',
+  // 2026-09-20 P1 补录
+  'cuttlefish', 'pork_tripe',
+])
 // 中嘌啉（75~150 mg）：一般畜禽肉与鱼，推荐时降权并配小份
-const PURINE_MEDIUM = new Set(['pork_lean', 'pork_belly', 'pork_ribs', 'pork_ground', 'pork_trotter', 'beef_lean', 'beef_brisket', 'beef_shank', 'beef_ground', 'beef_steak', 'lamb', 'chicken_breast', 'chicken_thigh', 'chicken_wing', 'chicken_whole', 'duck', 'roast_duck', 'fish_freshwater', 'fish_bass', 'salmon', 'tuna_canned', 'chinese_sausage', 'bacon', 'ham_deli', 'luncheon_meat', 'hot_dog', 'beef_jerky', 'fried_chicken'])
-const FATTY_MEAT = new Set(['pork_belly', 'pork_ribs', 'pork_trotter', 'lard', 'butter', 'cream', 'chinese_sausage', 'bacon', 'roast_duck', 'beef_brisket'])
-const LEAFY_GREENS = new Set(['spinach', 'broccoli', 'choy_sum', 'water_spinach', 'bok_choy', 'youmaicai', 'garlic_chives', 'asparagus', 'lettuce'])
-const LEAN_PROTEIN = new Set(['chicken_breast', 'egg_white', 'egg', 'fish_freshwater', 'fish_bass', 'salmon', 'shrimp', 'beef_lean', 'beef_shank', 'tofu', 'tofu_dried', 'greek_yogurt', 'whey_protein', 'tuna_canned', 'squid'])
-const ACIDIC = new Set(['tomato', 'cherry_tomato', 'orange', 'lemon', 'pomelo', 'vinegar', 'ketchup', 'orange_juice'])
+const PURINE_MEDIUM = new Set([
+  'pork_lean', 'pork_belly', 'pork_ribs', 'pork_ground', 'pork_trotter', 'beef_lean', 'beef_brisket',
+  'beef_shank', 'beef_ground', 'beef_steak', 'lamb', 'chicken_breast', 'chicken_thigh', 'chicken_wing',
+  'chicken_whole', 'duck', 'roast_duck', 'fish_freshwater', 'fish_bass', 'salmon', 'tuna_canned',
+  'chinese_sausage', 'bacon', 'ham_deli', 'luncheon_meat', 'hot_dog', 'beef_jerky', 'fried_chicken',
+  // 畜肉：原先这些部位一个集合都没进，痛风模式完全不降权
+  'pork_tenderloin', 'pork_shoulder', 'beef_ribeye', 'beef_tenderloin', 'beef_tongue', 'rabbit', 'beef_patty',
+  // 禽肉
+  'chicken_drumstick_skinless', 'chicken_feet', 'turkey_breast', 'goose', 'quail', 'pigeon',
+  // 鱼与鱼糜
+  'eel', 'saury', 'cod', 'tilapia', 'catfish', 'mackerel', 'croaker', 'surimi', 'fish_crucian',
+  // 2026-09-20 P1 补录
+  'eel_rice_field', 'snakehead', 'lamb_ribs', 'cured_pork', 'duck_leg',
+])
+// 明确低嘌呤的畜禽鱼贝：血制品嘌呤极低(~10 mg)，痛风患者反而可用作蛋白源，不能按肉降权。
+// 存在的意义是给 tests/conditionSets.test.ts 的结构守卫一个「已确认豁免」出口——
+// 守卫仍会抓出忘了登记的新食材，但不会逼着把低嘌呤食材塞进中嘌呤。
+const PURINE_LOW = new Set(['pork_blood', 'duck_blood'])
+/** 该食材是否已明确归入某一嘌呤等级（结构守卫用，避免补录时漏登记） */
+export function hasPurineLevel(ing: string): boolean {
+  return PURINE_HIGH.has(ing) || PURINE_MEDIUM.has(ing) || PURINE_LOW.has(ing)
+}
+const FATTY_MEAT = new Set(['pork_belly', 'pork_ribs', 'pork_trotter', 'lard', 'butter', 'cream',
+  'chinese_sausage', 'bacon', 'roast_duck', 'beef_brisket',
+  // 脂肪≥20 g/100 g 却一直没登记的：肉馅与雪花部位
+  'pork_ground', 'beef_ground', 'pork_shoulder', 'beef_ribeye',
+  'lamb_ribs', 'cured_pork'])
+// 备孕模式用来算叶酸摄入的「深色高叶酸蔬菜」，不是「所有蔬菜」：
+// 西兰花与芦笋虽非叶菜但叶酸高，故在内；大白菜、包菜、紫甘蓝(浅色/结球)与莴笋(茎)不计入。
+const LEAFY_GREENS = new Set([
+  'spinach', 'broccoli', 'choy_sum', 'water_spinach', 'bok_choy', 'youmaicai', 'garlic_chives',
+  'asparagus', 'lettuce',
+  // 库里本就有、却一直没登记的深色叶菜
+  'gai_lan', 'garland_chrysanthemum', 'amaranth_leaves', 'sweet_potato_leaves', 'mustard_greens',
+  'kale', 'arugula', 'pumpkin_leaves', 'pea_shoots', 'toon',
+])
+const LEAN_PROTEIN = new Set(['chicken_breast', 'egg_white', 'egg', 'fish_freshwater', 'fish_bass', 'salmon', 'shrimp', 'beef_lean', 'beef_shank', 'tofu', 'tofu_dried', 'greek_yogurt', 'whey_protein', 'tuna_canned', 'squid', 'fish_crucian', 'pork_blood', 'duck_blood',
+  // 蛋白≥15 g 且脂肪≤5 g 的补登记。内脏(高胆固醇高嘌呤)、火腿虾皮蟹棒(高钠)不收——
+  // 这个集合会被用来「推荐」，不只是描述成分。
+  'chicken_drumstick_skinless', 'turkey_breast', 'quail', 'cod', 'tilapia', 'croaker', 'fish_sea', 'abalone',
+  'snakehead', 'eel_rice_field', 'cuttlefish'])
+const ACIDIC = new Set(['tomato', 'cherry_tomato', 'orange', 'lemon', 'pomelo', 'vinegar', 'ketchup',
+  'orange_juice', 'vinaigrette', 'pineapple', 'grapefruit', 'hawthorn', 'vinegar_black'])
 const CARBONATED = new Set(['cola', 'cola_zero', 'beer', 'sports_drink'])
-const SOFT_PROTEIN = new Set(['egg', 'tofu', 'tofu_soft', 'fish_freshwater', 'fish_bass', 'salmon', 'shrimp', 'milk', 'yogurt', 'greek_yogurt', 'chicken_breast'])
-const HARD_TO_CHEW = new Set(['beef_jerky', 'nuts_mixed', 'peanut', 'walnut', 'almond'])
+const SOFT_PROTEIN = new Set(['egg', 'tofu', 'tofu_soft', 'fish_freshwater', 'fish_bass', 'salmon', 'shrimp', 'milk', 'yogurt', 'greek_yogurt', 'chicken_breast', 'egg_yolk', 'fish_crucian', 'pork_blood', 'duck_blood',
+  'egg_white', 'duck_egg', 'quail_egg', 'tofu_puff', 'tofu_pudding'])
+// 老年人模式用：看的是「入口时」硬不硬。干豆/干香菇/粉丝都要泡发煮熟后才吃，不算；
+// 花生酱芝麻酱是糊状，更不算。
+const HARD_TO_CHEW = new Set(['beef_jerky', 'nuts_mixed', 'peanut', 'walnut', 'almond',
+  'cashew', 'pistachio', 'macadamia', 'pecan', 'pine_nuts', 'pumpkin_seeds', 'sunflower_seeds',
+  'biscuits', 'mango_dried', 'cranberries_dried', 'dried_longan', 'red_dates', 'trail_mix', 'hazelnut'])
 
 function has(dish: Dish, set: Set<string>, minG = 0): boolean {
   return dish.parts.some((p) => set.has(p.ing) && p.g >= minG)
@@ -165,11 +231,11 @@ export function conditionWeight(dish: Dish, role: string, p: Profile): { w: numb
     if (dish.cuisine === 'takeout' || dish.cuisine === 'convenience') w *= 0.6
   }
   if (c.includes('hypertension')) {
-    // 家常菜普遍每道 1.5~2 g 盐，只靠分档降权拉不开差距：单菜钠 >700 mg 直接不推荐，其余按钠量连续衰减，同类里最淡的胜出
-    if (n.sodium > 700 && role !== 'combo') return { w: 0 }
-    w *= Math.exp(-n.sodium / 350)
-    if (n.sodium <= 350) reason = reason || '高血压模式选同类里最淡的'
-    if (dish.cook === 'heavy') w *= 0.5
+    // 2026-09-20 起不再用钠数值做排除与打分：中式家常菜每道 1.5~2 g 盐是真实水平，
+    // 按钠打分的结果是几乎所有家常菜都被压到底，反而推不出正常的中餐。改为只按「重口做法」
+    // 这类行为代理降权，配一句静态的少盐提醒（见 conditionPlanNotes / conditionFindings）。
+    // 腌腊酱菜仍走 PICKLED_OR_CURED 硬排除——那是具体品类规则，不会像钠阈值那样把什么都标红。
+    if (dish.cook === 'heavy') { w *= 0.5; reason = reason || '高血压模式选清淡做法' }
     if (dish.cuisine === 'takeout') w *= 0.3
     if (has(dish, new Set(['pork_belly', 'pork_ribs', 'lard', 'butter', 'cream']), 40)) w *= 0.6
     if ((role === 'veg' || role === 'fruit' || role === 'snack') && (dish.cat === 'veg' || dish.cat === 'fruit')) w *= 1.3
@@ -249,7 +315,7 @@ export function conditionPlanNotes(p: Profile, t: Targets): string[] {
   const out: string[] = []
   if (c.includes('pregnancy')) out.push(`孕期模式：已排除酒精、生食、含咖啡因饮品；奶类目标 ${t.dairyG} g，蛋白 ${t.protein} g`)
   if (c.includes('lactation')) out.push(`哺乳期模式：已排除酒精、含咖啡因饮品；奶类目标 ${t.dairyG} g，记得多喝水`)
-  if (c.includes('hypertension')) out.push(`高血压模式：钠上限 ${t.sodiumMax} mg，已排除腌腊与单菜钠超 700 mg 的菜，家常菜按少盐做法计（调味盐减半，记为已吃时也按此记）`)
+  if (c.includes('hypertension')) out.push('高血压模式：已避开腌腊与酱菜、优先清淡做法。盐靠做菜时控制——限盐勺、少酱油蚝油鸡精、汤只喝一半')
   if (c.includes('diabetes')) out.push(`糖尿病模式：主食粗粮，每餐碳水不超过 ${Math.round(t.carbs * Math.max(...Object.values(t.slotShare)) * 1.15)} g，已排除含糖饮料与甜食`)
   if (c.includes('fatty_liver')) out.push('脂肪肝模式：已排除酒精、含糖饮料与甜食，主食粗粮，肥肉与油炸降权，水果限 200 g')
   if (c.includes('gout')) out.push('痛风模式：已排除内脏、贝壳虾蟹、浓汤火锅、啤酒与含糖饮料；肉类用小份，蛋奶豆腐补蛋白；记得每天 2000 ml 水')
@@ -288,8 +354,7 @@ export function conditionFindings(w: WindowStats, t: Targets, p: Profile, entrie
   }
 
   if (c.includes('hypertension')) {
-    if (w.avg.sodium > t.sodiumMax) out.push({ key: 'htn_sodium', severity: 'warn', title: '钠超过高血压上限', detail: `日均 ${r0(w.avg.sodium)} mg，上限 ${t.sodiumMax} mg（约 ${(t.sodiumMax / 400).toFixed(1)} g 盐）。`, action: '汤、酱料、外卖和腌腊是四大来源。家里用限盐勺，外卖备注少盐，汤只喝一半。' })
-    else out.push({ key: 'htn_sodium_ok', severity: 'good', title: '钠在高血压上限内', detail: `日均 ${r0(w.avg.sodium)} mg。`, action: '保持，血压记录同步给医生。' })
+    out.push({ key: 'htn_salt_habit', severity: 'info', title: '少盐是这个模式的第一件事', detail: '中式家常菜每道约 1.5~2 g 盐，正常吃法本来就在推荐上限之上，所以这里不再逐日算钠、也不按钠给菜打分——那样只会把每道菜都标红。', action: '家里用限盐勺，少放酱油、蚝油和鸡精，汤只喝一半，外卖备注少盐少酱。腌腊与酱菜仍会替你避开。' })
     const potassiumProxy = w.avgVegServings * 100 + w.avgFruitG
     if (potassiumProxy < 500) out.push({ key: 'htn_potassium', severity: 'info', title: '蔬果不够，钾偏少', detail: `日均蔬菜 ${w.avgVegServings.toFixed(1)} 份、水果 ${r0(w.avgFruitG)} g。`, action: '每天 500 g 蔬菜加 300 g 水果，香蕉、菠菜、土豆、豆类都富含钾。肾功能异常者钾摄入请先问医生。' })
     const cured = recent.filter((e) => { const d = dishOf(e); return d && isPickledOrCured(d) }).length

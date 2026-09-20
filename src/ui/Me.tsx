@@ -94,7 +94,7 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
         <div className="kv"><span>目标摄入</span><span className="num"><b>{targets.kcal}</b> 千卡</span></div>
         <div className="kv"><span>蛋白 / 脂肪 / 碳水</span><span className="num">{targets.protein} / {targets.fat} / {targets.carbs} g</span></div>
         {profile.conditions?.includes('hypertension')
-          ? <div className="kv"><span>纤维 · 蔬菜 · 钠上限</span><span className="num">{targets.fiber} g · {targets.vegServings} 份 · {targets.sodiumMax} mg</span></div>
+          ? <div className="kv"><span>纤维 · 蔬菜</span><span className="num">{targets.fiber} g · {targets.vegServings} 份</span></div>
           : <div className="kv"><span>纤维 · 蔬菜</span><span className="num">{targets.fiber} g · {targets.vegServings} 份</span></div>}
         <div className="kv"><span>水果 · 奶类</span><span className="num">{targets.fruitG} g · {targets.dairyG} g</span></div>
         <div className="kv"><span>饮水</span><span className="num">{targets.waterMl} ml</span></div>

@@ -6,7 +6,6 @@ import { isHabitFinding, windowStats } from '@core/analysis'
 import { macroKcalShare } from '@core/nutrition'
 import { addDays, shortDate, todayStr, weekdayLabel, daysBetween } from '@core/dates'
 import { bmi, bmiLabel } from '@core/energy'
-import { showsSodium } from '@webui/format'
 import { useAppState } from '../../shared/useAppState'
 import { derive } from '../../shared/derive'
 import { LineChart } from '../../components/LineChart'
@@ -97,10 +96,10 @@ export default function Analysis() {
   const w = a.window
   const logged = w.loggedDays.length
   const conds = profile.conditions || []
-  const showNa = showsSodium(conds)
 
-  // 结论按「和数值有关」与「和习惯有关」分两组，警告排前面
-  const findings = a.findings.filter((f) => showNa || !f.key.startsWith('sodium_'))
+  // 结论按「和数值有关」与「和习惯有关」分两组，警告排前面。
+  // 钠已从共享层移除，不再需要按人群模式过滤钠相关的结论
+  const findings = a.findings
   const rank = (f: Finding) => (f.severity === 'warn' ? 0 : f.severity === 'info' ? 1 : 2)
   const metricFindings = findings.filter((f) => !isHabitFinding(f)).sort((x, y) => rank(x) - rank(y))
   const habitFindings = findings.filter(isHabitFinding).sort((x, y) => rank(x) - rank(y))
@@ -221,9 +220,6 @@ export default function Analysis() {
             <Variance label="纤维" value={w.avg.fiber} target={t.fiber} unit="g" color="#6e8f3a" mode="atLeast" tol={0.3} tone={toneOf('fiber')} />
             <Variance label="蔬菜" value={w.avgVegServings} target={t.vegServings} unit="份" color="#2e7a1f" mode="atLeast" tol={0.4} tone={toneOf('veg')} />
             <Variance label="水果" value={w.avgFruitG} target={t.fruitG} unit="g" color="#5a5d58" mode="atLeast" tol={Math.max(0.1, 1 - 100 / Math.max(1, t.fruitG))} tone={toneOf('fruit')} />
-            {showNa ? (
-              <Variance label="钠" value={w.avg.sodium} target={t.sodiumMax} unit="mg" color="#5a5d58" mode="atMost" tol={0.2} tone={toneOf('sodium')} />
-            ) : null}
             {waterAvg.days > 0 ? (
               <Variance label="饮水" value={waterAvg.avg} target={t.waterMl} unit="ml" color="#4fa6e3" mode="atLeast" tol={0.3} tone={toneOf('water')} />
             ) : null}

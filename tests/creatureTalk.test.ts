@@ -5,12 +5,12 @@ import type { Targets } from '../src/core/types'
 
 const targets: Targets = {
   method: 'mifflin', bmr: 1400, tdee: 1800, kcal: 1800, protein: 90, fat: 55, carbs: 220, fiber: 25,
-  sodiumMax: 2000, vegServings: 4, fruitG: 200, dairyG: 300, waterMl: 1500, evenCarbs: false,
+  vegServings: 4, fruitG: 200, dairyG: 300, waterMl: 1500, evenCarbs: false,
   slotShare: { breakfast: 0.25, lunch: 0.4, dinner: 0.35, snack: 0 }, notes: [],
 }
 const meal = (slot: 'breakfast' | 'lunch' | 'dinner') => ({ id: slot, date: '2026-09-11', slot, portion: 1, dishId: 'x' })
 const allMealsLogged = [meal('breakfast'), meal('lunch'), meal('dinner')]
-const base = { isToday: true, now: '08:00', date: '2026-09-11', entries: [], n: { ...ZERO }, targets, waterMl: 0, showSodium: false, focus: [] }
+const base = { isToday: true, now: '08:00', date: '2026-09-11', entries: [], n: { ...ZERO }, targets, waterMl: 0, focus: [] }
 
 describe('creatureLine：按优先级挑一句最要紧的话', () => {
   it('看别的日期只给轻松话，不提醒任何进度', () => {
@@ -41,13 +41,9 @@ describe('creatureLine：按优先级挑一句最要紧的话', () => {
     expect(line).not.toContain('午饭')
   })
 
-  it('高血压模式钠超标会提醒', () => {
-    const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: true, n: { ...ZERO, sodium: 2500 }, fruitG: 200 })
-    expect(line).toContain('钠')
-  })
 
   it('没开高血压模式时钠超标不提（看不到这个指标）', () => {
-    const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: false, n: { ...ZERO, sodium: 2500 }, fruitG: 200 })
+    const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, n: { ...ZERO, sodium: 2500 }, fruitG: 200 })
     expect(line).not.toContain('钠')
   })
 
@@ -147,12 +143,6 @@ describe('creatureLine：性格只改语气，不改要提醒的内容', () => {
     expect(cool).toContain('孵化完成')
   })
 
-  it('性格不影响优先级链，只影响措辞：钠超标该提醒时四种性格都会提', () => {
-    for (const personality of ['energetic', 'gentle', 'bossy', 'cool'] as const) {
-      const line = creatureLine({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, showSodium: true, n: { ...ZERO, sodium: 2500 }, fruitG: 200, personality })
-      expect(line).toContain('钠')
-    }
-  })
 })
 
 describe('creatureMood：表情/待机动画用的心情档位，跟 creatureLine 走同一条优先级链', () => {
@@ -175,15 +165,6 @@ describe('creatureMood：表情/待机动画用的心情档位，跟 creatureLin
     })).toBe('neutral')
   })
 
-  it('钠超标 / 饮食习惯提醒 / 营养超额，是担心', () => {
-    expect(creatureMood({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200, showSodium: true, n: { ...ZERO, sodium: 2500 } })).toBe('concerned')
-    const habitFinding = { key: 'skip_breakfast', severity: 'warn' as const, title: '常漏早餐', detail: '近 7 天有 3 天没吃早餐。', action: '试着早起十分钟。' }
-    expect(creatureMood({ ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200, habitFinding })).toBe('concerned')
-    expect(creatureMood({
-      ...base, now: '21:00', waterMl: 2000, entries: allMealsLogged, fruitG: 200,
-      focus: [{ key: 'fat', kind: 'over', amount: 12, label: '脂肪已超 12 g' }],
-    })).toBe('concerned')
-  })
 
   it('心情跟台词共用同一条优先级链，不会各判各的', () => {
     const input = { ...base, now: '15:00', waterMl: 0 }

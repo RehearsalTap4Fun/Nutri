@@ -35,7 +35,6 @@ function fromAdjustments(a: Adjustments, m: MealPlan): string[] {
   if (a.proteinLow && roles.some((r) => r === 'protein' || r === 'bfprotein' || r === 'combo')) {
     out.push('近期蛋白偏低，这一餐往高蛋白的菜上挑')
   }
-  if (a.sodiumHigh) out.push('近期盐偏多，优先清淡做法')
   if (a.fatHigh) out.push('近期油偏多，避开了油炸和肥肉')
   if ((a.vegLow || a.fiberLow) && roles.filter((r) => r === 'veg').length > 1) {
     out.push('近期蔬菜纤维不足，多加了一道菜')

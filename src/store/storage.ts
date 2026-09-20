@@ -1,5 +1,6 @@
 import { INGREDIENT_MAP } from '../data/ingredients'
 import type { LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry, WaterEntry, Dish } from '../core/types'
+import type { PlanItem } from '../core/planner'
 import type { Creature, CreatureTraits, RetiredCreature } from '../core/creature'
 import { BODIES, COLORS, EXTRAS, EYES, MOUTHS, PATTERNS, PERSONALITIES, ensureCat } from '../core/creature'
 import { emptyDex, isCatDex, seedDex, type CatDex } from '../core/catDex'
@@ -34,6 +35,12 @@ export interface AppState {
   customDishes: Dish[]
   /** 按日期保存换一换计数，保证刷新后推荐不变 */
   planSeeds: Record<string, PlanSeed>
+  /**
+   * 上次给出的推荐选了哪些菜，按日期存。
+   * 有它才能做到「照推荐吃就不重排，吃了别的才重算」。
+   * 不进同步：它是当天的临时产物，换设备重算一份即可。
+   */
+  planPicks: Record<string, Partial<Record<MealSlot, PlanItem[]>>>
   favorites: string[]
   /** 标记为训练日的日期（健身增肌模式） */
   trainingDays: string[]
@@ -59,7 +66,7 @@ export interface AppState {
 export const STORAGE_KEY = 'nutri.v1'
 
 export function defaultState(): AppState {
-  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, creature: null, creatureHistory: [], creatureDex: emptyDex(), settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false }, contributedFoodIds: [] } }
+  return { version: 1, profile: null, entries: [], weights: [], water: [], customFoods: [], customDishes: [], planSeeds: {}, planPicks: {}, favorites: [], trainingDays: [], vitals: [], tombstones: [], meta: { profileAt: 0, settingsAt: 0 }, creature: null, creatureHistory: [], creatureDex: emptyDex(), settings: { useAdaptiveTdee: false, provider: 'anthropic', anthropicKey: '', deepseekKey: '' , sync: { code: '', enabled: false }, contributedFoodIds: [] } }
 }
 
 export function uid(): string {
@@ -85,6 +92,21 @@ export function normalizeState(raw: unknown): AppState {
   }
   if (Array.isArray(raw.customFoods)) s.customFoods = raw.customFoods.filter((c) => isObj(c) && typeof c.name === 'string' && isObj(c.nutrients)) as CustomFood[]
   if (isObj(raw.planSeeds)) s.planSeeds = raw.planSeeds as Record<string, PlanSeed>
+  // 只收形状对的：这是缓存，宁可丢掉重算，也别把坏数据喂给 planner
+  if (isObj(raw.planPicks)) {
+    const out: AppState['planPicks'] = {}
+    for (const [d, byslot] of Object.entries(raw.planPicks)) {
+      if (!isObj(byslot)) continue
+      const keep: Partial<Record<MealSlot, PlanItem[]>> = {}
+      for (const [slot, items] of Object.entries(byslot)) {
+        if (!Array.isArray(items)) continue
+        const ok = items.every((it) => isObj(it) && typeof it.dishId === 'string' && typeof it.portion === 'number')
+        if (ok) keep[slot as MealSlot] = items as unknown as PlanItem[]
+      }
+      if (Object.keys(keep).length) out[d] = keep
+    }
+    s.planPicks = out
+  }
   if (Array.isArray(raw.favorites)) s.favorites = raw.favorites.filter((x) => typeof x === 'string') as string[]
   if (Array.isArray(raw.trainingDays)) s.trainingDays = raw.trainingDays.filter((x) => typeof x === 'string') as string[]
   if (Array.isArray(raw.tombstones)) s.tombstones = raw.tombstones.filter((t) => isObj(t) && typeof t.coll === 'string' && typeof t.id === 'string' && typeof t.at === 'number') as AppState['tombstones']

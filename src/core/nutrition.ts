@@ -60,6 +60,7 @@ export function dishNutrients(dish: Dish, ingMap: Map<string, Ingredient> = INGR
 /** 调味料（盐、酱油、酱类等），少盐做法只减这部分的钠 */
 export const CONDIMENT_IDS = new Set(['salt', 'soy_sauce', 'oyster_sauce', 'doubanjiang', 'chili_sauce', 'sweet_bean_sauce', 'fermented_bean_curd', 'black_pepper_sauce', 'curry_block', 'ketchup', 'mayonnaise', 'thousand_island', 'vinaigrette', 'chili_oil', 'hotpot_base'])
 
+/** 调味料带来的钠。2026-09-20 起钠不再作为判定或展示指标，此函数仅供数据核对与贡献草稿使用。 */
 export function condimentSodium(dish: Dish, ingMap: Map<string, Ingredient> = INGREDIENT_MAP): number {
   let na = 0
   for (const p of dish.parts) {
@@ -96,14 +97,12 @@ export function canLowOil(dish: Dish): boolean {
 }
 
 export interface CookMods {
-  lowSalt?: boolean
   lowOil?: boolean
 }
 
 /** 一份的营养，可按少盐（调味钠减半）/ 少油（烹调油减半）做法计 */
 export function dishNutrientsFor(dish: Dish, mods?: CookMods): Nutrients {
   let n = dishNutrients(dish)
-  if (mods?.lowSalt && canLowSalt(dish)) n = { ...n, sodium: n.sodium - condimentSodium(dish) * 0.5 }
   if (mods?.lowOil && canLowOil(dish)) {
     const cut = oilFat(dish) * 0.5
     n = { ...n, fat: n.fat - cut, kcal: n.kcal - cut * 9 }

@@ -12,7 +12,7 @@ const VERDICT_LABEL: Record<Verdict, string> = { avoid: '不建议', caution: '�
 const VERDICT_PILL: Record<Verdict, string> = { avoid: 'pill bad', caution: 'pill warn', ok: 'pill good' }
 
 /** 「能不能吃」：搜一个食物，按当前人群模式与今天已吃的量给建议。规则复用 core/verdict，不重新发明。 */
-export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds, conditions, targets, todaySoFar, showSodium, nextSlot, onQuickLog }: {
+export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds, conditions, targets, todaySoFar, nextSlot, onQuickLog }: {
   dishes: Dish[]
   dishMap: Map<string, Dish>
   customFoods: CustomFood[]
@@ -21,7 +21,6 @@ export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds
   conditions: Condition[]
   targets: Targets
   todaySoFar: Nutrients
-  showSodium: boolean
   nextSlot: MealSlot
   onQuickLog?: (slot: MealSlot, dishId: string, portion?: number) => void
 }) {
@@ -92,7 +91,6 @@ export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds
             { label: '脂肪', value: r0(scaled.fat), unit: 'g' },
             { label: '碳水', value: r0(scaled.carbs), unit: 'g' },
             { label: '纤维', value: r0(scaled.fiber), unit: 'g' },
-            ...(showSodium ? [{ label: '钠', value: r0(scaled.sodium), unit: 'mg' }] : []),
           ]} />
           {pick.kind === 'dish' && onQuickLog && (
             logged

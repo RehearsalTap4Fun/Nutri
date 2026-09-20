@@ -92,7 +92,6 @@ export function windowStats(entries: LogEntry[], dishMap: Map<string, Dish>, end
 export interface Adjustments {
   enough: boolean
   proteinLow: boolean
-  sodiumHigh: boolean
   fatHigh: boolean
   fiberLow: boolean
   vegLow: boolean
@@ -107,7 +106,7 @@ export interface Adjustments {
 }
 
 export const NO_ADJUST: Adjustments = {
-  enough: false, proteinLow: false, sodiumHigh: false, fatHigh: false, fiberLow: false, vegLow: false, fruitLow: false,
+  enough: false, proteinLow: false, fatHigh: false, fiberLow: false, vegLow: false, fruitLow: false,
   kcalOver: false, kcalUnder: false, processedHigh: false, takeoutLunch: false, breakfastSkipped: false, lateEating: false, breakfastProteinLow: false,
 }
 
@@ -119,7 +118,6 @@ export function deriveAdjustments(w: WindowStats, t: Targets, profile: Profile):
   return {
     enough: true,
     proteinLow: w.avg.protein < t.protein * 0.85,
-    sodiumHigh: w.avg.sodium > t.sodiumMax * 1.2,
     fatHigh: share.fat > 0.38,
     fiberLow: w.avg.fiber < t.fiber * 0.7,
     vegLow: w.avgVegServings < t.vegServings * 0.6,
@@ -182,12 +180,6 @@ export function buildFindings(w: WindowStats, t: Targets, profile: Profile, adj:
     out.push({ key: 'fat_high', severity: 'warn', title: '脂肪供能比偏高', detail: `脂肪占总热量 ${pct(share.fat)}%，建议 25~35%。`, action: '炒菜油减到每菜 1 勺(10 g)，少点红烧、油炸和奶油类；换蒸、煮、凉拌。' })
   }
 
-  // 钠
-  if (adj.sodiumHigh) {
-    out.push({ key: 'sodium_high', severity: 'warn', title: '盐吃多了', detail: `日均钠 ${r0(a.sodium)} mg，约合 ${(a.sodium / 400).toFixed(1)} g 盐，上限 5 g。`, action: '外卖、酱料、咸菜和汤是主要来源。喝汤减半、外卖少要酱、家里做菜用限盐勺。' })
-  } else if (a.sodium > t.sodiumMax) {
-    out.push({ key: 'sodium_edge', severity: 'info', title: '钠略高于上限', detail: `日均钠 ${r0(a.sodium)} mg，上限 ${t.sodiumMax}。`, action: '注意酱油和汤的量即可。' })
-  }
 
   // 蔬菜、纤维、水果
   if (adj.vegLow) {
@@ -284,7 +276,6 @@ export function isHabitFinding(f: Finding): boolean {
   if (k.startsWith('kcal_')) return false
   if (k === 'protein_low' || k === 'protein_ok') return false
   if (k === 'fat_high') return false
-  if (k.startsWith('sodium_')) return false
   if (k.startsWith('veg_')) return false
   if (k === 'fiber_low') return false
   if (k === 'fruit_low') return false

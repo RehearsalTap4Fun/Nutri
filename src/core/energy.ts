@@ -97,7 +97,6 @@ export function computeTargets(p: Profile, now = new Date(), tdeeOverride?: numb
   let dairyG = 300
   let fruitG = 200
   let vegServings = 4
-  let sodiumMax = 2000
   let fiberMin = 25
 
   // 孕期：中国居民膳食指南(2022) / DRIs 2023：孕中期 +250 千卡 +15 g 蛋白，孕晚期 +400 千卡 +30 g 蛋白，奶类 500 g
@@ -119,12 +118,11 @@ export function computeTargets(p: Profile, now = new Date(), tdeeOverride?: numb
     fruitG = 300
     notes.push('哺乳期：热量 +400 千卡，蛋白 +25 g，奶类 500 g/天，多喝水')
   }
-  // 高血压：DASH 思路，钠 ≤1500 mg，蔬果多、钾多，少腌腊与外卖
+  // 高血压：DASH 思路，蔬果多、钾多，少腌腊与外卖；盐不再量化，见 sources.ts
   if (conds.includes('hypertension')) {
-    sodiumMax = 1500
     vegServings = 5
     fruitG = Math.max(fruitG, 300)
-    notes.push('高血压：钠上限 1500 mg（约 3.8 g 盐），蔬菜 5 份、水果 300 g，避开腌腊与重口外卖')
+    notes.push('高血压：蔬菜 5 份、水果 300 g 补钾，避开腌腊与重口外卖；盐靠做菜时控制，不再逐日算钠')
   }
   // 老年人：蛋白 ≥1.2 g/kg 防肌少症，奶类 400 g
   if (elderly) {
@@ -228,7 +226,6 @@ export function computeTargets(p: Profile, now = new Date(), tdeeOverride?: numb
     fat,
     carbs,
     fiber: Math.round(Math.max(fiberMin, (kcal / 1000) * 14)),
-    sodiumMax,
     vegServings,
     fruitG,
     dairyG,

@@ -48,7 +48,7 @@ describe('食物库审计 · 对台湾食药署实测值', () => {
 
 describe('食物库审计 · 结构性规则', () => {
   // 加工肉制品（含淀粉/糖）与内脏（糖原）本就有碳水，不在此规则内
-  const processed = /肠|丸|午餐肉|火腿|培根|饼|鸡块|炸|排\(|馅|鸭脖|卤|烤鸭|凤爪|肉干|肝|舌|心|肚|腰|胗/
+  const processed = /肠|丸|午餐肉|火腿|培根|腊|饼|鸡块|炸|排\(|馅|鸭脖|卤|烤鸭|凤爪|肉干|肝|舌|心|肚|腰|胗/
   it('纯肉禽类食材碳水不超过 1.5 g（中国表的差减法残差已归零）', () => {
     const bad = INGREDIENTS.filter((i) => (i.cat === 'meat' || i.cat === 'poultry') && !processed.test(i.name) && i.per100.carbs > 1.5).map((i) => `${i.name} ${i.per100.carbs}`)
     expect(bad, bad.join(', ')).toEqual([])

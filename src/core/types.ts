@@ -156,7 +156,6 @@ export interface Targets {
   fat: number
   carbs: number
   fiber: number
-  sodiumMax: number
   /** 蔬菜份数，1 份 = 100 g */
   vegServings: number
   /** 水果目标克数 */

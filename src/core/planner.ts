@@ -1,6 +1,6 @@
 import type { Dish, LogEntry, MealSlot, Nutrients, Profile, Targets } from './types'
 import { MEAL_SLOTS, ZERO } from './types'
-import { canLowOil, canLowSalt, dishAllergens, dishNutrients, dishNutrientsFor, isProcessedOrFried, isVegan, isVegetarian, macroKcalShare, scale, sum, vegGrams } from './nutrition'
+import { add, canLowOil, dishAllergens, dishNutrients, dishNutrientsFor, isProcessedOrFried, isVegan, isVegetarian, macroKcalShare, scale, sum, vegGrams } from './nutrition'
 import { INGREDIENT_MAP } from '../data/ingredients'
 import { hashString, makeRng, weightedPick } from './rng'
 import type { Adjustments } from './analysis'
@@ -14,7 +14,6 @@ export interface PlanItem {
   role: Role
   reason?: string
   /** 按少盐做法计钠（高血压模式下家常菜默认开） */
-  lowSalt?: boolean
   /** 按少油做法计脂肪（全天脂肪超预算时家常菜自动开） */
   lowOil?: boolean
 }
@@ -52,6 +51,11 @@ export interface PlanInput {
   adjustments: Adjustments
   /** 今天已吃的各餐营养（有则该餐视为已完成，其余餐按剩余预算规划） */
   eatenToday?: Partial<Record<MealSlot, Nutrients>>
+  /**
+   * 上一次给出的推荐。按推荐吃不该让剩下的餐重排，所以先看沿用它还能不能满足全天目标，
+   * 能就原样留着，不能才整体重排。判定见 `keptPlanFits`。
+   */
+  keep?: Partial<Record<MealSlot, PlanItem[]>>
 }
 
 const WHOLE_GRAIN = new Set(['brown_rice_cooked', 'oats', 'bread_whole', 'corn', 'sweet_potato', 'quinoa_cooked', 'potato', 'yam', 'taro', 'millet_porridge', 'red_beans_dry', 'mung_beans_dry', 'chickpeas_cooked', 'lentils_cooked'])
@@ -131,7 +135,7 @@ function roleFilter(d: Dish, role: Role, slot: MealSlot, mealKcal: number): bool
     case 'snack':
       return (d.cat === 'snack' || d.cat === 'fruit' || d.cat === 'drink') && n.kcal >= 40 && n.kcal <= 350 && !isProcessedOrFried(d) && !hasTag(d, 'sweet')
     case 'combo':
-      return d.cat === 'combo' && n.kcal <= mealKcal * 1.45 && n.sodium <= 2600 && d.cook !== 'fried'
+      return d.cat === 'combo' && n.kcal <= mealKcal * 1.45 && d.cook !== 'fried'
   }
 }
 
@@ -157,10 +161,6 @@ function weigh(d: Dish, role: Role, slot: MealSlot, ctx: Ctx): Weighted {
 
   // 主食优先清淡本味（炒饭、葱油饼一类降权）
   if (role === 'staple' && share.fat > 0.3) w *= 0.35
-
-  // 钠：营养师默认少推高盐菜，按钠量连续衰减（600 mg ≈ ×0.65，900 ≈ ×0.42，1200 ≈ ×0.28）；外卖整餐本身钠高，阈值放宽
-  if (role === 'combo') { if (n.sodium > 2000) w *= 0.5 }
-  else w *= Math.exp(-Math.max(0, n.sodium - 300) / 700)
 
   // 脂肪：菜的脂肪供能比明显高于目标供能比时降权（减脂目标脂肪 28%，家常菜常在 40% 以上）
   const fatTargetShare = (ctx.targets.fat * 9) / Math.max(1, ctx.targets.kcal)
@@ -193,11 +193,6 @@ function weigh(d: Dish, role: Role, slot: MealSlot, ctx: Ctx): Weighted {
   if (adj.proteinLow && (role === 'protein' || role === 'bfprotein' || role === 'snack' || role === 'combo')) {
     if (share.protein >= 0.35) { w *= 1.9; reason = '近期蛋白偏低，选了高蛋白' }
     else if (share.protein >= 0.25) w *= 1.25
-  }
-  if (adj.sodiumHigh) {
-    if (d.cook === 'light') { w *= 1.6; reason = reason || '近期盐偏多，选清淡做法' }
-    if (d.cook === 'heavy') w *= 0.5
-    if (n.sodium > 900) w *= 0.5
   }
   if (adj.fatHigh) {
     if (share.fat > 0.5) w *= 0.4
@@ -241,13 +236,6 @@ function totalsOf(items: PlanItem[], dishMap: Map<string, Dish>): Nutrients {
 }
 
 /** 高血压模式：推荐里的家常菜按少盐做法计 */
-function applyLowSalt(items: PlanItem[], ctx: Ctx): void {
-  if (!(ctx.profile.conditions || []).includes('hypertension')) return
-  for (const it of items) {
-    const d = ctx.dishMap.get(it.dishId)
-    if (d && canLowSalt(d)) it.lowSalt = true
-  }
-}
 
 function planMainMeal(slot: MealSlot, T: number, P: number, ctx: Ctx, rnd: () => number): MealPlan {
   const notes: string[] = []
@@ -266,9 +254,8 @@ function planMainMeal(slot: MealSlot, T: number, P: number, ctx: Ctx, rnd: () =>
         const v = pick('veg', slot, T, ctx, rnd)
         if (v) items.push({ dishId: v.dish.id, portion: 1, role: 'veg', reason: '外卖普遍缺蔬菜，加一份' })
       }
-      applyLowSalt(items, ctx)
       const totals = totalsOf(items, ctx.dishMap)
-      if (totals.sodium > 1500) notes.push('外卖钠偏高，点单时备注少盐少酱，汤别喝完')
+      notes.push('外卖普遍偏咸，点单时备注少盐少酱，汤别喝完')
       return { slot, targetKcal: T, targetProtein: P, items, totals, notes }
     }
   }
@@ -300,7 +287,6 @@ function planMainMeal(slot: MealSlot, T: number, P: number, ctx: Ctx, rnd: () =>
     items.push({ dishId: staple.dish.id, portion, role: 'staple', reason: staple.reason })
   }
 
-  applyLowSalt(items, ctx)
   // 收敛到目标区间
   let totals = totalsOf(items, ctx.dishMap)
   const protItem = items.find((i) => i.role === 'protein')
@@ -343,6 +329,12 @@ function planMainMeal(slot: MealSlot, T: number, P: number, ctx: Ctx, rnd: () =>
   return { slot, targetKcal: T, targetProtein: P, items, totals, notes }
 }
 
+/**
+ * 老年人模式承诺「蛋白分到三餐，早餐也配了蛋白」（见 conditionPlanNotes），下限定在 15 g。
+ * planBreakfast 与 balanceDay 两处都要守这条线：前者管单餐组合，后者管全天压份量之后的回补。
+ */
+export const ELDERLY_BREAKFAST_PROTEIN = 15
+
 function planBreakfast(T: number, P: number, ctx: Ctx, rnd: () => number): MealPlan {
   const items: PlanItem[] = []
   const notes: string[] = []
@@ -367,7 +359,6 @@ function planBreakfast(T: number, P: number, ctx: Ctx, rnd: () => number): MealP
     }
     if (fruit) items.push({ dishId: fruit.dish.id, portion: 1, role: 'fruit', reason: fruit.reason })
   }
-  applyLowSalt(items, ctx)
   let totals = totalsOf(items, ctx.dishMap)
   let guard = 0
   // 不够就补：先加主食份量，再补水果，再补蛋白
@@ -398,8 +389,8 @@ function planBreakfast(T: number, P: number, ctx: Ctx, rnd: () => number): MealP
     else break
     totals = totalsOf(items, ctx.dishMap)
   }
-  // 老年人模式：早餐蛋白至少 15 g（蛋白分到三餐），不够就把蛋白配菜加到两份
-  if ((ctx.profile.conditions || []).includes('elderly') && totals.protein < 15) {
+  // 老年人模式：早餐蛋白至少 ELDERLY_BREAKFAST_PROTEIN，不够就把蛋白配菜加到两份
+  if ((ctx.profile.conditions || []).includes('elderly') && totals.protein < ELDERLY_BREAKFAST_PROTEIN) {
     const extra = items.find((i) => i.role === 'bfprotein')
     if (extra && extra.portion < 2) { extra.portion = 2; totals = totalsOf(items, ctx.dishMap) }
   }
@@ -415,7 +406,6 @@ function planSnack(T: number, P: number, ctx: Ctx, rnd: () => number): MealPlan 
     const portion = clamp(round4(T / n.kcal), 1, 2)
     items.push({ dishId: s.dish.id, portion, role: 'snack', reason: s.reason })
   }
-  applyLowSalt(items, ctx)
   return { slot: 'snack', targetKcal: T, targetProtein: P, items, totals: totalsOf(items, ctx.dishMap), notes: [] }
 }
 
@@ -442,7 +432,7 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
   const notes: string[] = []
   const t = ctx.targets
   const total = () => sum(meals.map((m) => (m.totals = totalsOf(m.items, ctx.dishMap))))
-  const budget = { kcal: Math.max(0, t.kcal - eaten.kcal), fat: Math.max(0, t.fat - eaten.fat), protein: Math.max(0, t.protein - eaten.protein), sodium: Math.max(0, t.sodiumMax - eaten.sodium) }
+  const budget = { kcal: Math.max(0, t.kcal - eaten.kcal), fat: Math.max(0, t.fat - eaten.fat), protein: Math.max(0, t.protein - eaten.protein) }
   const swappable: Role[] = ['protein', 'veg', 'soup', 'main', 'bfprotein', 'snack', 'staple']
   const allItems = () => meals.flatMap((m) => m.items)
   const nOf = (it: PlanItem) => scale(dishNutrientsFor(ctx.dishMap.get(it.dishId)!, it), it.portion)
@@ -463,7 +453,7 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
     const m: MealPlan = bestM
     const cur = m.items[bestIdx]
     const curN = nOf(cur)
-    const mods = (d: Dish) => ({ lowSalt: cur.lowSalt && canLowSalt(d), lowOil: cur.lowOil && canLowOil(d) })
+    const mods = (d: Dish) => ({ lowOil: cur.lowOil && canLowOil(d) })
     // 热量差异交给后面的主食步骤去补，这里放宽到 ±200 千卡或七成
     const keepProtein = (cand: Nutrients) => (cur.role !== 'protein' && cur.role !== 'bfprotein') || cand.protein >= curN.protein * 0.8
     const rep = pick(cur.role, m.slot, m.targetKcal, ctx, rnd, (d, n) => { const cand = scale(dishNutrientsFor(d, mods(d)), cur.portion); return accept(cand, curN, cur.role) && keepProtein(cand) && Math.abs(n.kcal * cur.portion - curN.kcal) < Math.max(200, curN.kcal * 0.7) })
@@ -487,7 +477,7 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
       const cand = allItems().filter((it) => (it.role === 'protein' || it.role === 'bfprotein') && it.portion < cap)
       if (!cand.length) break
       // 优先加最「瘦」的那份：每克蛋白带的脂肪与钠最少
-      cand.sort((a, b) => { const na = nOf(a), nb = nOf(b); return (na.fat + na.sodium / 100) / Math.max(1, na.protein) - (nb.fat + nb.sodium / 100) / Math.max(1, nb.protein) })
+      cand.sort((a, b) => { const na = nOf(a), nb = nOf(b); return na.fat / Math.max(1, na.protein) - nb.fat / Math.max(1, nb.protein) })
       cand[0].portion = round4(cand[0].portion + 0.25)
       x = total()
     }
@@ -521,26 +511,11 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
   adjustKcal(false)
 
   // B. 两轮：钠 → 脂肪。换菜时不让另一项明显变差
-  let saltNoted = false
   let oilNoted = false
   for (let pass = 0; pass < 2; pass++) {
-    if (x.sodium > budget.sodium) {
-      let changed = false
-      for (const it of allItems()) {
-        const d = ctx.dishMap.get(it.dishId)
-        if (d && canLowSalt(d) && !it.lowSalt) { it.lowSalt = true; changed = true }
-      }
-      if (changed && !saltNoted) { notes.push('家常菜按少盐做法计钠（调味盐减半，记为已吃时会带上少盐标记），否则一天很难压进钠上限'); saltNoted = true }
-      x = total()
-      let g = 0
-      while (x.sodium > budget.sodium * 1.1 && g++ < 8) {
-        if (!swapWorst((it) => nOf(it).sodium, (cand, cur) => cand.sodium < cur.sodium * 0.75 && cand.fat <= cur.fat * 1.25 + 2, '换成更淡的菜')) break
-        x = total()
-      }
-    }
     let g = 0
     while (x.fat > budget.fat * 1.1 && g++ < 6) {
-      if (!swapWorst((it) => nOf(it).fat, (cand, cur) => cand.fat < cur.fat * 0.75 && cand.sodium <= cur.sodium * 1.25 + 50, '换成少油的菜')) break
+      if (!swapWorst((it) => nOf(it).fat, (cand, cur) => cand.fat < cur.fat * 0.75, '换成少油的菜')) break
       x = total()
     }
     if (x.fat > budget.fat * 1.1) {
@@ -553,10 +528,8 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
       x = total()
     }
   }
-  // 仍超就压份量：先钠再脂肪
+  // 仍超就压份量
   let g = 0
-  while (x.sodium > budget.sodium * 1.1 && g++ < 4) { if (!trimWorst((it) => nOf(it).sodium)) break; x = total() }
-  g = 0
   while (x.fat > budget.fat * 1.1 && g++ < 3) { if (!trimWorst((it) => nOf(it).fat)) break; x = total() }
 
   // C. 蛋白不能掉出 85%；脂肪还有余量时再往 90% 补；最后只用主食微调热量
@@ -585,10 +558,57 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
     x = total()
   }
 
+  // D2. 老年人模式的早餐蛋白下限。planBreakfast 里已经保证过一次，但上面 A~C 全按「全天」预算
+  // 压份量与换菜，会把它再压回去（实测：玉米面窝头 1.5→1.25 份，早餐蛋白 16.2→14.7 g）。
+  // balanceDay 全程没有任何按餐次的约束，所以这里按餐次兜最后一道：宁可热量略超，也要守住这条线。
+  if ((ctx.profile.conditions || []).includes('elderly')) {
+    const bf = meals.find((m) => m.slot === 'breakfast')
+    if (bf) {
+      let k = 0
+      while (bf.totals.protein < ELDERLY_BREAKFAST_PROTEIN && k++ < 6) {
+        const cand = bf.items.filter((it) => (it.role === 'bfprotein' || it.role === 'protein') && it.portion < 2)
+        if (cand.length) {
+          // 和 bumpProtein 一致：优先加最「瘦」的那份，每克蛋白带的脂肪与钠最少
+          cand.sort((a, b) => { const na = nOf(a), nb = nOf(b); return na.fat / Math.max(1, na.protein) - nb.fat / Math.max(1, nb.protein) })
+          cand[0].portion = round4(cand[0].portion + 0.25)
+        } else {
+          const e = pick('bfprotein', 'breakfast', bf.targetKcal, ctx, rnd)
+          if (!e) break
+          bf.items.push({ dishId: e.dish.id, portion: 1, role: 'bfprotein', reason: e.reason })
+        }
+        bf.totals = totalsOf(bf.items, ctx.dishMap)
+      }
+      x = total()
+    }
+  }
+
   // E. 没压进去的差距如实说
-  if (x.sodium > budget.sodium * 1.1) notes.push(`今天推荐约 ${Math.round(x.sodium)} mg 钠，仍高于上限 ${Math.round(budget.sodium)}：汤别喝完、凉拌菜和蘸料少放酱油，就能补上这段差距`)
   if (x.fat > budget.fat * 1.1) notes.push(`今天脂肪约 ${Math.round(x.fat)} g，仍高于目标 ${Math.round(budget.fat)} g，肉选更瘦的部位可以补上`)
   return notes
+}
+
+/**
+ * 沿用上次的推荐，加上今天已吃的，还能不能落在目标附近。
+ *
+ * 阈值取的是应用里别处已经在用的口径，不另立一套：
+ * 热量 ±10%（与分析页「达标日」同一条线），蛋白不低于 85%（与「蛋白不足」的判定同线）。
+ * 不看脂肪碳水，那两项本来就靠全天收敛去压，不该成为重排的理由。
+ */
+export function keptPlanFits(
+  kept: Partial<Record<MealSlot, PlanItem[]>>,
+  eaten: Nutrients,
+  targets: Targets,
+  dishMap: Map<string, Dish>,
+): boolean {
+  let n: Nutrients = { ...eaten }
+  for (const slot of MEAL_SLOTS) {
+    const items = kept[slot]
+    if (items && items.length) n = add(n, totalsOf(items, dishMap))
+  }
+  if (targets.kcal <= 0) return false
+  const kcalOk = Math.abs(n.kcal - targets.kcal) <= targets.kcal * 0.1
+  const proteinOk = targets.protein <= 0 || n.protein >= targets.protein * 0.85
+  return kcalOk && proteinOk
 }
 
 export function planDay(input: PlanInput): DayPlan {
@@ -625,6 +645,20 @@ export function planDay(input: PlanInput): DayPlan {
     notes.push(`前面吃得少，今天还有约 ${Math.round(remainingKcal - plannedCap)} 千卡余量，可以加一份水果、坚果或牛奶`)
   }
 
+  // 沿用上次的推荐：只在整体仍满足时原样留着，否则全部重排。
+  // 不做「留一部分换一部分」，那样解释不清，用户也说不准哪几道会动。
+  const keepAll = (() => {
+    if (!input.keep) return null
+    const kept: Partial<Record<MealSlot, PlanItem[]>> = {}
+    for (const slot of toPlan) {
+      const items = input.keep[slot]
+      if (!items) return null // 有一餐没记录过就整体重排
+      kept[slot] = items
+    }
+    const eatenTotals = sum(eatenSlots.map((k) => eaten[k] || ZERO))
+    return keptPlanFits(kept, eatenTotals, targets, input.dishMap) ? kept : null
+  })()
+
   const meals: MealPlan[] = []
   for (const slot of toPlan) {
     const share = targets.slotShare[slot]
@@ -640,7 +674,11 @@ export function planDay(input: PlanInput): DayPlan {
     const mealSeed = input.mealSeeds?.[slot] || 0
     const rnd = makeRng(hashString(`${date}|${slot}|${seed}|${mealSeed}`))
     let meal: MealPlan
-    if (slot === 'breakfast') meal = planBreakfast(T, P, ctx, rnd)
+    if (keepAll && keepAll[slot]) {
+      const items = keepAll[slot]!
+      meal = { slot, targetKcal: T, targetProtein: P, items, totals: totalsOf(items, input.dishMap), notes: [] }
+      for (const it of items) ctx.usedToday.add(it.dishId)
+    } else if (slot === 'breakfast') meal = planBreakfast(T, P, ctx, rnd)
     else if (slot === 'snack') meal = planSnack(T, P, ctx, rnd)
     else meal = planMainMeal(slot, T, P, ctx, rnd)
     meal.targetKcal = Math.round(T)
@@ -648,13 +686,16 @@ export function planDay(input: PlanInput): DayPlan {
     meals.push(meal)
   }
 
-  // 全天收敛
+  // 全天收敛。沿用上次推荐时跳过：收敛会换菜，那就等于又重排了一遍
   const eatenTotal = sum(eatenSlots.map((k) => eaten[k] || ZERO))
-  notes.push(...balanceDay(meals, ctx, eatenTotal, makeRng(hashString(`${date}|balance|${seed}`))))
+  if (!keepAll) {
+    notes.push(...balanceDay(meals, ctx, eatenTotal, makeRng(hashString(`${date}|balance|${seed}`))))
+  } else {
+    notes.push('按上次的推荐保留，没有重排')
+  }
 
   const adj = input.adjustments
   if (adj.proteinLow) notes.push('近期蛋白偏低，今天每餐都配了高蛋白的菜')
-  if (adj.sodiumHigh) notes.push('近期盐偏多，今天以清淡做法为主')
   if (adj.fatHigh) notes.push('近期油偏多，今天少油少炸')
   if (adj.vegLow || adj.fiberLow) notes.push('近期蔬菜纤维不足，今天多配了菜和粗粮')
   if (adj.kcalOver) notes.push('近期热量超标，今天按目标量给，别再加餐')

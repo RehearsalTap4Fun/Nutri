@@ -26,14 +26,13 @@ interface Props {
   conditions: Condition[]
   targets: Targets
   todaySoFar: Nutrients
-  showSodium: boolean
   nextSlot: MealSlot
   onQuickLog?: (slot: MealSlot, dishId: string, portion?: number) => void
 }
 
 export function CanIEat({
   dishes, dishMap, customFoods, favorites, recentDishIds,
-  conditions, targets, todaySoFar, showSodium, nextSlot, onQuickLog,
+  conditions, targets, todaySoFar, nextSlot, onQuickLog,
 }: Props) {
   const [q, setQ] = useState('')
   const [pick, setPick] = useState<FoodPick | null>(null)
@@ -146,7 +145,6 @@ export function CanIEat({
               { label: '脂肪', value: r0(scaled.fat), unit: 'g' },
               { label: '碳水', value: r0(scaled.carbs), unit: 'g' },
               { label: '纤维', value: r0(scaled.fiber), unit: 'g' },
-              ...(showSodium ? [{ label: '钠', value: r0(scaled.sodium), unit: 'mg' }] : []),
             ]}
           />
 

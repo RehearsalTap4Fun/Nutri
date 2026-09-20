@@ -45,7 +45,6 @@ describe('analysis', () => {
     }
     const a = analyze(profile, targets, entries, [], DISH_MAP, today)
     expect(a.adjustments.takeoutLunch).toBe(true)
-    expect(a.adjustments.sodiumHigh).toBe(true)
   })
   it('自适应 TDEE：数据不足返回 null；足够时按体重斜率修正', () => {
     expect(adaptiveTdee([], [], DISH_MAP, today, 2200, 2200)).toBeNull()

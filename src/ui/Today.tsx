@@ -13,7 +13,7 @@ import { entryName, entryNutrients, servingGrams } from '../core/nutrition'
 import { Meter } from './charts'
 import { useCountUp } from './hooks'
 import { IconBowl, IconClose, IconPlus } from './icons'
-import { SLOT_LABEL, entryPortionText, portionText, r0, showsSodium, withoutSodiumNotes } from './format'
+import { SLOT_LABEL, entryPortionText, portionText, r0 } from './format'
 import { CONDITION_LABEL } from '../core/conditions'
 import { SignalChips } from './bits'
 import { CanIEat } from './CanIEat'
@@ -68,8 +68,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   goPlan: () => void
 }) {
   const n = stat.n
-  const showNa = showsSodium(conditions)
-  const notes = withoutSodiumNotes(planNotes, showNa)
+  const notes = planNotes
   // 左滑露出「删除」：只在水平位移占优时跟手，松手超过 44px 就停在打开态
   const [swiped, setSwiped] = useState<string | null>(null)
   const [showBudget, setShowBudget] = useState(false)
@@ -82,10 +81,10 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   const habitFinding = useMemo(() => findings.find((f) => f.severity === 'warn' && isHabitFinding(f)), [findings])
   const talkInput = useMemo(
     () => ({
-      isToday, now: nowTimeStr(), date, entries, n, targets, waterMl: waterMlToday, showSodium: showNa, focus,
+      isToday, now: nowTimeStr(), date, entries, n, targets, waterMl: waterMlToday, focus,
       justHatched: creature ? creature.mutations === 0 : false, fruitG: stat.fruitG, habitFinding, personality: creature?.personality,
     }),
-    [isToday, date, entries, n, targets, waterMlToday, showNa, focus, creature, stat.fruitG, habitFinding],
+    [isToday, date, entries, n, targets, waterMlToday, focus, creature, stat.fruitG, habitFinding],
   )
   const talk = useMemo(() => creatureLine(talkInput), [talkInput])
   const mood = useMemo(() => creatureMood(talkInput), [talkInput])
@@ -165,7 +164,6 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
             <div className="hero-sub">
               <span>蔬菜 <b>{(stat.vegG / 100).toFixed(1)}</b> 份</span>
               <span>水果 <b>{r0(stat.fruitG)}</b> g</span>
-              {showNa && <span>钠 <b style={n.sodium > targets.sodiumMax ? { color: 'var(--bad-text)' } : undefined}>{r0(n.sodium)}</b> / {targets.sodiumMax} mg</span>}
               {conditions.map((c) => <button key={c} className="pill accent" style={{ border: 'none', cursor: 'pointer' }} onClick={goModes}>{CONDITION_LABEL[c]}模式</button>)}
               {remain > 50 && budgetPicks.length > 0 && onQuickLog && (
                 <button className={`chip${showBudget ? ' on' : ''}`} style={{ padding: '2px 10px', fontSize: 12 }} aria-expanded={showBudget} onClick={() => setShowBudget(!showBudget)}>还能吃什么</button>
@@ -230,7 +228,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
       )}
       <WaterCard entries={water} targetMl={targets.waterMl} fluidMl={fluidMl} isToday={date === todayStr()} onSet={onSetWater} />
 
-      <CanIEat dishes={dishes} dishMap={dishMap} customFoods={customFoods} favorites={favorites} recentDishIds={recentDishIds} conditions={conditions} targets={targets} todaySoFar={n} showSodium={showNa} nextSlot={nextSlot} onQuickLog={onQuickLog} />
+      <CanIEat dishes={dishes} dishMap={dishMap} customFoods={customFoods} favorites={favorites} recentDishIds={recentDishIds} conditions={conditions} targets={targets} todaySoFar={n} nextSlot={nextSlot} onQuickLog={onQuickLog} />
 
       <div className="card">
         <div className="section-title"><h2>今日记录</h2><span className="small muted">{entries.length ? `${entries.length} 条` : ''}</span></div>
@@ -267,7 +265,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
                       <div className="list-item tap" style={{ ['--i' as string]: i }} onClick={() => (swiped ? setSwiped(null) : onEdit(e))}
                         onTouchStart={(ev) => onSwipeStart(e.id, ev)} onTouchMove={onSwipeMove} onTouchEnd={onSwipeEnd} onTouchCancel={onSwipeEnd}>
                       <div className="grow">
-                        <div className="ellipsis">{entryName(e, dishMap)} <span className="muted small">× {entryPortionText(e, dishMap)}</span>{e.lowSalt && <span className="pill" style={{ marginLeft: 6 }}>少盐</span>}{e.lowOil && <span className="pill" style={{ marginLeft: 4 }}>少油</span>}</div>
+                        <div className="ellipsis">{entryName(e, dishMap)} <span className="muted small">× {entryPortionText(e, dishMap)}</span>{e.lowOil && <span className="pill" style={{ marginLeft: 4 }}>少油</span>}</div>
                         <div className="tiny muted num">{e.time || ''} · 蛋白 {r0(en.protein)} · 脂肪 {r0(en.fat)} · 碳水 {r0(en.carbs)} g</div>
                       </div>
                       <div className="num ink2" style={{ fontWeight: 600 }}>{r0(en.kcal)}</div>

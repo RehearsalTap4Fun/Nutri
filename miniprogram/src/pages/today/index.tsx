@@ -5,7 +5,7 @@ import type { LogEntry, MealSlot } from '@core/types'
 import { MEAL_SLOTS } from '@core/types'
 import { entryNutrients, entryName } from '@core/nutrition'
 import { todayStr } from '@core/dates'
-import { SLOT_LABEL, entryPortionText, showsSodium, withoutSodiumNotes, defaultTimeForSlot } from '@webui/format'
+import { SLOT_LABEL, entryPortionText, defaultTimeForSlot } from '@webui/format'
 import { frequentDishes } from '@core/recent'
 import { bumpCreature, logEntry } from '../../shared/log'
 import { allDishesOf } from '../../shared/derive'
@@ -215,7 +215,6 @@ export default function Today() {
         n: n || { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, sodium: 0 },
         targets: t,
         waterMl: drankMl,
-        showSodium: showsSodium(conds),
         focus: budgetFocus(remainOf(t, n || { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, sodium: 0 }), t).slice(0, 3),
         justHatched: creature.mutations === 0,
         fruitG: d.stat ? d.stat.fruitG : 0,
@@ -255,13 +254,6 @@ export default function Today() {
               <Text className="hero-fact">
                 水果 <Text className="hero-b">{d.stat ? Math.round(d.stat.fruitG) : 0}</Text> g
               </Text>
-              {showsSodium(conds) ? (
-                <Text className="hero-fact">
-                  钠 <Text className={n && n.sodium > t.sodiumMax ? 'hero-b hero-bad' : 'hero-b'}>
-                    {n ? Math.round(n.sodium) : 0}
-                  </Text> / {Math.round(t.sodiumMax)} mg
-                </Text>
-              ) : null}
               {conds.map((c) => (
                 <Text className="pill" key={c}>
                   {CONDITION_LABEL[c]}模式
@@ -332,7 +324,7 @@ export default function Today() {
       {planNotes.length > 0 ? (
         <View className="card">
           <View className="h2">今天的营养师提醒</View>
-          <SignalChips notes={withoutSodiumNotes(planNotes, showsSodium(conds))} />
+          <SignalChips notes={planNotes} />
         </View>
       ) : null}
 
@@ -345,7 +337,6 @@ export default function Today() {
         conditions={conds}
         targets={t}
         todaySoFar={eatenN}
-        showSodium={showsSodium(conds)}
         nextSlot={nextSlot}
         onQuickLog={quickLog}
       />
@@ -453,7 +444,6 @@ export default function Today() {
                         <View className="entry-name">
                           {entryName(e, dishMap)}
                           <Text className="entry-portion"> × {entryPortionText(e, dishMap)}</Text>
-                          {e.lowSalt ? <Text className="pill">少盐</Text> : null}
                           {e.lowOil ? <Text className="pill">少油</Text> : null}
                         </View>
                         <View className="entry-sub">
@@ -493,14 +483,6 @@ export default function Today() {
             {n ? Math.round(n.fiber) : 0}/{Math.round(t.fiber)} g
           </Text>
         </View>
-        {showsSodium(conds) ? (
-          <View className="row">
-            <Text className="label">钠</Text>
-            <Text className="value">
-              {n ? Math.round(n.sodium) : 0}/{Math.round(t.sodiumMax)} mg
-            </Text>
-          </View>
-        ) : null}
       </View>
 
       {showBp ? (

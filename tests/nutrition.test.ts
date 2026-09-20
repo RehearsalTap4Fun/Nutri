@@ -43,23 +43,16 @@ describe('nutrition', () => {
   })
 })
 
-describe('少盐做法', () => {
-  it('只减调味料的一半钠，且只对家常菜生效', async () => {
-    const { canLowSalt, condimentSodium, dishNutrientsFor } = await import('../src/core/nutrition')
+// 「少盐做法」已于 2026-09-20 随钠指标一起移除：它唯一的作用是把调味钠减半，
+// 钠不再计算展示后这个开关是空操作。少油做法保留。
+describe('少油做法', () => {
+  it('只减烹调油的一半脂肪与热量，且只对家常菜生效', async () => {
+    const { dishNutrientsFor } = await import('../src/core/nutrition')
     const d = DISH_MAP.get('cn_tomato_egg')!
     const full = dishNutrientsFor(d)
-    const low = dishNutrientsFor(d, { lowSalt: true })
-    expect(canLowSalt(d)).toBe(true)
-    expect(full.sodium - low.sodium).toBeCloseTo(condimentSodium(d) * 0.5, 3)
-    expect(low.kcal).toBe(full.kcal)
-    const takeout = DISHES.find((x) => x.cuisine === 'takeout' && x.cat === 'combo')!
-    expect(canLowSalt(takeout)).toBe(false)
-    expect(dishNutrientsFor(takeout, { lowSalt: true }).sodium).toBe(dishNutrientsFor(takeout).sodium)
     const lowOil = dishNutrientsFor(d, { lowOil: true })
     expect(full.fat - lowOil.fat).toBeCloseTo(5, 1)
     expect(full.kcal - lowOil.kcal).toBeCloseTo(45, 0)
-    const e = entryNutrients({ id: 'x', date: '2026-09-05', slot: 'lunch', dishId: 'cn_tomato_egg', portion: 2, lowSalt: true }, DISH_MAP)
-    expect(e.sodium).toBeCloseTo(low.sodium * 2, 3)
   })
 })
 

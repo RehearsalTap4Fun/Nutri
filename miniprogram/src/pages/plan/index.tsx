@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Taro from '@tarojs/taro'
 import { View, Text, Button } from '@tarojs/components'
 import type { Dish, MealSlot } from '@core/types'
 import { MEAL_SLOTS } from '@core/types'
-import type { MealPlan } from '@core/planner'
+import type { MealPlan, PlanItem } from '@core/planner'
 import { shoppingList } from '@core/planner'
 import { todayStr } from '@core/dates'
 import { dishNutrientsFor, entryName, scale, servingGrams } from '@core/nutrition'
@@ -14,12 +14,11 @@ import {
   entryPortionText,
   portionText,
   r0,
-  showsSodium,
-  withoutSodiumNotes,
 } from '@webui/format'
 import { useAppState } from '../../shared/useAppState'
 import { logEntry } from '../../shared/log'
 import { derive, dishMapOf } from '../../shared/derive'
+import { useRememberPlan } from '../../shared/rememberPlan'
 import { mealWhy } from '@core/mealWhy'
 import { Fold } from '../../components/bits'
 import { Icon } from '../../components/Icon'
@@ -47,6 +46,8 @@ export default function Plan() {
   const dishMap = useMemo(() => dishMapOf(state), [state])
   const [showList, setShowList] = useState(false)
   const [loggedSlots, setLoggedSlots] = useState<MealSlot[]>([])
+  // hook 必须在提前返回之前
+  useRememberPlan(d.plan, date, state.planPicks, update)
 
   if (!d.profile || !d.plan || !d.targets) {
     return (
@@ -63,19 +64,23 @@ export default function Plan() {
   }
 
   const plan = d.plan
-  const showSodium = showsSodium(d.profile.conditions)
   const list = shoppingList(plan, dishMap)
   const allEaten = plan.meals.length === 0
   const dayEntries = state.entries.filter((e) => e.date === date)
 
-  /** 换一换：整天或单餐。种子记在 planSeeds 里，刷新后推荐不变 */
+  /**
+   * 换一换：整天或单餐。种子记在 planSeeds 里，刷新后推荐不变。
+   * 同时清掉当天的沿用缓存，否则新种子算出来的推荐又会被旧选择顶回去。
+   */
   const reroll = (slot?: MealSlot) => {
     update((s) => {
       const cur = s.planSeeds[date] || { day: 0, meals: {} }
       const next = slot
         ? { ...cur, meals: { ...cur.meals, [slot]: (cur.meals[slot] || 0) + 1 } }
-        : { ...cur, day: cur.day + 1 }
-      return { ...s, planSeeds: { ...s.planSeeds, [date]: next } }
+        : { day: cur.day + 1, meals: {} }
+      const picks = { ...s.planPicks }
+      delete picks[date]
+      return { ...s, planSeeds: { ...s.planSeeds, [date]: next }, planPicks: picks }
     })
   }
 
@@ -88,7 +93,6 @@ export default function Plan() {
         time: defaultTimeForSlot(m.slot),
         dishId: it.dishId,
         portion: it.portion,
-        lowSalt: it.lowSalt,
         lowOil: it.lowOil,
       })
     }
@@ -177,7 +181,6 @@ export default function Plan() {
                           × {portionText(it.portion, servingGrams(dish))}
                         </Text>
                         {it.reason ? <Text className="pill">{reasonTag(it.reason)}</Text> : null}
-                        {it.lowSalt ? <Text className="pill">少盐</Text> : null}
                         {it.lowOil ? <Text className="pill">少油</Text> : null}
                       </View>
                       <View className="entry-sub">
@@ -196,7 +199,6 @@ export default function Plan() {
             <View className="slot-head" style={{ marginTop: '16px' }}>
               <Text className="lobe-sub">
                 合计 {r0(m.totals.kcal)} 千卡 · 蛋白 {r0(m.totals.protein)} g
-                {showSodium ? ` · 钠 ${r0(m.totals.sodium)} mg` : ''}
               </Text>
               {m.items.length > 0 ? (
                 <Text className="add" onClick={() => (logged ? undefined : logMeal(m))}>
@@ -205,7 +207,7 @@ export default function Plan() {
               ) : null}
             </View>
 
-            {withoutSodiumNotes(m.notes, showSodium).map((tx, i) => (
+            {m.notes.map((tx, i) => (
               <Text className="lobe-sub" key={i}>
                 {tx}
               </Text>
@@ -260,7 +262,7 @@ export default function Plan() {
       {plan.notes.length > 0 ? (
         <View className="card">
           <Fold summary={`今天这样排的原因（${plan.notes.length} 条）`}>
-            {withoutSodiumNotes(plan.notes, showSodium).map((nt, i) => (
+            {plan.notes.map((nt, i) => (
               <Text className="entry-sub" key={i} style={{ display: 'block' }}>
                 {nt}
               </Text>

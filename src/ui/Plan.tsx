@@ -5,7 +5,7 @@ import type { DayPlan, MealPlan } from '../core/planner'
 import { shoppingList } from '../core/planner'
 import { addDays, shortDate, todayStr, weekdayLabel } from '../core/dates'
 import { dishNutrientsFor, entryName, entryNutrients, scale, servingGrams, sum } from '../core/nutrition'
-import { COOK_LABEL, SLOT_LABEL, entryPortionText, portionText, r0, withoutSodiumNotes } from './format'
+import { COOK_LABEL, SLOT_LABEL, entryPortionText, portionText, r0 } from './format'
 import { IconClose } from './icons'
 import { Fold, SignalChips, Stats } from './bits'
 import { mealWhy } from '../core/mealWhy'
@@ -17,12 +17,10 @@ function reasonTag(r: string): string {
   return r.length > 6 ? r.slice(0, 6) : r
 }
 
-export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMeal, onDislike, isToday, showSodium = false, date, planFor, onRerollWeek, onPickDate, adjustments, profile }: {
+export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMeal, onDislike, isToday, date, planFor, onRerollWeek, onPickDate, adjustments, profile }: {
   /** 「这一餐为什么这么排」要用：近 7 天结论与档案 */
   adjustments: import('../core/analysis').Adjustments
   profile: import('../core/types').Profile
-  /** 只有高血压模式显示钠 */
-  showSodium?: boolean
   /** 当前日期与一周视图 */
   date: string
   planFor: (d: string) => DayPlan | null
@@ -74,7 +72,7 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
           { label: '推荐蛋白', value: r0(plan.totals.protein), of: targets.protein, unit: 'g' },
         ]} />}
         {view === 'day' && hasEaten && <p className="tiny muted" style={{ marginTop: 2 }}>已吃{plan.eatenSlots.map((s) => SLOT_LABEL[s]).join('、')}；推荐只覆盖其余餐次，按剩余预算给</p>}
-        {view === 'day' && <SignalChips notes={withoutSodiumNotes(plan.notes, showSodium)} />}
+        {view === 'day' && <SignalChips notes={plan.notes} />}
       </div>
 
       {view === 'week' && (
@@ -121,7 +119,7 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
         }
         const m = plan.meals.find((x) => x.slot === slot)
         if (!m) return null
-        return <MealCard key={slot} meal={m} dishMap={dishMap} onReroll={() => onReroll(m.slot)} onLog={() => onLogMeal(m)} onDislike={onDislike} showSodium={showSodium} why={mealWhy({ meal: m, targets, adjustments, profile, redistributed: plan.eatenSlots.length > 0 })} />
+        return <MealCard key={slot} meal={m} dishMap={dishMap} onReroll={() => onReroll(m.slot)} onLog={() => onLogMeal(m)} onDislike={onDislike} why={mealWhy({ meal: m, targets, adjustments, profile, redistributed: plan.eatenSlots.length > 0 })} />
       })}
 
       {view === 'day' && allEaten && <div className="card"><div className="empty">今天的餐都记录了，明天再来看推荐</div></div>}
@@ -141,7 +139,7 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
   )
 }
 
-function MealCard({ meal, dishMap, onReroll, onLog, onDislike, showSodium, why }: { meal: MealPlan; dishMap: Map<string, Dish>; onReroll: () => void; onLog: () => void; onDislike: (id: string) => void; showSodium: boolean; why: string[] }) {
+function MealCard({ meal, dishMap, onReroll, onLog, onDislike, why }: { meal: MealPlan; dishMap: Map<string, Dish>; onReroll: () => void; onLog: () => void; onDislike: (id: string) => void; why: string[] }) {
   const [logged, setLogged] = useState(false)
   return (
     <div className={`card lobe lobe-${meal.slot}`}>
@@ -157,7 +155,7 @@ function MealCard({ meal, dishMap, onReroll, onLog, onDislike, showSodium, why }
           return (
             <div key={it.dishId} className="list-item">
               <div className="grow">
-                <div className="ellipsis">{d.name} <span className="muted small">× {portionText(it.portion, servingGrams(d))}</span>{it.reason && <span className="pill accent" title={it.reason} style={{ marginLeft: 6 }}>{reasonTag(it.reason)}</span>}{it.lowSalt && <span className="pill" style={{ marginLeft: 6 }}>少盐</span>}{it.lowOil && <span className="pill" style={{ marginLeft: 4 }}>少油</span>}</div>
+                <div className="ellipsis">{d.name} <span className="muted small">× {portionText(it.portion, servingGrams(d))}</span>{it.reason && <span className="pill accent" title={it.reason} style={{ marginLeft: 6 }}>{reasonTag(it.reason)}</span>}{it.lowOil && <span className="pill" style={{ marginLeft: 4 }}>少油</span>}</div>
                 <div className="tiny muted">{d.serving} · {COOK_LABEL[d.cook]} · 蛋白 {r0(n.protein)} g</div>
               </div>
               <div className="num ink2">{r0(n.kcal)}</div>
@@ -168,10 +166,10 @@ function MealCard({ meal, dishMap, onReroll, onLog, onDislike, showSodium, why }
         {meal.items.length === 0 && <div className="empty small">没有符合条件的菜，试试放宽过敏或不吃设置</div>}
       </div>
       <div className="row between" style={{ marginTop: 8 }}>
-        <span className="small ink2 num">合计 {r0(meal.totals.kcal)} 千卡 · 蛋白 {r0(meal.totals.protein)} g{showSodium && ` · 钠 ${r0(meal.totals.sodium)} mg`}</span>
+        <span className="small ink2 num">合计 {r0(meal.totals.kcal)} 千卡 · 蛋白 {r0(meal.totals.protein)} g</span>
         {meal.items.length > 0 && <button className="btn primary sm" disabled={logged} onClick={() => { onLog(); setLogged(true) }}>{logged ? '已记录' : '照这个吃，记为已吃'}</button>}
       </div>
-      {withoutSodiumNotes(meal.notes, showSodium).map((t, i) => <p key={i} className="small muted" style={{ marginTop: 6 }}>{t}</p>)}
+      {meal.notes.map((t, i) => <p key={i} className="small muted" style={{ marginTop: 6 }}>{t}</p>)}
       {why.length > 0 && (
         <Fold summary="这一餐为什么这么排">
           {why.map((t, i) => <p key={i}>{t}</p>)}

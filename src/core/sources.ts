@@ -102,9 +102,9 @@ export function targetBasis(p: Profile, t: Targets, opts: { adaptive?: boolean; 
   else rows.push({ metric: '脂肪 / 碳水', value: `${t.fat} g / ${t.carbs} g`, rule: `脂肪 ${c.includes('gerd') ? '25%（反流模式）' : '28%'} 热量（参考范围 20~30%），碳水用剩余热量补齐`, sources: ['dris2023'] })
 
   rows.push({ metric: '膳食纤维', value: `${t.fiber} g`, rule: `每 1000 千卡 14 g，且不低于 ${t.fiber >= 30 ? '30' : '25'} g`, sources: ['dris2023', 'dga2020'].concat(c.includes('diabetes') ? ['dm2020'] : []) })
-  rows.push(t.sodiumMax <= 1500
-    ? { metric: '钠上限', value: `${t.sodiumMax} mg`, rule: '高血压模式：1500 mg（约 3.8 g 盐）', sources: ['aha', 'dash', 'htn2018'] }
-    : { metric: '钠上限', value: `${t.sodiumMax} mg`, rule: '盐 <5 g，即钠 2000 mg', sources: ['dg2022'] })
+  // 2026-09 起不再把钠作为量化指标：中式家常菜每道 1.5~2 g 盐是真实水平，按钠打分会把
+  // 几乎所有中餐都标红，反而失去信息量。指南的限盐建议仍然成立，改为在高血压模式里给出行为提醒。
+  rows.push({ metric: '盐', value: '不设量化上限', rule: '指南建议盐 <5 g/日（高血压 <3.8 g）。本应用不按钠给菜打分，改为提醒少盐做法', sources: ['dg2022', 'aha', 'dash', 'htn2018'] })
   rows.push({ metric: '蔬菜', value: `${t.vegServings} 份（每份 100 g）`, rule: `指南 300~500 g/日${t.vegServings >= 5 ? '，特殊模式取上限 500 g' : '，取 400 g'}`, sources: ['dg2022'] })
   rows.push({ metric: '水果', value: `${t.fruitG} g`, rule: t.fruitG >= 300 ? '指南 200~350 g/日，孕产期或高血压取 300 g' : t.fruitG <= 200 && (c.includes('diabetes') || c.includes('gout') || c.includes('fatty_liver') || c.includes('preconception')) ? '限果糖：控制在 200 g 并分两次吃' : '指南 200~350 g/日，取 200 g', sources: ['dg2022'].concat(c.includes('diabetes') ? ['dm2020'] : c.includes('gout') ? ['gout2019'] : c.includes('fatty_liver') ? ['nafld2018'] : []) })
   rows.push(t.dairyG === 0

@@ -6,6 +6,7 @@ import { DISHES_WEST_TAKEOUT } from './westTakeout'
 import { DISHES_CN_MORE } from './cnMore'
 import { DISHES_TAKEOUT_MORE } from './takeout2'
 import { DISHES_CONVENIENCE_MORE } from './convenience2'
+import { DISHES_CN_HOME } from './cnHome'
 
 // 各分组文件在此汇总；新增分组时在下方 concat
 export const DISHES: Dish[] = [
@@ -16,6 +17,7 @@ export const DISHES: Dish[] = [
   ...DISHES_CN_MORE,
   ...DISHES_TAKEOUT_MORE,
   ...DISHES_CONVENIENCE_MORE,
+  ...DISHES_CN_HOME,
 ]
 
 export const DISH_MAP: Map<string, Dish> = new Map(DISHES.map((d) => [d.id, d]))

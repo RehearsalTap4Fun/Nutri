@@ -18,7 +18,6 @@ interface Tone {
   water: (should: number, behind: number) => string
   slot: Record<'breakfast' | 'lunch' | 'dinner', string>
   fruit: string
-  sodium: (v: number, max: number) => string
   habit: (f: Finding) => string
   over: (label: string) => string
   gap: (label: string) => string
@@ -36,7 +35,6 @@ const TONE: Record<Personality, Tone> = {
       dinner: '晚饭还没安排上吗，我都饿了。',
     },
     fruit: '今天好像还没吃水果，找点应季的加一份呗。',
-    sodium: (v, max) => `你今天钠已经到 ${v} mg 了，超过 ${max} 上限啦，接下来清淡点。`,
     habit: (f) => `${f.title}：${f.detail}`,
     over: (label) => `我看了一下，你${label}，接下来吃清淡点吧。`,
     gap: (label) => `${label}，要不要加一点，别亏待自己。`,
@@ -51,7 +49,6 @@ const TONE: Record<Personality, Tone> = {
       dinner: '晚饭还没安排？我都饿扁了，走起！',
     },
     fruit: '今天水果还没安排上吧，来一份应季的，冲！',
-    sodium: (v, max) => `钠已经冲到 ${v} mg 啦，超过 ${max} 的线了，接下来清淡一点，加油稳住！`,
     habit: (f) => `${f.title}！${f.detail} 一起改善一下吧！`,
     over: (label) => `我看了一下，你${label}，接下来吃清淡点，冲鸭稳住！`,
     gap: (label) => `${label}，加一点呀，别亏待自己，冲！`,
@@ -66,7 +63,6 @@ const TONE: Record<Personality, Tone> = {
       dinner: '晚饭还没影呢，别告诉我又忘了。',
     },
     fruit: '一整天了水果都没吃，是不是又懒得削皮？加一份。',
-    sodium: (v, max) => `钠都吃到 ${v} mg 了，超过 ${max} 的线，接下来给我清淡点。`,
     habit: (f) => `${f.title}。${f.detail} 说了多少次了。`,
     over: (label) => `你${label}，听见没，接下来给我吃清淡点。`,
     gap: (label) => `${label}，还不快加一点，亏待自己算怎么回事。`,
@@ -81,7 +77,6 @@ const TONE: Record<Personality, Tone> = {
       dinner: '晚餐未记录。',
     },
     fruit: '今日未摄入水果，建议补充一份。',
-    sodium: (v, max) => `钠 ${v} mg，超出上限 ${max}。建议清淡饮食。`,
     habit: (f) => `${f.title}：${f.detail}`,
     over: (label) => `你${label}。建议接下来清淡饮食。`,
     gap: (label) => `${label}。建议适量补充。`,
@@ -100,8 +95,6 @@ export interface CreatureTalkInput {
   targets: Targets
   /** 今天喝水总量 ml（不含餐食里的饮品） */
   waterMl: number
-  /** 只有高血压模式才提钠 */
-  showSodium: boolean
   /** Today 页已经算好的缺口/超额信号，直接拿来讲 */
   focus: BudgetFocus[]
   /** 蛋刚孵化出来（异变次数为 0），打个招呼，优先级最高，只说这一句 */
@@ -128,7 +121,7 @@ interface LineAndMood {
 
 // 说什么和什么心情共用同一条优先级链，避免两处各判断一遍、结果对不上。
 function pick(input: CreatureTalkInput): LineAndMood {
-  const { isToday, now, date, entries, n, targets, waterMl, showSodium, focus, justHatched, fruitG, habitFinding, personality } = input
+  const { isToday, now, date, entries, targets, waterMl, focus, justHatched, fruitG, habitFinding, personality } = input
   const tone = TONE[personality ?? 'gentle']
   if (!isToday) return { text: pickIdle(date, tone), mood: 'happy' }
 
@@ -151,8 +144,6 @@ function pick(input: CreatureTalkInput): LineAndMood {
   // 3. 下午了还没吃水果
   if (nowHour >= FRUIT_DUE_HOUR && (fruitG ?? 0) <= 0) return { text: tone.fruit, mood: 'neutral' }
 
-  // 4. 钠超标（只有高血压模式看得到这个指标）
-  if (showSodium && n.sodium > targets.sodiumMax) return { text: tone.sodium(Math.round(n.sodium), targets.sodiumMax), mood: 'concerned' }
 
   // 5. 近期饮食习惯类提醒（分析页里归不进宏量指标的那些）
   if (habitFinding) return { text: tone.habit(habitFinding), mood: 'concerned' }

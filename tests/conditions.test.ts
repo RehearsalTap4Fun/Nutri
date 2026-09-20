@@ -4,7 +4,7 @@ import { computeTargets } from '../src/core/energy'
 import { NO_ADJUST, analyze } from '../src/core/analysis'
 import { planDay } from '../src/core/planner'
 import type { PlanInput } from '../src/core/planner'
-import { conditionExcludes, isAlcohol, isCaffeine, isPickledOrCured, isRaw, isSugary, isWholeGrain } from '../src/core/conditions'
+import { conditionExcludes, conditionPlanNotes, isAlcohol, isCaffeine, isPickledOrCured, isRaw, isSugary, isWholeGrain } from '../src/core/conditions'
 import type { LogEntry, Profile } from '../src/core/types'
 import { addDays } from '../src/core/dates'
 
@@ -35,11 +35,12 @@ describe('特殊人群模式 · 目标', () => {
     expect(t.kcal).toBe(Math.round((t0.kcal + 400) / 10) * 10)
     expect(t.protein).toBe(t0.protein + 25)
   })
-  it('高血压：钠 1500，蔬菜 5 份', () => {
+  it('高血压：蔬菜 5 份补钾；不再给钠设量化上限（2026-09-20）', () => {
     const t = computeTargets({ ...base, conditions: ['hypertension'] }, NOW)
-    expect(t.sodiumMax).toBe(1500)
     expect(t.vegServings).toBe(5)
     expect(t.fruitG).toBe(300)
+    expect('sodiumMax' in t, '钠上限应已从目标里移除').toBe(false)
+    expect(t.notes.some((n) => n.includes('不再逐日算钠'))).toBe(true)
   })
   it('糖尿病：碳水 50%，蛋白 ≥18%，纤维 ≥30，按餐均分', () => {
     const t = computeTargets({ ...base, conditions: ['diabetes'] }, NOW)
@@ -78,18 +79,16 @@ describe('特殊人群模式 · 推荐', () => {
       expect(plan.notes.some((n) => n.includes('孕期模式'))).toBe(true)
     }
   })
-  it('高血压不推荐腌腊，全天钠不高于普通模式且日均不超 2000', () => {
-    let htn = 0
-    let normal = 0
+  // 2026-09-20 起不再比较钠总量：家常菜普遍超线，按钠打分推不出正常中餐。
+  // 高血压模式改为「避开腌腊 + 优先清淡做法 + 一句静态少盐提醒」。
+  it('高血压不推荐腌腊，且给出少盐提醒', () => {
+    const p: Profile = { ...base, conditions: ['hypertension'] }
     for (let s = 0; s < 6; s++) {
-      const a = planDay(input({ ...base, conditions: ['hypertension'] }, { seed: s }))
-      const b = planDay(input(base, { seed: s }))
-      for (const it of a.meals.flatMap((m) => m.items)) expect(isPickledOrCured(DISH_MAP.get(it.dishId)!)).toBe(false)
-      htn += a.totals.sodium
-      normal += b.totals.sodium
+      const plan = planDay(input(p, { seed: s }))
+      for (const it of plan.meals.flatMap((m) => m.items)) expect(isPickledOrCured(DISH_MAP.get(it.dishId)!)).toBe(false)
     }
-    expect(htn).toBeLessThanOrEqual(normal)
-    expect(htn / 6).toBeLessThanOrEqual(2000)
+    const t = computeTargets(p, NOW)
+    expect(conditionPlanNotes(p, t).some((n) => n.includes('限盐勺'))).toBe(true)
   })
   it('糖尿病不推荐含糖饮料与甜食，单餐碳水不超过上限', () => {
     for (let s = 0; s < 8; s++) {
@@ -175,5 +174,40 @@ describe('特殊人群模式 · 脂肪肝 / 痛风 / 老年人', () => {
     const a = analyze(p, computeTargets(p, NOW), entries, [], DISH_MAP, date)
     expect(a.findings.some((f) => f.key === 'gout_purine')).toBe(true)
     expect(a.findings.some((f) => f.key === 'gout_alcohol')).toBe(true)
+  })
+})
+
+describe('balanceDay 的按餐次约束（2026-09-20 修复）', () => {
+  // balanceDay 全程按「全天」预算压份量与换菜，没有任何按餐次的约束，会把 planBreakfast 里
+  // 保证过的老年人早餐蛋白再压回去（实测：玉米面窝头 1.5→1.25 份，早餐蛋白 16.2→14.7 g）。
+  // 原来的用例只跑 seed 0~7 覆盖不到，这里拉宽到 60。
+  it('老年人早餐蛋白在 60 个 seed 下都不掉出 15 g', () => {
+    const p: Profile = { ...base, goal: 'maintain', conditions: ['elderly'] }
+    let min = Infinity
+    const bad: string[] = []
+    for (let s = 0; s < 60; s++) {
+      const plan = planDay(input(p, { seed: s }))
+      const bf = plan.meals.find((m) => m.slot === 'breakfast')!
+      min = Math.min(min, bf.totals.protein)
+      if (bf.totals.protein < 15) bad.push(`s${s}:${bf.totals.protein.toFixed(1)}g(${bf.items.map((i) => DISH_MAP.get(i.dishId)?.name).join('+')})`)
+    }
+    expect(bad, bad.join(', ')).toEqual([])
+    expect(min).toBeGreaterThanOrEqual(15)
+  })
+
+  it('守住早餐蛋白没有把全天热量顶爆', () => {
+    const p: Profile = { ...base, goal: 'maintain', conditions: ['elderly'] }
+    const t = computeTargets(p, NOW)
+    for (let s = 0; s < 40; s++) {
+      const plan = planDay(input(p, { seed: s }))
+      expect(plan.totals.kcal, `seed ${s}`).toBeLessThan(t.kcal * 1.15)
+    }
+  })
+
+  it('不带老年人模式时不受影响（这段只在 elderly 下生效）', () => {
+    for (let s = 0; s < 20; s++) {
+      const plan = planDay(input({ ...base, goal: 'maintain' }, { seed: s }))
+      expect(plan.meals.find((m) => m.slot === 'breakfast')!.items.length).toBeGreaterThan(0)
+    }
   })
 })

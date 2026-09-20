@@ -1,4 +1,4 @@
-import type { ActivityLevel, Allergen, Condition, Cuisine, DietStyle, Dish, DishCategory, Goal, LogEntry, MealSlot, Sex } from '../core/types'
+import type { ActivityLevel, Allergen, Cuisine, DietStyle, Dish, DishCategory, Goal, LogEntry, MealSlot, Sex } from '../core/types'
 import { servingGrams } from '../core/nutrition'
 
 export const SEX_LABEL: Record<Sex, string> = { male: '男', female: '女' }
@@ -73,13 +73,6 @@ export function guessSlot(time: string): MealSlot {
  * 钠是按「每道家常菜 1.5~2 g 盐」估出来的，几乎天天超上限，当成日常指标只会一直红。
  * 所以默认不显示；只有高血压模式下钠上限是核心指标，才显示钠与含钠数字的提醒。
  */
-export function showsSodium(conditions: Condition[] | undefined): boolean {
-  return !!conditions?.includes('hypertension')
-}
-/** 不显示钠时，把带钠数字的提醒句过滤掉；「近期盐偏多」这类做法说明保留 */
-export function withoutSodiumNotes(notes: string[], show: boolean): string[] {
-  return show ? notes : notes.filter((t) => !/钠/.test(t))
-}
 
 /** 提醒句的标题：取第一个逗号前，去掉没闭合的括号和尾标点 */
 export function noteHead(t: string): string {

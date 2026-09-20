@@ -7,7 +7,7 @@ import { analyze, dayStat, NO_ADJUST } from './core/analysis'
 import { planDay } from './core/planner'
 import { remainOf, suggestForBudget } from './core/budget'
 import { frequentBySlot, frequentDishes } from './core/recent'
-import type { MealPlan } from './core/planner'
+import type { MealPlan, PlanItem } from './core/planner'
 import { DISHES, DISH_MAP } from './data/dishes/index'
 import { addDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from './core/dates'
 import { defaultState, loadState, saveState, uid } from './store/storage'
@@ -26,7 +26,7 @@ import { Toast } from './ui/Toast'
 import { SpeakJobBanner } from './ui/SpeakJobBanner'
 import { useToast } from './ui/hooks'
 import { IconBowl, IconChart, IconLeaf, IconPerson, IconPlus } from './ui/icons'
-import { SLOT_LABEL, defaultTimeForSlot, entryPortionText, guessSlot, portionText, showsSodium } from './ui/format'
+import { SLOT_LABEL, defaultTimeForSlot, entryPortionText, guessSlot, portionText } from './ui/format'
 import { entryName, servingGrams } from './core/nutrition'
 import { captureInstallPrompt, isIOS, isStandalone, isWeChat, registerSW } from './pwa'
 import { deleteRemote, syncOnce, SyncError } from './sync/client'
@@ -109,8 +109,25 @@ export default function App() {
       profile, targets, dishes: allDishes, dishMap: dishMap, date, seed: seeds.day, mealSeeds: seeds.meals,
       recentEntries: state.entries.filter((e) => e.date >= from && e.date <= date),
       adjustments: analysis.adjustments, eatenToday: eaten,
+      // 照推荐吃就别重排：先看沿用上次的还满不满足全天目标
+      keep: state.planPicks[date],
     })
-  }, [profile, targets, analysis, stat, state.planSeeds, state.entries, date, dishMap, allDishes])
+  }, [profile, targets, analysis, stat, state.planSeeds, state.planPicks, state.entries, date, dishMap, allDishes])
+
+  // 把这次给出的推荐记下来，下次先试着沿用。只在真的变了时写，免得每次渲染都触发一次状态更新
+  useEffect(() => {
+    if (!plan) return
+    const next: Partial<Record<MealSlot, PlanItem[]>> = {}
+    for (const m of plan.meals) next[m.slot] = m.items
+    const prev = state.planPicks[date]
+    const same = prev && MEAL_SLOTS.every((s0) => {
+      const a = prev[s0]?.map((i) => `${i.dishId}:${i.portion}`).join(',') || ''
+      const b = next[s0]?.map((i) => `${i.dishId}:${i.portion}`).join(',') || ''
+      return a === b
+    })
+    if (same) return
+    update((s0) => ({ ...s0, planPicks: { ...s0.planPicks, [date]: next } }))
+  }, [plan, date])
 
   // 常吃：不分餐次的总榜给「能不能吃」搜索与预算建议加分用；分餐次的给今日页一键补记与录入页默认列表
   const recentDishIds = useMemo(() => frequentDishes(state.entries, today), [state.entries, today])
@@ -300,7 +317,7 @@ export default function App() {
 
   const logMeal = (meal: MealPlan) => {
     const time = date === today ? nowTimeStr() : defaultTimeForSlot(meal.slot)
-    const entries: LogEntry[] = meal.items.map((it) => ({ id: uid(), updatedAt: Date.now(), date, slot: meal.slot, time, dishId: it.dishId, portion: it.portion, ...(it.lowSalt ? { lowSalt: true } : {}), ...(it.lowOil ? { lowOil: true } : {}) }))
+    const entries: LogEntry[] = meal.items.map((it) => ({ id: uid(), updatedAt: Date.now(), date, slot: meal.slot, time, dishId: it.dishId, portion: it.portion, ...(it.lowOil ? { lowOil: true } : {}) }))
     restoreEntries(entries)
     show(`${SLOT_LABEL[meal.slot]}已记录 ${entries.length} 项`, { label: '撤销', run: () => removeEntries(entries.map((e) => e.id)) })
   }
@@ -321,8 +338,9 @@ export default function App() {
 
   const rerollWeek = (dates: string[]) => update((s) => {
     const next = { ...s.planSeeds }
-    for (const d of dates) { const cur = next[d] || { day: 0, meals: {} }; next[d] = { day: cur.day + 1, meals: {} } }
-    return { ...s, planSeeds: next }
+    const picks = { ...s.planPicks }
+    for (const d of dates) { const cur = next[d] || { day: 0, meals: {} }; next[d] = { day: cur.day + 1, meals: {} }; delete picks[d] }
+    return { ...s, planSeeds: next, planPicks: picks }
   })
   const addVital = (v: Omit<VitalEntry, 'id'>) => {
     const entry: VitalEntry = { ...v, id: uid() }
@@ -392,7 +410,6 @@ export default function App() {
     )
   }
 
-  const showNa = showsSodium(profile.conditions)
   const dateLabel = date === today ? '今天' : date === addDays(today, -1) ? '昨天' : date === addDays(today, 1) ? '明天' : `${shortDate(date)} 周${weekdayLabel(date)}`
 
   return (
@@ -415,7 +432,7 @@ export default function App() {
           <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} dishes={allDishes} customFoods={state.customFoods} favorites={state.favorites} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickBySlot={quickBySlot} recentDishIds={recentDishIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} onDislike={dislikeDish} water={dayWater} fluidMl={fluidMl} onSetWater={setWater} creature={state.creature} findings={analysis?.findings ?? []} />
         )}
         {tab === 'plan' && plan && targets && (
-          <PlanView adjustments={analysis?.adjustments ?? NO_ADJUST} profile={profile} showSodium={showNa} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} />
+          <PlanView adjustments={analysis?.adjustments ?? NO_ADJUST} profile={profile} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} />
         )}
         {tab === 'analysis' && analysis && targets && (
           <AnalysisView vitals={state.vitals} onAddVital={addVital} onRemoveVital={removeVital} analysis={analysis} targets={targets} weights={state.weights} entries={state.entries} water={state.water} onAddWeight={addWeight} useAdaptive={state.settings.useAdaptiveTdee} onToggleAdaptive={setAdaptive} date={date} profile={profile} dishMap={dishMap} />
@@ -440,8 +457,8 @@ export default function App() {
       </nav>
 
       {sheet && (
-        <LogSheet showSodium={showNa} date={date} isToday={date === today} slot={sheet.slot} editing={sheet.editing} dishes={allDishes} dishMap={dishMap} customFoods={state.customFoods}
-          favorites={state.favorites} recentBySlot={recentBySlot} onResult={onSheetResult} onAddCustomFood={addCustomFood} onAddCustomDish={addCustomDish} onToggleFavorite={toggleFavorite} llm={llm} defaultLowSalt={profile.conditions.includes('hypertension')}
+        <LogSheet date={date} isToday={date === today} slot={sheet.slot} editing={sheet.editing} dishes={allDishes} dishMap={dishMap} customFoods={state.customFoods}
+          favorites={state.favorites} recentBySlot={recentBySlot} onResult={onSheetResult} onAddCustomFood={addCustomFood} onAddCustomDish={addCustomDish} onToggleFavorite={toggleFavorite} llm={llm}
           speakJob={speakJob} onSpeakStart={runSpeakJob} onConsumeSpeakJob={consumeSpeakJob} />
       )}
       <Toast toast={toast} onDismiss={dismiss} />

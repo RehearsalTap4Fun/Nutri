@@ -74,13 +74,12 @@ describe('能不能吃 · 基于今天已吃的预算', () => {
     expect(r.reasons.some((x) => x.includes('千卡'))).toBe(true)
   })
 
-  it('高血压：今天钠已经超上限，加一份就是不建议', () => {
+  it('高血压：不再按钠数值劝阻（2026-09-20 起钠不作为量化指标）', () => {
     const p: Profile = { ...base, conditions: ['hypertension'] }
     const t = computeTargets(p, NOW)
-    const eaten = { ...ZERO, sodium: t.sodiumMax + 1 }
+    const eaten = { ...ZERO, sodium: 9999 }
     const r = foodVerdictForDish(pineapple, p, t, eaten)
-    expect(r.verdict).toBe('avoid')
-    expect(r.reasons.some((x) => x.includes('钠'))).toBe(true)
+    expect(r.reasons.some((x) => /钠|\d+\s*mg/.test(x)), r.reasons.join(' / ')).toBe(false)
   })
 
   it('糖尿病：今天碳水已经到量，会提醒血糖', () => {
@@ -98,8 +97,9 @@ describe('能不能吃 · 自定义食物（只有营养数值）', () => {
     const p: Profile = { ...base, conditions: ['hypertension'] }
     const t = computeTargets(p, NOW)
     const r = foodVerdictForNutrients({ ...ZERO, kcal: 200, sodium: 900 }, p, t, ZERO)
+    // 只有营养数值、没有食材构成时仍要标注局限；但钠已不作为判定依据，所以不再是 avoid
     expect(r.limited).toBe(true)
-    expect(r.verdict).toBe('avoid')
+    expect(r.verdict).not.toBe('avoid')
   })
 
   it('没有模式时不标注局限性', () => {

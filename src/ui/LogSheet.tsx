@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Dish, DishCategory, LogEntry, MealSlot, Nutrients } from '../core/types'
 import { MEAL_SLOTS } from '../core/types'
-import { canLowOil, canLowSalt, dishNutrients, dishNutrientsFor, scale, vegGrams, servingGrams } from '../core/nutrition'
+import { canLowOil, dishNutrients, dishNutrientsFor, scale, vegGrams, servingGrams } from '../core/nutrition'
 import { INGREDIENTS, INGREDIENT_MAP } from '../data/ingredients'
 import type { Ingredient } from '../core/types'
 import type { CustomFood } from '../store/storage'
@@ -14,6 +14,7 @@ import { IconScan, IconSparkle, IconStar, IconClose } from './icons'
 import { Stats } from './bits'
 import type { LlmConfig, SpeakJob } from '../llm/mealParser'
 import { searchFoods, type FoodPick } from './foodSearch'
+import { guessDishFromName, type DishGuess } from '../core/dishGuess'
 
 export type LogSheetResult =
   | { kind: 'save'; entry: LogEntry }
@@ -26,10 +27,7 @@ type Pick = FoodPick
 
 const CAT_CHIPS: Array<DishCategory | 'all'> = ['all', 'staple', 'protein', 'veg', 'soup', 'breakfast', 'combo', 'snack', 'fruit', 'drink']
 
-export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot, editing, dishes, dishMap, customFoods, favorites, recentBySlot, onResult, onAddCustomFood, onAddCustomDish, onToggleFavorite, llm, defaultLowSalt = false, speakJob, onSpeakStart, onConsumeSpeakJob }: {
-  defaultLowSalt?: boolean
-  /** 只有高血压模式显示钠 */
-  showSodium?: boolean
+export function LogSheet({ date, isToday, slot: initialSlot, editing, dishes, dishMap, customFoods, favorites, recentBySlot, onResult, onAddCustomFood, onAddCustomDish, onToggleFavorite, llm, speakJob, onSpeakStart, onConsumeSpeakJob }: {
   date: string
   isToday: boolean
   slot: MealSlot
@@ -66,7 +64,6 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
   const [speak, setSpeak] = useState(() => !!speakJob)
   const [scan, setScan] = useState(false)
   const [customBarcode, setCustomBarcode] = useState<string | undefined>(undefined)
-  const [lowSalt, setLowSalt] = useState<boolean>(editing ? !!editing.lowSalt : defaultLowSalt)
   const [lowOil, setLowOil] = useState<boolean>(editing ? !!editing.lowOil : false)
 
   useEffect(() => {
@@ -105,10 +102,12 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
 
   const recentDishIds = recentBySlot[slot] || []
   const results = useMemo(() => searchFoods(q, cat, dishes, customFoods, favorites, recentDishIds, dishMap), [q, cat, dishes, customFoods, favorites, recentDishIds, dishMap])
+  // 搜不到时把菜名拆成食材猜测，直接把「按食材搭配」预填好，省掉从零挑食材
+  const guess = useMemo(() => (results.length || !q.trim() ? null : guessDishFromName(q, INGREDIENTS)), [results.length, q])
+  const [prefill, setPrefill] = useState<DishGuess | null>(null)
 
-  const lowSaltable = pick?.kind === 'dish' && canLowSalt(pick.dish)
   const lowOilable = pick?.kind === 'dish' && canLowOil(pick.dish)
-  const perServing: Nutrients | null = pick ? (pick.kind === 'dish' ? dishNutrientsFor(pick.dish, { lowSalt: lowSaltable && lowSalt, lowOil: lowOilable && lowOil }) : pick.food.nutrients) : null
+  const perServing: Nutrients | null = pick ? (pick.kind === 'dish' ? dishNutrientsFor(pick.dish, { lowOil: lowOilable && lowOil }) : pick.food.nutrients) : null
   // 成品重量：显示的「约 N g」与「按克」输入用同一个数
   const weight = pick?.kind === 'dish' ? servingGrams(pick.dish) : 0
   const now = perServing ? scale(perServing, portion) : null
@@ -118,7 +117,7 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
     const entry: LogEntry = {
       id: editing?.id || '',
       date, slot, time: time || undefined, portion,
-      ...(pick.kind === 'dish' ? { dishId: pick.dish.id, ...(lowSaltable && lowSalt ? { lowSalt: true } : {}), ...(lowOilable && lowOil ? { lowOil: true } : {}) } : { custom: { name: pick.food.name, nutrients: pick.food.nutrients } }),
+      ...(pick.kind === 'dish' ? { dishId: pick.dish.id, ...(lowOilable && lowOil ? { lowOil: true } : {}) } : { custom: { name: pick.food.name, nutrients: pick.food.nutrients } }),
     }
     onResult({ kind: 'save', entry })
   }
@@ -181,15 +180,25 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
                     </div>
                   )
                 })}
-                {results.length === 0 && <div className="empty small">没找到「{q}」，可以自定义录入</div>}
+                {results.length === 0 && (
+                  guess
+                    ? (
+                      <div className="empty small stack" style={{ gap: 8 }}>
+                        <div>没找到「{q}」</div>
+                        <div className="tiny muted">认出这些食材：{guess.matched.join('、')}</div>
+                        <button className="btn primary" onClick={() => { setPrefill(guess); setShowCustom(true) }}>用这些食材搭一道 →</button>
+                      </div>
+                    )
+                    : <div className="empty small">没找到「{q}」，可以自定义录入</div>
+                )}
               </div>
             </div>
-            <button className="btn" onClick={() => setShowCustom(true)}>找不到？自定义录入营养值</button>
+            <button className="btn" onClick={() => { setPrefill(null); setShowCustom(true) }}>找不到？自定义录入营养值</button>
           </>
         )}
 
         {showCustom && !pick && (
-          <CustomForm barcode={customBarcode} onDoneDish={(d) => { onAddCustomDish(d); setPick({ kind: 'dish', dish: d }); setShowCustom(false); setCustomBarcode(undefined) }} onCancel={() => { setShowCustom(false); setCustomBarcode(undefined) }} onDone={(f) => { onAddCustomFood(f); setPick({ kind: 'custom', food: f }); setShowCustom(false); setCustomBarcode(undefined) }} />
+          <CustomForm barcode={customBarcode} prefill={prefill} onDoneDish={(d) => { onAddCustomDish(d); setPick({ kind: 'dish', dish: d }); setShowCustom(false); setCustomBarcode(undefined); setPrefill(null) }} onCancel={() => { setShowCustom(false); setCustomBarcode(undefined); setPrefill(null) }} onDone={(f) => { onAddCustomFood(f); setPick({ kind: 'custom', food: f }); setShowCustom(false); setCustomBarcode(undefined); setPrefill(null) }} />
         )}
 
         {pick && perServing && now && (
@@ -225,9 +234,8 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
                   </div>
                 )}
               </div>
-              {(lowSaltable || lowOilable) && (
+              {lowOilable && (
                 <div className="row wrap" style={{ gap: 8 }}>
-                  {lowSaltable && <button className={`chip${lowSalt ? ' on' : ''}`} aria-pressed={lowSalt} onClick={() => setLowSalt(!lowSalt)}>少盐做法</button>}
                   {lowOilable && <button className={`chip${lowOil ? ' on' : ''}`} aria-pressed={lowOil} onClick={() => setLowOil(!lowOil)}>少油做法</button>}
                   <span className="tiny muted">自己做时盐或油放一半就勾上，按减半计</span>
                 </div>
@@ -252,7 +260,6 @@ export function LogSheet({ showSodium = false, date, isToday, slot: initialSlot,
                 { label: '脂肪', value: r0(now.fat), unit: 'g' },
                 { label: '碳水', value: r0(now.carbs), unit: 'g' },
                 { label: '纤维', value: r0(now.fiber), unit: 'g' },
-                ...(showSodium ? [{ label: '钠', value: r0(now.sodium), unit: 'mg' }] : []),
               ]} />
             </div>
 
@@ -289,20 +296,21 @@ function defaultGrams(ing: Ingredient): number {
   }
 }
 
-function CustomForm({ onCancel, onDone, onDoneDish, barcode }: { onCancel: () => void; onDone: (f: CustomFood) => void; onDoneDish: (d: Dish) => void; barcode?: string }) {
+function CustomForm({ onCancel, onDone, onDoneDish, barcode, prefill }: { onCancel: () => void; onDone: (f: CustomFood) => void; onDoneDish: (d: Dish) => void; barcode?: string; prefill?: DishGuess | null }) {
   // 默认按食材搭配：营养与蔬菜量自动算出，和菜品库同一套逻辑；看包装成分表时切到「按成分表」
   const [mode, setMode] = useState<'parts' | 'label'>(barcode ? 'label' : 'parts')
-  const [name, setName] = useState('')
+  const [name, setName] = useState(prefill?.name ?? '')
   // 成分表模式
   const [serving, setServing] = useState('1份')
-  const [v, setV] = useState({ kcal: '', protein: '', fat: '', carbs: '', fiber: '', sodium: '', vegG: '', fruitG: '' })
+  const [v, setV] = useState({ kcal: '', protein: '', fat: '', carbs: '', fiber: '', vegG: '', fruitG: '' })
   const num = (s: string) => (s === '' ? 0 : Number(s))
   const macroKcal = num(v.protein) * 4 + num(v.fat) * 9 + num(v.carbs) * 4
   const kcal = v.kcal === '' ? macroKcal : num(v.kcal)
   const okLabel = name.trim() && kcal > 0
   // 食材模式
-  const [cat, setCat] = useState<CustomCat>('protein')
-  const [parts, setParts] = useState<Array<{ ing: string; g: number }>>([])
+  const [cat, setCat] = useState<CustomCat>(prefill?.cat ?? 'protein')
+  const [parts, setParts] = useState<Array<{ ing: string; g: number }>>(prefill?.parts ?? [])
+  const [cook] = useState(prefill?.cook ?? 'normal')
   const [iq, setIq] = useState('')
   const hits = useMemo(() => {
     const q = iq.trim().toLowerCase()
@@ -313,7 +321,7 @@ function CustomForm({ onCancel, onDone, onDoneDish, barcode }: { onCancel: () =>
       .sort((a, b) => rank(a) - rank(b) || (a.cat === 'oil' || a.cat === 'condiment' ? 0 : 1) - (b.cat === 'oil' || b.cat === 'condiment' ? 0 : 1) || a.name.length - b.name.length)
       .slice(0, 8)
   }, [iq, parts])
-  const draft: Dish | null = parts.length ? { id: 'custom_draft', name: name || '自定义', cat, cuisine: 'cn', cook: 'normal', slots: SLOTS_BY_CAT[cat], serving: `1份(约${Math.round(parts.reduce((s, p) => s + p.g, 0))}g)`, parts } : null
+  const draft: Dish | null = parts.length ? { id: 'custom_draft', name: name || '自定义', cat, cuisine: 'cn', cook, slots: SLOTS_BY_CAT[cat], serving: `1份(约${Math.round(parts.reduce((s, p) => s + p.g, 0))}g)`, parts } : null
   const dn = draft ? dishNutrients(draft) : null
   const dveg = draft ? vegGrams(draft) : 0
   const okParts = name.trim() && parts.length > 0 && parts.every((p) => p.g > 0)
@@ -360,7 +368,7 @@ function CustomForm({ onCancel, onDone, onDoneDish, barcode }: { onCancel: () =>
               })}
             </div>
           )}
-          {dn && <div className="note num">一份约 <b>{r0(dn.kcal)}</b> 千卡 · 蛋白 {r0(dn.protein)} g · 脂肪 {r0(dn.fat)} g · 碳水 {r0(dn.carbs)} g · 纤维 {r0(dn.fiber)} g · 钠 {r0(dn.sodium)} mg · 蔬菜 {r0(dveg)} g</div>}
+          {dn && <div className="note num">一份约 <b>{r0(dn.kcal)}</b> 千卡 · 蛋白 {r0(dn.protein)} g · 脂肪 {r0(dn.fat)} g · 碳水 {r0(dn.carbs)} g · 纤维 {r0(dn.fiber)} g · 蔬菜 {r0(dveg)} g</div>}
           <div className="row">
             <button className="btn" onClick={onCancel}>返回</button>
             <button className="btn primary grow" disabled={!okParts} onClick={saveDish}>保存并选用</button>
@@ -373,13 +381,13 @@ function CustomForm({ onCancel, onDone, onDoneDish, barcode }: { onCancel: () =>
           <p className="small muted">看包装营养成分表填一份的量即可。热量不填就按三大宏量折算。{barcode ? `条码 ${barcode} 会一并记住，下次扫到直接用。` : ''}</p>
           <div className="field"><label>一份是多少</label><input value={serving} onChange={(e) => setServing(e.target.value)} placeholder="如 1盒(300g)" /></div>
           <div className="grid3">
-            {([['kcal', '热量 千卡'], ['protein', '蛋白 g'], ['fat', '脂肪 g'], ['carbs', '碳水 g'], ['fiber', '纤维 g'], ['sodium', '钠 mg'], ['vegG', '含蔬菜 g（可选）'], ['fruitG', '含水果 g（可选）']] as const).map(([k, label]) => (
+            {([['kcal', '热量 千卡'], ['protein', '蛋白 g'], ['fat', '脂肪 g'], ['carbs', '碳水 g'], ['fiber', '纤维 g'], ['vegG', '含蔬菜 g（可选）'], ['fruitG', '含水果 g（可选）']] as const).map(([k, label]) => (
               <div key={k} className="field"><label>{label}</label><input type="number" inputMode="decimal" value={v[k]} onChange={(e) => setV({ ...v, [k]: e.target.value })} /></div>
             ))}
           </div>
           <div className="row">
             <button className="btn" onClick={onCancel}>返回</button>
-            <button className="btn primary grow" disabled={!okLabel} onClick={() => onDone({ id: uid(), name: name.trim(), serving: serving || '1份', nutrients: { kcal, protein: num(v.protein), fat: num(v.fat), carbs: num(v.carbs), fiber: num(v.fiber), sodium: num(v.sodium) }, ...(num(v.vegG) > 0 ? { vegG: num(v.vegG) } : {}), ...(num(v.fruitG) > 0 ? { fruitG: num(v.fruitG) } : {}), ...(barcode ? { barcode } : {}) })}>保存并选用</button>
+            <button className="btn primary grow" disabled={!okLabel} onClick={() => onDone({ id: uid(), name: name.trim(), serving: serving || '1份', nutrients: { kcal, protein: num(v.protein), fat: num(v.fat), carbs: num(v.carbs), fiber: num(v.fiber), sodium: 0 }, ...(num(v.vegG) > 0 ? { vegG: num(v.vegG) } : {}), ...(num(v.fruitG) > 0 ? { fruitG: num(v.fruitG) } : {}), ...(barcode ? { barcode } : {}) })}>保存并选用</button>
           </div>
         </>
       )}

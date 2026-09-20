@@ -38,12 +38,11 @@ function dishConditionReasons(dish: Dish, profile: ConditionsOnly): { avoid: str
         if (dish.cook === 'fried') caution.push(`${label}模式：油炸，偶尔吃可以，别当常态`)
       }
     } else if (cond === 'hypertension') {
-      if (isPickledOrCured(dish)) avoid.push(`${label}模式：腌腊/腌渍，钠很高`)
+      if (isPickledOrCured(dish)) avoid.push(`${label}模式：腌腊/腌渍，很咸`)
       else if (isAlcohol(dish)) avoid.push(`${label}模式：含酒精，会升血压`)
-      else if (n.sodium > 700) avoid.push(`${label}模式：单份钠就有 ${r0(n.sodium)} mg，超过安全线`)
       else {
-        if (n.sodium > 400) caution.push(`${label}模式：这份钠约 ${r0(n.sodium)} mg，偏咸，少吃或要求少盐`)
-        if (dish.cook === 'heavy') caution.push(`${label}模式：做法偏重口`)
+        // 不再按钠数值判定：家常菜普遍超线，逐份报数只会让每道菜都带警告
+        if (dish.cook === 'heavy') caution.push(`${label}模式：做法偏重口，做的时候少放盐和酱油`)
         if (isFattyMeat(dish)) caution.push(`${label}模式：肥肉/黄油类，少吃`)
       }
     } else if (cond === 'diabetes') {
@@ -109,10 +108,6 @@ function nutrientConditionReasons(n: Nutrients, profile: ConditionsOnly): { avoi
   const share = macroKcalShare(n)
   for (const cond of c) {
     const label = CONDITION_LABEL[cond]
-    if (cond === 'hypertension') {
-      if (n.sodium > 700) avoid.push(`${label}模式：单份钠就有 ${r0(n.sodium)} mg，超过安全线`)
-      else if (n.sodium > 400) caution.push(`${label}模式：这份钠约 ${r0(n.sodium)} mg，偏咸`)
-    }
     if ((cond === 'fatty_liver' || cond === 'gerd') && share.fat > 0.45) caution.push(`${label}模式：脂肪占比偏高`)
     if (cond === 'diabetes' && share.carbs > 0.7) caution.push(`${label}模式：碳水占比高，注意份量`)
   }
@@ -128,11 +123,6 @@ function budgetReasons(scaled: Nutrients, profile: ConditionsOnly, targets: Targ
     else if (scaled.kcal > remainKcal) caution.push(`这份约 ${r0(scaled.kcal)} 千卡，比今天剩下的 ${r0(remainKcal)} 千卡预算多，吃了会超`)
   }
   const c = profile.conditions || []
-  if (c.includes('hypertension') && scaled.sodium > 0) {
-    const remainNa = targets.sodiumMax - todaySoFar.sodium
-    if (remainNa <= 0) avoid.push(`今天钠已经超过高血压上限（${r0(todaySoFar.sodium)} / ${targets.sodiumMax} mg），这份会继续加码`)
-    else if (scaled.sodium > remainNa) caution.push(`今天钠还剩约 ${r0(remainNa)} mg 额度，这份约 ${r0(scaled.sodium)} mg，加起来会超标`)
-  }
   if (c.includes('diabetes') && scaled.carbs > 0) {
     const remain = remainOf(targets, todaySoFar)
     if (remain.carbs <= 0) caution.push(`今天碳水已经到量了（${r0(todaySoFar.carbs)} / ${targets.carbs} g），这份还有 ${r0(scaled.carbs)} g`)

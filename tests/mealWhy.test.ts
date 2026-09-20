@@ -13,7 +13,7 @@ const profile: Profile = {
 const targets: Targets = computeTargets(profile, new Date('2026-09-20T09:00:00'))
 const ZERO = { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, sodium: 0 }
 const none: Adjustments = {
-  enough: false, proteinLow: false, sodiumHigh: false, fatHigh: false, fiberLow: false,
+  enough: false, proteinLow: false, fatHigh: false, fiberLow: false,
   vegLow: false, fruitLow: false, kcalOver: false, kcalUnder: false, processedHigh: false,
   takeoutLunch: false, breakfastSkipped: false, lateEating: false, breakfastProteinLow: false,
 }
@@ -42,7 +42,7 @@ describe('这一餐为什么长这样', () => {
   })
 
   it('记录不足时不援引近 7 天结论', () => {
-    const a: Adjustments = { ...none, enough: false, proteinLow: true, sodiumHigh: true }
+    const a: Adjustments = { ...none, enough: false, proteinLow: true }
     const r = mealWhy({ meal: meal([it1('protein')]), targets, adjustments: a, profile })
     expect(r.join('')).not.toContain('近期')
   })

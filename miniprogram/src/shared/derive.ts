@@ -74,6 +74,8 @@ export function derive(s: AppState, date: string, now = new Date()): Derived {
     recentEntries,
     adjustments: analysis.adjustments,
     eatenToday: eaten,
+    // 照推荐吃就别重排：先看沿用上次的还满不满足全天目标
+    keep: s.planPicks[date],
   })
 
   return { profile, targets, plan, stat, analysis, baseTargets }

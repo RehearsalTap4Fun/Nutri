@@ -92,7 +92,7 @@ export function ProfileForm({ initial, onSave, onCancel }: { initial: Profile | 
           <div className="kv"><span>目标摄入</span><span className="num"><b>{preview.kcal}</b> 千卡</span></div>
           <div className="kv"><span>蛋白 / 脂肪 / 碳水</span><span className="num">{preview.protein} / {preview.fat} / {preview.carbs} g</span></div>
           {conds.includes('hypertension')
-            ? <div className="kv"><span>膳食纤维 · 蔬菜 · 钠上限</span><span className="num">{preview.fiber} g · {preview.vegServings} 份 · {preview.sodiumMax} mg</span></div>
+            ? <div className="kv"><span>膳食纤维 · 蔬菜</span><span className="num">{preview.fiber} g · {preview.vegServings} 份</span></div>
             : <div className="kv"><span>膳食纤维 · 蔬菜</span><span className="num">{preview.fiber} g · {preview.vegServings} 份</span></div>}
           <div className="kv"><span>水果 · 奶类 · 饮水</span><span className="num">{preview.fruitG} g · {preview.dairyG} g · {preview.waterMl} ml</span></div>
           <TargetBasis profile={p} targets={preview} />

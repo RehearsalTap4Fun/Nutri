@@ -7,7 +7,7 @@ import { isHabitFinding, windowStats } from '../core/analysis'
 import { macroKcalShare } from '../core/nutrition'
 import { addDays, lastNDays, nowTimeStr, shortDate, todayStr, weekdayLabel } from '../core/dates'
 import { BarChart, LineChart, Variance, VarianceAxis, type VarianceTone } from './charts'
-import { r0, showsSodium } from './format'
+import { r0 } from './format'
 import { IconAlert, IconCheck, IconChevron, IconClose, IconInfo } from './icons'
 import { Fold, Legend, ProgressRow, ShareBar, Stats } from './bits'
 import { TargetBasis } from './Sources'
@@ -31,7 +31,6 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
 }) {
   const w = analysis.window
   const today = todayStr()
-  const showNa = showsSodium(profile.conditions)
   const conds = profile.conditions || []
   const showBp = conds.includes('hypertension')
   const showGlucose = conds.includes('diabetes')
@@ -51,17 +50,16 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
   const ad = analysis.adaptive
   const latest = weights[weights.length - 1]
   const waterAvg = useMemo(() => avgWater(water, lastNDays(today, 7)), [water, today])
-  const warn = analysis.findings.filter((f) => f.severity === 'warn' && (showNa || !f.key.startsWith('sodium_')))
+  const warn = analysis.findings.filter((f) => f.severity === 'warn')
   // 结论按宏量归位：挂到对应的条右侧；归不进去的是饮食习惯，单列
   const byMetric = useMemo(() => {
-    const m: Record<string, Finding[]> = { kcal: [], protein: [], fat: [], sodium: [], veg: [], fiber: [], fruit: [], water: [] }
+    const m: Record<string, Finding[]> = { kcal: [], protein: [], fat: [], veg: [], fiber: [], fruit: [], water: [] }
     const habits: Finding[] = []
     for (const f of analysis.findings) {
       const k = f.key
       if (k.startsWith('kcal_')) m.kcal.push(f)
       else if (k === 'protein_low' || k === 'protein_ok') m.protein.push(f)
       else if (k === 'fat_high') m.fat.push(f)
-      else if (k.startsWith('sodium_')) m.sodium.push(f)
       else if (k.startsWith('veg_')) m.veg.push(f)
       else if (k === 'fiber_low') m.fiber.push(f)
       else if (k === 'fruit_low') m.fruit.push(f)
@@ -124,7 +122,6 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
             <MetricRow findings={byMetric.m.fiber}><Variance label="纤维" value={w.avg.fiber} target={targets.fiber} unit="g" color="var(--fiber)" mode="atLeast" tol={0.3} tone={sevOf(byMetric.m.fiber)} /></MetricRow>
             <MetricRow findings={byMetric.m.veg}><Variance label="蔬菜" value={w.avgVegServings} target={targets.vegServings} unit="份" color="var(--accent)" mode="atLeast" tol={0.4} tone={sevOf(byMetric.m.veg)} /></MetricRow>
             <MetricRow findings={byMetric.m.fruit}><Variance label="水果" value={w.avgFruitG} target={targets.fruitG} unit="g" color="var(--ink-2)" mode="atLeast" tol={Math.max(0.1, 1 - 100 / Math.max(1, targets.fruitG))} tone={sevOf(byMetric.m.fruit)} /></MetricRow>
-            {showNa && <MetricRow findings={byMetric.m.sodium}><Variance label="钠" value={w.avg.sodium} target={targets.sodiumMax} unit="mg" color="var(--ink-2)" mode="atMost" tol={0.2} tone={sevOf(byMetric.m.sodium)} /></MetricRow>}
             {waterAvg.days > 0 && <MetricRow findings={byMetric.m.water}><Variance label="饮水" value={waterAvg.avg} target={targets.waterMl} unit="ml" color="var(--pond)" mode="atLeast" tol={0.3} tone={sevOf(byMetric.m.water)} /></MetricRow>}
             <Legend items={[{ swatch: 'shoal', label: '合适区间' }, { swatch: 'land', label: '达标' }, { swatch: 'sun', label: '要改' }]} />
             <ShareBar protein={share.protein} fat={share.fat} carbs={share.carbs} />
