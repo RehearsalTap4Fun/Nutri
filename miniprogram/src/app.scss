@@ -679,42 +679,147 @@ page {
   margin-top: 8px;
 }
 
-/* ── 喝水：水塘 ── */
-.cups {
+/* ── 喝水：一排小水塘 ──
+   复刻网页版 .ponds：横向排开、不规则塘形隔一个换一套、空塘虚线、
+   点亮后深蓝加一点高光，当前时刻一根竖刻度。 */
+.ponds {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin: 22px 0 16px;
+  gap: 16px;
+  padding: 16px 0 4px;
 }
 
-.cup {
-  width: 88px;
-  height: 88px;
-  border-radius: var(--r-chip);
-  box-shadow: inset 0 0 0 3px var(--hair);
-  background: var(--surface);
+.pond-slot {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 10px;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
 }
 
-.cup-lit {
+.pond {
+  position: relative;
+  width: 100%;
+  height: 72px;
+  background: var(--surface-2);
+  border-radius: 58% 42% 55% 45% / 62% 60% 40% 38%;
+  overflow: hidden;
+  border: 3px dashed rgba(44, 46, 42, 0.38);
+  transition: transform 400ms cubic-bezier(0.34, 1.45, 0.64, 1),
+    background 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.pond-even {
+  border-radius: 44% 56% 48% 52% / 40% 42% 58% 60%;
+}
+
+.pond:active {
+  transform: scale(0.94);
+}
+
+.pond-lit {
+  background: #3e8fce;
+  border-color: transparent;
+}
+
+/* 未满的那一塘：水面按比例涨上来 */
+.pond-water {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: var(--pond);
-  box-shadow: none;
+  transition: height 400ms cubic-bezier(0.34, 1.45, 0.64, 1);
 }
 
-.cup-thirsty {
-  box-shadow: inset 0 0 0 4px var(--sun);
+.pond-glint {
+  position: absolute;
+  left: 18%;
+  top: 18%;
+  width: 34%;
+  height: 24%;
+  border-radius: 60% 40% 55% 45% / 55% 65% 35% 45%;
+  background: rgba(255, 255, 255, 0.55);
 }
 
-.cup-hour {
-  font-size: 18px;
+.pond-base {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 100px;
+  height: 2px;
+  background: var(--hair);
+  z-index: 0;
+}
+
+.pond-lbl {
+  font-size: 20px;
+  font-weight: 600;
   color: var(--faint);
+  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
-.cup-lit .cup-hour {
-  color: #ffffff;
+.pond-slot-lit .pond-lbl {
+  color: var(--fat-text);
+}
+
+/* 当前时刻的竖刻度 */
+.pond-now {
+  position: absolute;
+  top: 88px;
+  width: 4px;
+  height: 26px;
+  background: var(--ink);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+/* 到点还没喝：塘微微发抖，上方滴一滴水 */
+.pond-thirsty {
+  border-color: var(--pond);
+  animation: thirsty 2.6s ease-in-out infinite;
+}
+
+.pond-drop {
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  width: 18px;
+  height: 24px;
+  margin-left: -9px;
+  background: var(--pond);
+  border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%;
+  animation: drop 2.6s ease-in infinite;
+}
+
+@keyframes drop {
+  0%, 55% { transform: translateY(0); opacity: 0; }
+  62% { opacity: 1; }
+  78% { transform: translateY(52px) scale(1, 1.1); opacity: 1; }
+  84%, 100% { transform: translateY(60px) scale(1.6, 0.3); opacity: 0; }
+}
+
+/* 喝够了：整排荡一下水波 */
+.ponds-done .pond {
+  animation: ripple 0.7s cubic-bezier(0.34, 1.45, 0.64, 1) 1;
+}
+
+@keyframes ripple {
+  0% { transform: none; }
+  40% { transform: translateY(-12px) scale(1.06); }
+  100% { transform: none; }
+}
+
+.water-total {
+  font-size: 26px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
 }
 
 /* ── 杂项 ── */

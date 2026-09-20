@@ -24,7 +24,7 @@ import { SignalChips } from '../../components/bits'
 import { SwipeRow } from '../../components/SwipeRow'
 import { CanIEat } from '../../components/CanIEat'
 import { useState } from 'react'
-import { Water } from '../../components/Water'
+import { WaterCard } from '../../components/Water'
 import { Vitals } from '../../components/Vitals'
 import { waterOnDate, fluidFromDrinks } from '@core/water'
 import type { VitalEntry } from '@core/types'
@@ -92,7 +92,6 @@ export default function Today() {
   const showGlucose = conds.includes('diabetes')
   const drankMl = waterOnDate(state.water, date)
   const fluidMl = fluidFromDrinks(state.entries, dishMap, date)
-  const hour = new Date().getHours()
 
   /** 把当天饮水总量设成 ml：用一条当天的记录承载，点杯子来回改都只动这一条 */
   const setWater = (ml: number) => {
@@ -306,21 +305,13 @@ export default function Today() {
         onQuickLog={quickLog}
       />
 
-      <View className="card">
-        <View className="h2">喝水</View>
-        <Water
-          totalMl={drankMl}
-          targetMl={t.waterMl}
-          isToday={date === todayStr()}
-          hour={hour}
-          onSet={setWater}
-        />
-        {fluidMl > 0 ? (
-          <Text className="entry-sub">
-            另外从饮品里摄入约 {Math.round(fluidMl)} ml，不计入上面的杯数。
-          </Text>
-        ) : null}
-      </View>
+      <WaterCard
+        entries={state.water.filter((w) => w.date === date)}
+        targetMl={t.waterMl}
+        fluidMl={fluidMl}
+        isToday={date === todayStr()}
+        onSet={setWater}
+      />
 
       <View className="card">
         <View className="h2">健康小管家</View>
