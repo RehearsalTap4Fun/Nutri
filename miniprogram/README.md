@@ -24,7 +24,9 @@ npm run dev          # 监听式编译到 dist/
 
 ```bash
 npm run build        # 出包
-npm run typecheck    # 类型检查（含共用的 core/data/store）
+npm run check        # 扫产物里小程序不接受的新语法（上传前必跑）
+npm run typecheck    # 类型检查（含共用的 core/data/store/sync）
+npm run pixelpack    # 重新生成像素猫图层（像素包更新后跑）
 npm run dev:h5       # 编译成 H5，本机快速看效果
 ```
 
@@ -41,12 +43,14 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 
 现在的实测结果：`npx tsc --noEmit` 在小程序的 tsconfig 下对这三个目录**零报错**，网页版 272 个测试仍全绿，`src/` 一行未改。
 
-## 小程序侧只写了三样东西
+## 小程序侧写了哪些东西
 
 | 文件 | 干什么 |
 |---|---|
 | `src/shared/state.ts` | 把 `loadState`/`saveState` 换成 `Taro.getStorageSync`/`setStorageSync`，其余（`defaultState`/`normalizeState`/`uid`/`exportJson`）从网页版原样 re-export。附一个极简订阅 store，让四个 tab 看到同一份状态 |
 | `src/shared/derive.ts` | 按 `src/App.tsx` 的同一套顺序调用 `computeTargets` → `analyze` → `planDay`，自己不含业务逻辑 |
+| `src/shared/log.ts` | 记一笔 = 写记录 + 喂小管家。两个记录入口共用，保证行为一致 |
+| `src/shared/sync.ts` + `cryptoPolyfill.ts` | 云同步的适配层，见下文 |
 | `src/pages/*` | 四个 tab 加一个记录页的界面 |
 
 整份状态存在一个 key 里，和网页版一致。小程序的存储上限是单 key 1MB、总量 10MB。
@@ -61,11 +65,12 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 - **计划**：按当天剩余预算排三餐，每道菜给出份量与理由，可以「记下」一键补记，也可以「换一换」重排。
 - **分析**：近 7 天热量柱状图（记录不全的日子标浅色且不计入日均）、三大营养素供能比、按「数值」与「习惯」分组的结论、体重折线图与记录、以及按体重反推的 TDEE 校准开关。
 - **健康小管家**：今日页顶部。记下第一笔孵化，之后每记一笔推进一阶，长出的部件、达成的称号和成长进度都在卡片里；孵化、异变、解锁称号会在记录成功的提示里说出来。
+- **云同步**：在「我的」页。和网页版是同一份数据，填同一个同步码两边就合并。
 - **图鉴与毕业**：在「我的」页。图鉴按槽位 × 进化链 × 阶排格，没见过的显示问号，现在身上这件描深色边；称号列出全部配方，没达成的只给凑法。毕业会换一颗新蛋，旧的进「毕业过的」，收集进度不清零。
 
 数字全部来自网页版同一套计算，菜品 569 道、食材 372 种是同一份数据。
 
-网页版还有而这边没有的：云同步、喝水记录、血压血糖。
+网页版还有而这边没有的：喝水记录、血压血糖。
 
 不打算搬：
 
@@ -100,13 +105,7 @@ npm run dev:h5       # 编译成 H5，本机快速看效果
 
 `npm run pixelpack` 做三件事：把共享目录的 58 张 PNG 同步进包、生成 base64 兜底表、校验目录声明的图层是否齐全。少一张不会让构建失败，只会让某些猫在运行时画不出来，所以在生成这一步就拦掉。像素包更新后记得重跑。
 
-## 待办
-
-- **云同步**：见下一节，要先决定走不走云开发。
-- 喝水、血压血糖这些次要记录。
-- 像素猫的 base64 兜底表（58 KB）：真机已确认包内 PNG 路径可用，这张表可以删掉换体积，但留着能挡住个别机型的意外。
-
-## 一个踩过的坑：上传报 invalid file
+## 上传报 invalid file 怎么办
 
 开发者工具上传时如果报：
 
@@ -115,23 +114,34 @@ Error: invalid file: common.js, 1:1872
 SyntaxError: Unexpected token .
 ```
 
-那是产物里留了**可选链 `?.`**，小程序的代码校验过不了。
+那是产物里留了小程序不接受的新语法，通常是可选链 `?.`。**上传前跑 `npm run check`** 就能提前发现，它会指出文件、种类和出错位置的上下文。
 
-原因在 `babel.config.js`：不写 `targets` 时 babel 会去读 `package.json` 的 `browserslist`，脚手架给的默认值（`defaults and fully supports es6-module`）太新，`?.` 会被原样保留。共用的 `core`／`data` 里用了不少可选链，于是全落在 `common.js` 里。
+这个坑踩过两次，原因不同：
 
-现在 `babel.config.js` 显式写了 `targets: { chrome: '53', ios: '9' }`，`package.json` 的 `browserslist` 也一并调低。改动这两处之后要重新构建并确认产物干净：
+1. **babel 没写 targets**。不写就去读 `package.json` 的 `browserslist`，脚手架给的默认值太新，可选链原样保留。现在 `babel.config.js` 显式写了 `targets: { chrome: '53', ios: '9' }`。
+2. **node_modules 默认不过 babel**。同步用的加密库 `@noble` 源码里有可选链，一样会漏进产物。现在 `config/index.ts` 的 `compile.include` 把它显式纳入编译。
 
-```bash
-npm run build
-grep -rE '\?\.[A-Za-z_$([]' dist/*.js dist/pages/*/*.js   # 应当无输出
-```
+排查时注意：直接 `grep '?\.'` 会误报，压缩后的三元表达式 `x ? .85 : .8` 长得一模一样。要看 `?.` 后面跟的是标识符还是数字，`npm run check` 已经按这个判据写了。
 
-注意直接 `grep '?\.'` 会误报：压缩后的三元表达式 `x ? .85 : .8` 长得一样。要判断是不是真的可选链，得看 `?.` 后面跟的是标识符还是数字。
+## 云同步是怎么接的
 
-## 后端
+**小程序和网页版是同一份数据。** 填同一个同步码，两边合并，服务端一行都没改。
 
-目前完全离线，不发任何网络请求，所以不需要配置服务器域名。
+做法是云函数转发。小程序的 `request` 只能发到已备案域名，而同步服务跑在 IP 上（`47.109.97.108`），配不进白名单；但**云函数在服务端出网，不受这条限制**。所以 `cloud/sync/` 这个云函数把请求原样转给现有的同步服务，HTTPS 连不上时用 HTTP 兜底（证书是 Let's Encrypt 给 IP 签的短期证书，6 天一续）。云函数只放行 `/sync/<64位十六进制>` 这一种路径，免得变成任意转发器。
 
-以后要做同步：现有那台阿里云服务器接不进来（小程序要求 HTTPS + 已 ICP 备案的域名，不接受 IP，而线上是 `47.109.97.108` 直访）。走**微信云开发**最省事，它用微信私有协议，不需要配服务器域名也不需要自己备案域名。
+加密没动。`src/sync/crypto.ts` 用的是 noble 的纯 JS 实现，本来就没碰 WebCrypto，端到端的性质也保住了：同步码只在客户端派生密钥，云函数和服务器拿到的都是密文。
 
-同步用的加密（`src/sync/crypto.ts`）本身是可以直接搬的：它用 `@noble/ciphers` 和 `@noble/hashes` 的纯 JS 实现，没碰 Web Crypto。只需要补 `btoa`、`atob`、`TextDecoder` 三个小垫片，另外 PBKDF2 是 6 万次迭代，要先测一下在小程序引擎上的耗时。
+小程序侧只加了两样东西：
+
+- `src/shared/cryptoPolyfill.ts`：补 `btoa`、`atob`、`TextDecoder`，以及 noble 会找的 `crypto.getRandomValues`。**随机数是这里唯一要小心的地方**——微信只给了异步的 `Taro.getRandomValues`，而 noble 是同步调用的，所以维护一个熵池，用之前先 `await ensureEntropy()` 灌满；池子空了直接抛错，绝不退化成 `Math.random`，同步码和 AES 的 nonce 都不能用伪随机凑合。
+- `src/shared/sync.ts`：一个 fetch 形状的适配器，把请求转给云函数。合并、冲突重试全部复用 `syncOnce`。
+
+PBKDF2 是 6 万次迭代，Node 上约 140 ms，小程序引擎会慢几倍，但 `deriveKeys` 有缓存，一次会话只算一次。
+
+**部署云函数**：开发者工具里右键 `cloud/sync` → 上传并部署（云端安装依赖）。它没有第三方依赖，上传很快。改了 `BASES` 里的地址要重新部署。
+
+## 待办
+
+- 自动同步：现在是手动点「立即同步」。以后可以在 `onShow` 和记录后防抖触发，跟网页版一致。
+- 喝水、血压血糖这些次要记录。
+- 像素猫的 base64 兜底表（58 KB）：真机已确认包内 PNG 路径可用，这张表可以删掉换体积，但留着能挡住个别机型的意外。

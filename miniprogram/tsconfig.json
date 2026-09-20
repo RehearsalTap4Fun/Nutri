@@ -29,9 +29,10 @@
       "@data/*": ["../src/data/*"],
       "@store/*": ["../src/store/*"],
       // src/ui 里 format.ts 与 foodSearch.ts 是纯函数，没有 DOM 依赖，一并复用
-      "@webui/*": ["../src/ui/*"]
+      "@webui/*": ["../src/ui/*"],
+      "@sync/*": ["../src/sync/*"]
     }
   },
-  "include": ["./src", "./types", "./config", "../src/core", "../src/data", "../src/store"],
+  "include": ["./src", "./types", "./config", "../src/core", "../src/data", "../src/store", "../src/sync"],
   "compileOnSave": false
 }

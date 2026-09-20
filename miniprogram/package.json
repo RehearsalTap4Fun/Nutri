@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "taro build --type weapp --watch",
     "build": "taro build --type weapp",
+    "check": "node scripts/checkSyntax.mjs",
     "dev:h5": "taro build --type h5 --watch",
     "build:h5": "taro build --type h5",
     "typecheck": "tsc --noEmit",

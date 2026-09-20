@@ -1,0 +1,7 @@
+{
+  "name": "sync",
+  "version": "1.0.0",
+  "description": "把小程序的同步请求转发到 nutri 的同步服务",
+  "main": "index.js",
+  "dependencies": {}
+}

@@ -1,11 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Taro from '@tarojs/taro'
 import { View, Text, Picker, Input, Button } from '@tarojs/components'
 import type { ActivityLevel, DietStyle, Goal, Profile, Sex } from '@core/types'
 import { ageOf, bmi, bmiLabel } from '@core/energy'
 import { retire } from '@core/creature'
 import { describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
-import { useAppState } from '../../shared/useAppState'
+import { getLatest, useAppState } from '../../shared/useAppState'
+import { dropRemote, newSyncCode, normalizeSyncCode, runSync } from '../../shared/sync'
 import { CatDexCard } from '../../components/CatDex'
 import { PixelCat } from '../../components/PixelCat'
 
@@ -75,6 +76,76 @@ export default function Me() {
 
   const creature = state.creature
   const fullyGrown = creature ? isFullyGrown(creature.cat) : false
+
+  const [codeInput, setCodeInput] = useState('')
+  const [syncing, setSyncing] = useState(false)
+  const sync = state.settings.sync
+
+  const setSync = (next: { code: string; enabled: boolean }) =>
+    update((s) => ({
+      ...s,
+      settings: { ...s.settings, sync: next },
+      meta: { ...s.meta, settingsAt: Date.now() },
+    }))
+
+  const doSync = async (code: string) => {
+    if (syncing) return
+    setSyncing(true)
+    Taro.showLoading({ title: '同步中' })
+    try {
+      const r = await runSync(getLatest(), code)
+      update(() => r.state)
+      Taro.hideLoading()
+      Taro.showToast({
+        title: r.pulledChanges ? '已拉到云端的改动' : r.pushed ? '已上传' : '已是最新',
+        icon: 'none',
+      })
+    } catch (e) {
+      Taro.hideLoading()
+      Taro.showModal({
+        title: '同步没成功',
+        content: e instanceof Error ? e.message : String(e),
+        showCancel: false,
+      })
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  const enableNew = async () => {
+    try {
+      const code = await newSyncCode()
+      setSync({ code, enabled: true })
+      await doSync(code)
+    } catch (e) {
+      Taro.showModal({ title: '开不了同步', content: String(e), showCancel: false })
+    }
+  }
+
+  const enableExisting = () => {
+    const norm = normalizeSyncCode(codeInput)
+    if (!norm) {
+      Taro.showToast({ title: '同步码格式不对', icon: 'none' })
+      return
+    }
+    setSync({ code: norm, enabled: true })
+    setCodeInput('')
+    void doSync(norm)
+  }
+
+  const disableSync = () => {
+    Taro.showModal({
+      title: '关闭同步？',
+      content: '本机数据保留。云端副本也一起删掉吗？',
+      cancelText: '只关闭',
+      confirmText: '连云端一起删',
+      success: (r) => {
+        const code = sync.code
+        setSync({ code: r.confirm ? '' : code, enabled: false })
+        if (r.confirm && code) void dropRemote(code).catch(() => undefined)
+      },
+    })
+  }
 
   const graduate = () => {
     if (!creature) return
@@ -253,6 +324,56 @@ export default function Me() {
           </View>
         ) : (
           <Text className="muted">还是一颗蛋。去「今日」记下第一笔就会孵化。</Text>
+        )}
+      </View>
+
+      <View className="card">
+        <View className="h2">云同步</View>
+        {sync.enabled && sync.code ? (
+          <View>
+            <Text className="muted">
+              同步码就是钥匙。云端只存密文，服务器解不开，码丢了数据也就取不回来了。在网页版填同一个码，两边就是同一份数据。
+            </Text>
+            <View className="field">
+              <Text className="k">同步码</Text>
+              <Text className="ctl code">{sync.code}</Text>
+            </View>
+            <Button
+              className="btn btn-plain"
+              onClick={() => {
+                Taro.setClipboardData({ data: sync.code })
+              }}
+            >
+              复制同步码
+            </Button>
+            <Button className="btn" loading={syncing} onClick={() => void doSync(sync.code)}>
+              立即同步
+            </Button>
+            <Button className="btn btn-plain" onClick={disableSync}>
+              关闭同步
+            </Button>
+          </View>
+        ) : (
+          <View>
+            <Text className="muted">
+              开启后换手机不会丢数据。已经在网页版用着的话，把那边的同步码填进来，两边就合成一份。
+            </Text>
+            <View className="field">
+              <Text className="k">已有同步码</Text>
+              <Input
+                className="ctl"
+                value={codeInput}
+                placeholder="XXXX-XXXX-…"
+                onInput={(e) => setCodeInput(e.detail.value)}
+              />
+            </View>
+            <Button className="btn" onClick={enableExisting}>
+              用这个码同步
+            </Button>
+            <Button className="btn btn-plain" onClick={() => void enableNew()}>
+              生成新的同步码
+            </Button>
+          </View>
         )}
       </View>
 

@@ -7,6 +7,15 @@ import prodConfig from './prod'
 /** 与网页版共用的源码目录 */
 const SHARED_SRC = path.resolve(__dirname, '..', '..', 'src')
 
+/**
+ * node_modules 默认不过 babel。noble 的源码里有可选链，不转换的话会原样进产物，
+ * 开发者工具上传时报 invalid file。同步用的加密就依赖它，所以显式纳入编译。
+ */
+const NOBLE = [
+  path.resolve(__dirname, '..', 'node_modules', '@noble'),
+  path.resolve(__dirname, '..', '..', 'node_modules', '@noble'),
+]
+
 // https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数
 
 export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
@@ -28,7 +37,8 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
       '@core': path.resolve(SHARED_SRC, 'core'),
       '@data': path.resolve(SHARED_SRC, 'data'),
       '@store': path.resolve(SHARED_SRC, 'store'),
-      '@webui': path.resolve(SHARED_SRC, 'ui')
+      '@webui': path.resolve(SHARED_SRC, 'ui'),
+      '@sync': path.resolve(SHARED_SRC, 'sync')
     },
     compiler: 'webpack5',
     plugins: [
@@ -51,7 +61,7 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
     mini: {
       // core / data / store 在 sourceRoot 之外，要显式交给 babel 处理
       compile: {
-        include: [SHARED_SRC]
+        include: [SHARED_SRC, ...NOBLE]
       },
       // Terser 默认按现代语法压缩，会把 babel 已经降级的 `a && a.b` 重新写回
       // 可选链 `a?.b`，导致开发者工具上传时报
@@ -78,7 +88,7 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
     },
     h5: {
       compile: {
-        include: [SHARED_SRC]
+        include: [SHARED_SRC, ...NOBLE]
       },
       publicPath: '/',
       staticDirectory: 'static',
