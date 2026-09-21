@@ -104,8 +104,6 @@ export interface LogEntry {
   custom?: { name: string; nutrients: Nutrients; vegG?: number; fruitG?: number; dairyG?: number }
   /** 份量倍数，1 = 一份标准份量 */
   portion: number
-  /** 少盐做法：调味料带来的钠减半（家常菜适用） */
-  lowSalt?: boolean
   /** 少油做法：烹调油带来的脂肪与热量减半（家常菜适用） */
   lowOil?: boolean
   /** 最后修改时间（毫秒），多设备合并时同 id 取新的 */

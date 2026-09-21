@@ -57,19 +57,6 @@ export function dishNutrients(dish: Dish, ingMap: Map<string, Ingredient> = INGR
   return n
 }
 
-/** 调味料（盐、酱油、酱类等），少盐做法只减这部分的钠 */
-export const CONDIMENT_IDS = new Set(['salt', 'soy_sauce', 'oyster_sauce', 'doubanjiang', 'chili_sauce', 'sweet_bean_sauce', 'fermented_bean_curd', 'black_pepper_sauce', 'curry_block', 'ketchup', 'mayonnaise', 'thousand_island', 'vinaigrette', 'chili_oil', 'hotpot_base'])
-
-/** 调味料带来的钠。2026-09-20 起钠不再作为判定或展示指标，此函数仅供数据核对与贡献草稿使用。 */
-export function condimentSodium(dish: Dish, ingMap: Map<string, Ingredient> = INGREDIENT_MAP): number {
-  let na = 0
-  for (const p of dish.parts) {
-    const ing = ingMap.get(p.ing)
-    if (ing && CONDIMENT_IDS.has(p.ing)) na += (ing.per100.sodium * p.g) / 100
-  }
-  return na
-}
-
 /** 烹调油（少油做法只减这部分的脂肪与热量） */
 export const OIL_IDS = new Set(['oil', 'lard', 'olive_oil', 'sesame_oil', 'chili_oil', 'butter'])
 
@@ -86,11 +73,6 @@ function isHomeDish(dish: Dish): boolean {
   return (dish.cuisine === 'cn' || dish.cuisine === 'west') && dish.cat !== 'combo'
 }
 
-/** 家常菜（非外卖、非整餐套餐）才谈少盐做法 */
-export function canLowSalt(dish: Dish): boolean {
-  return isHomeDish(dish) && condimentSodium(dish) >= 100
-}
-
 /** 家常菜且烹调油 ≥ 5 g 才谈少油做法 */
 export function canLowOil(dish: Dish): boolean {
   return isHomeDish(dish) && oilFat(dish) >= 5
@@ -100,7 +82,7 @@ export interface CookMods {
   lowOil?: boolean
 }
 
-/** 一份的营养，可按少盐（调味钠减半）/ 少油（烹调油减半）做法计 */
+/** 一份的营养，可按少油做法（烹调油减半）计 */
 export function dishNutrientsFor(dish: Dish, mods?: CookMods): Nutrients {
   let n = dishNutrients(dish)
   if (mods?.lowOil && canLowOil(dish)) {

@@ -13,7 +13,6 @@ export interface PlanItem {
   portion: number
   role: Role
   reason?: string
-  /** 按少盐做法计钠（高血压模式下家常菜默认开） */
   /** 按少油做法计脂肪（全天脂肪超预算时家常菜自动开） */
   lowOil?: boolean
 }
@@ -235,8 +234,6 @@ function totalsOf(items: PlanItem[], dishMap: Map<string, Dish>): Nutrients {
   }))
 }
 
-/** 高血压模式：推荐里的家常菜按少盐做法计 */
-
 function planMainMeal(slot: MealSlot, T: number, P: number, ctx: Ctx, rnd: () => number): MealPlan {
   const notes: string[] = []
   const items: PlanItem[] = []
@@ -423,9 +420,9 @@ function recentDishDays(entries: LogEntry[], date: string): Map<string, number> 
 }
 
 /**
- * 全天收敛：单餐只按热量与蛋白收敛，叠起来脂肪和钠会跑偏。
- * 顺序：先把蛋白与热量调到位 → 两轮「钠 → 脂肪」换菜（换菜时不让另一项明显变差）→ 只用主食微调热量 → 糖尿病碳水上限复核。
- * 钠仍超先按少盐做法计，脂肪仍超先按少油做法计，再不行才压份量；最后把没压进去的差距如实写进说明。
+ * 全天收敛：单餐只按热量与蛋白收敛，叠起来脂肪会跑偏。
+ * 顺序：先把蛋白与热量调到位 → 两轮脂肪换菜（换菜时不让蛋白明显变差）→ 只用主食微调热量 → 糖尿病碳水上限复核。
+ * 脂肪仍超先按少油做法计，再不行才压份量；最后把没压进去的差距如实写进说明。
  * eaten 为今天已吃的量，目标按剩余预算计。
  */
 function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => number): string[] {
@@ -476,7 +473,7 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
     while (x.protein < budget.protein * 0.9 && g++ < max) {
       const cand = allItems().filter((it) => (it.role === 'protein' || it.role === 'bfprotein') && it.portion < cap)
       if (!cand.length) break
-      // 优先加最「瘦」的那份：每克蛋白带的脂肪与钠最少
+      // 优先加最「瘦」的那份：每克蛋白带的脂肪最少
       cand.sort((a, b) => { const na = nOf(a), nb = nOf(b); return na.fat / Math.max(1, na.protein) - nb.fat / Math.max(1, nb.protein) })
       cand[0].portion = round4(cand[0].portion + 0.25)
       x = total()
@@ -510,7 +507,7 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
   bumpProtein(6)
   adjustKcal(false)
 
-  // B. 两轮：钠 → 脂肪。换菜时不让另一项明显变差
+  // B. 两轮脂肪：先换成更少油的菜，还超就整体按少油做法计。换菜时不让蛋白明显变差
   let oilNoted = false
   for (let pass = 0; pass < 2; pass++) {
     let g = 0
@@ -568,7 +565,7 @@ function balanceDay(meals: MealPlan[], ctx: Ctx, eaten: Nutrients, rnd: () => nu
       while (bf.totals.protein < ELDERLY_BREAKFAST_PROTEIN && k++ < 6) {
         const cand = bf.items.filter((it) => (it.role === 'bfprotein' || it.role === 'protein') && it.portion < 2)
         if (cand.length) {
-          // 和 bumpProtein 一致：优先加最「瘦」的那份，每克蛋白带的脂肪与钠最少
+          // 和 bumpProtein 一致：优先加最「瘦」的那份，每克蛋白带的脂肪最少
           cand.sort((a, b) => { const na = nOf(a), nb = nOf(b); return na.fat / Math.max(1, na.protein) - nb.fat / Math.max(1, nb.protein) })
           cand[0].portion = round4(cand[0].portion + 0.25)
         } else {
