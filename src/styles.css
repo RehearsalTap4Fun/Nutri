@@ -213,6 +213,12 @@ p { margin: 0; }
 .land.over .land-coast { opacity: 1; }
 .land-top { display: grid; grid-template-columns: 188px 1fr; gap: 12px; align-items: center; }
 .lake-wrap { position: relative; width: 188px; height: 158px; display: grid; place-items: center; margin-left: -8px; }
+/*
+ * 塘底的轮廓，始终在，和 .lake 同形同角度。
+ * 水位（.lake 的 scale）表示还剩多少热量，超支时水会退光——但轮廓留着，
+ * 否则那只「荷包蛋」一超支就整个消失，主视觉塌掉一块。水退到 58% 时它也正好读作退后的岸线。
+ */
+.lake-wrap::before { content: ''; position: absolute; inset: 0; border-radius: 63% 37% 56% 44% / 46% 66% 34% 54%; transform: rotate(-7deg); box-shadow: inset 0 0 0 2px var(--lake); opacity: .85; }
 .lake { position: absolute; inset: 0; border-radius: 63% 37% 56% 44% / 46% 66% 34% 54%; background: var(--lake); transform: rotate(-7deg) scale(var(--lake-scale, 1)); transform-origin: 50% 50%; transition: transform var(--t-coast) var(--ease-coast), opacity var(--t-med); }
 .land.over .lake { opacity: 0; }
 .lake-label { position: relative; display: flex; flex-direction: column; align-items: center; line-height: 1.1; color: var(--ink); text-align: center; }

@@ -998,6 +998,24 @@ page {
   justify-content: center;
 }
 
+/*
+ * 塘底轮廓：与水塘同形同角度，始终在。
+ * 水位（.lake 的 scale）表示还剩多少热量，超支时缩到 0——轮廓留着，
+ * 否则那只「荷包蛋」一超支就整个消失。网页版用 .lake-wrap::before 做，
+ * 这里用实节点：小程序的伪元素在自定义组件与真机上都踩过坑，不值当省这一个 View。
+ */
+.lake-rim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 63% 37% 56% 44% / 46% 66% 34% 54%;
+  transform: rotate(-7deg);
+  box-shadow: inset 0 0 0 4rpx var(--bg);
+  opacity: 0.85;
+}
+
 /* 水塘：不规则圆 + 轻微旋转，大小随剩余热量变化 */
 .lake {
   position: absolute;

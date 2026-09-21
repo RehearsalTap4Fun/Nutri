@@ -234,6 +234,7 @@ export default function Today() {
         />
         <View className="land-top">
           <View className="lake-wrap">
+            <View className="lake-rim" />
             <View className="lake" style={{ transform: `rotate(-7deg) scale(${lakeScale})` }} />
             <View className="lake-label">
               <Text className="lake-cap">{over ? '已超出' : '还可以吃'}</Text>
