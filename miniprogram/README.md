@@ -168,7 +168,9 @@ SyntaxError: Unexpected token .
 
 加全局只改 `cryptoPolyfill.ts`，检查器会自己跟上；别在检查器里开豁免。手写的 UTF-8 编解码单独放在 `src/shared/utf8.ts`（不依赖 Taro），主仓库 `tests/miniUtf8.test.ts` 拿整个 BMP 逐码点和内置 `TextEncoder` 对照过，代理对和孤立代理都覆盖了。
 
-**还有一个没解决的**：`@noble/ciphers` 的 AES-GCM 用了 `BigInt` 和 `DataView.setBigUint64`（产物里搜 `setBigUint64` 能看到）。这两个在 iOS 14 之前的 JSCore 上没有，那种机器同步会挂在这里。没有便宜的修法——要么换掉 GCM，要么放弃老机型。目前选择是放着，先知道有这回事。
+**同一类问题里有一个已决定不管的**：`@noble/ciphers` 的 AES-GCM 用了 `BigInt` 和 `DataView.setBigUint64`（产物里搜 `setBigUint64` 能看到），iOS 14 以前的 JSCore 没有这两个，那种机器同步会挂在这里。
+
+**结论是不修**（2026-09-21 用户拍板）。iOS 上小程序跑系统自带的 JSCore，所以门槛按系统版本走；而 iOS 14 一直支持到 iPhone 6s／SE1，真正跑不了的是 iPhone 6 及更老的机器，也就是 2014 年以前的硬件。修它要么换掉 GCM、要么自己塞 BigInt 垫片，都不划算。真要重新评估，去小程序后台看「系统版本分布」里 iOS 14 以下的占比，别凭感觉。
 
 ## 云同步是怎么接的
 
