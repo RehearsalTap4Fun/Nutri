@@ -122,9 +122,12 @@ export function LogSheet({ date, isToday, slot: initialSlot, editing, dishes, di
     onResult({ kind: 'save', entry })
   }
 
+  // 搜菜名这一屏定高：结果多一条少一条都不该让搜索框在手指底下上下跳
+  const searching = !speak && !scan && !pick && !showCustom
+
   return (
     <div className="sheet-bg" onClick={() => onResult({ kind: 'close' })}>
-      <div className="sheet" ref={sheetRef} onClick={(e) => e.stopPropagation()}>
+      <div className={`sheet${searching ? ' searching' : ''}`} ref={sheetRef} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-grab" onTouchStart={onGrabStart} onTouchMove={onGrabMove} onTouchEnd={onGrabEnd} onTouchCancel={onGrabEnd}>
           <div className="sheet-handle" />
         </div>
@@ -148,7 +151,7 @@ export function LogSheet({ date, isToday, slot: initialSlot, editing, dishes, di
             onNeedKey={() => onResult({ kind: 'needKey' })} onBack={() => onResult({ kind: 'close' })} />
         )}
 
-        {!speak && !scan && !pick && !showCustom && (
+        {searching && (
           <>
             <div className="search">
               <input autoFocus placeholder="搜菜名，如 番茄炒蛋、拉面、拿铁" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -157,7 +160,7 @@ export function LogSheet({ date, isToday, slot: initialSlot, editing, dishes, di
             <div className="chips">
               {CAT_CHIPS.map((c) => <button key={c} className={`chip${cat === c ? ' on' : ''}`} onClick={() => setCat(c)}>{c === 'all' ? '全部' : CAT_LABEL[c]}</button>)}
             </div>
-            <div className="card" style={{ padding: '4px 14px' }}>
+            <div className="card search-results" style={{ padding: '4px 14px' }}>
               {!q && cat === 'all' && results.length > 0 && <div className="slot-head"><span>{SLOT_LABEL[slot]}常吃 / 收藏</span></div>}
               <div className="list">
                 {results.map((r) => {
@@ -193,7 +196,7 @@ export function LogSheet({ date, isToday, slot: initialSlot, editing, dishes, di
                 )}
               </div>
             </div>
-            <button className="btn" onClick={() => { setPrefill(null); setShowCustom(true) }}>找不到？自定义录入营养值</button>
+            <button className="btn search-custom" onClick={() => { setPrefill(null); setShowCustom(true) }}>找不到？自定义录入营养值</button>
           </>
         )}
 

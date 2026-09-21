@@ -320,6 +320,12 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
 .sheet.dragging { animation: none; transition: none; }
 .sheet.settle { transition: transform var(--t-slow) var(--ease-drawer); }
 .sheet > * { flex-shrink: 0; }
+/* 搜菜名时定高：抽屉是贴着底边长的，内容一少它就变矮，搜索框会从手指底下往下跑。
+   定高之后输入框与分类不动，只有结果区自己滚，「找不到？自定义录入」也一直在视野里。 */
+.sheet.searching { height: 92dvh; }
+/* 结果卡按内容高，多了自己滚；「找不到？」钉在底边，不跟着结果条数上下走 */
+.sheet.searching .search-results { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
+.sheet.searching .search-custom { margin-top: auto; }
 .sheet-handle { width: 36px; height: 5px; border-radius: 3px; background: var(--axis); margin: 2px auto 4px; }
 .sheet-grab { padding: 8px 0 4px; margin: -10px -16px 0; cursor: grab; touch-action: none; }
 .sheet .card { background: var(--surface-2); border-radius: 24px 30px 26px 32px / 28px 24px 32px 26px; padding: 14px 16px; }
