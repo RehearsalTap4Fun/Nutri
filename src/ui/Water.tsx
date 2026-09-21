@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { WaterEntry } from '../core/types'
-import { CUP_ML, WATER_END_H, WATER_START_H, cupCount, cupDueHours, cupsDueAt, fmtHour } from '../core/water'
+import { CUP_ML, WATER_END_H, WATER_START_H, cupCount, cupDueHours, fmtHour, waterStatus } from '../core/water'
+import type { DayWhen } from '../core/water'
 import { Fold } from './bits'
 
 /** 小时小数，如 13.5 */
@@ -13,15 +14,17 @@ function nowHour(): number {
  * 今日饮水：一排 250 ml 的小水塘沿 8~22 点排开，点到第几个就是喝到第几杯。
  * 每个水塘有自己的「应喝完」时刻；到点还没点亮的那几个会口渴（微微发抖）。全部点亮时整排荡一下水波。
  */
-export function WaterCard({ entries, targetMl, fluidMl, isToday, onSet }: {
+export function WaterCard({ entries, targetMl, fluidMl, when, onSet }: {
   entries: WaterEntry[]
   targetMl: number
   /** 餐食记录里饮品的液体量，单列不计入 */
   fluidMl: number
-  isToday: boolean
+  /** 这一天在今天之前、就是今天、还是在今天之后：刻度提醒只对「今天」说得通 */
+  when: DayWhen
   /** 把这一天的饮水总量设为 ml（点亮到第几杯） */
   onSet: (ml: number) => void
 }) {
+  const isToday = when === 'today'
   const total = entries.reduce((s, e) => s + e.ml, 0)
   const n = cupCount(targetMl)
   const lit = Math.min(n, Math.floor(total / CUP_ML))
@@ -33,22 +36,12 @@ export function WaterCard({ entries, targetMl, fluidMl, isToday, onSet }: {
     const t = window.setInterval(() => setHour(nowHour()), 60_000)
     return () => window.clearInterval(t)
   }, [isToday])
-  // 非今天：过去的日子全部到点，未来的日子都没到点
+  // 非今天不画「现在」游标，也不让水塘口渴
   const h = isToday ? hour : WATER_END_H + 1
-  const shouldHave = isToday ? cupsDueAt(hour, n) : n
-  const behind = Math.max(0, shouldHave - lit)
   const done = lit >= n
   const nowPct = Math.max(0, Math.min(100, ((h - WATER_START_H) / (WATER_END_H - WATER_START_H)) * 100))
   const tap = (i: number) => onSet(i <= lit ? (i - 1) * CUP_ML : i * CUP_ML)
-  const status = done
-    ? '今天喝够了'
-    : behind > 0
-      ? `现在该喝到第 ${shouldHave} 杯了，还差 ${behind} 杯`
-      : lit > shouldHave
-        ? `比刻度快 ${lit - shouldHave} 杯，下一杯 ${fmtHour(due[lit] ?? WATER_END_H)} 前`
-        : lit === 0
-          ? `第 1 杯 ${fmtHour(due[0])} 前`
-          : `进度正好，下一杯 ${fmtHour(due[lit] ?? WATER_END_H)} 前`
+  const status = waterStatus({ when, lit, n, hour })
   return (
     <div className="card">
       <div className="section-title">

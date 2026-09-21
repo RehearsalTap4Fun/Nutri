@@ -12,7 +12,9 @@ const VERDICT_LABEL: Record<Verdict, string> = { avoid: '不建议', caution: '�
 const VERDICT_PILL: Record<Verdict, string> = { avoid: 'pill bad', caution: 'pill warn', ok: 'pill good' }
 
 /** 「能不能吃」：搜一个食物，按当前人群模式与今天已吃的量给建议。规则复用 core/verdict，不重新发明。 */
-export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds, conditions, targets, todaySoFar, nextSlot, onQuickLog }: {
+export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds, conditions, targets, todaySoFar, nextSlot, onQuickLog, isToday = true }: {
+  /** 看的是不是今天：不是的话别说「今天吃的量」 */
+  isToday?: boolean
   dishes: Dish[]
   dishMap: Map<string, Dish>
   customFoods: CustomFood[]
@@ -50,7 +52,7 @@ export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds
       <h2>能不能吃</h2>
       {!pick && (
         <>
-          <p className="small muted">搜一个食物，看看按你现在的模式和今天吃的量，这份能不能吃。</p>
+          <p className="small muted">搜一个食物，看看按你现在的模式和{isToday ? '今天' : '这天'}吃的量，这份能不能吃。</p>
           <input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜菜名或自定义食物，如 小龙虾、蛋糕" />
           {results.length > 0 && (
             <div className="list" style={{ marginTop: 8 }}>
@@ -82,7 +84,7 @@ export function CanIEat({ dishes, dishMap, customFoods, favorites, recentDishIds
           {result.reasons.length > 0 ? (
             <Bullets items={result.reasons.map((t) => ({ icon: <IconAlert size={14} />, text: t }))} />
           ) : (
-            <p className="small" style={{ marginTop: 8 }}>{hasConditions ? '在当前模式下没有踩雷。' : '没有设置特殊人群模式，仅按今天的热量预算参考。'}</p>
+            <p className="small" style={{ marginTop: 8 }}>{hasConditions ? '在当前模式下没有踩雷。' : `没有设置特殊人群模式，仅按${isToday ? '今天' : '这天'}的热量预算参考。`}</p>
           )}
           {limited && <p className="tiny muted">自定义食物没有食材构成，判不了酒精、生食、腌制、嘌呤这些，仅按热量与宏量粗判。</p>}
           <Stats dense items={[

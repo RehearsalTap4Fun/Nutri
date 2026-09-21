@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cupCount, cupDueHours, cupsDueAt, fmtHour, thirst } from '../src/core/water'
+import { cupCount, cupDueHours, cupsDueAt, fmtHour, thirst, waterStatus } from '../src/core/water'
 
 describe('饮水杯与时间刻度', () => {
   it('目标折成 250 ml 的杯数，向上取整', () => {
@@ -23,5 +23,23 @@ describe('饮水杯与时间刻度', () => {
   it('小时格式化', () => {
     expect(fmtHour(10)).toBe('10点')
     expect(fmtHour(12.67)).toBe('12:40')
+  })
+})
+
+describe('饮水卡那句话', () => {
+  it('今天：按刻度说落后多少、下一杯什么时候', () => {
+    expect(waterStatus({ when: 'today', lit: 3, n: 7, hour: 19 })).toBe('现在该喝到第 5 杯了，还差 2 杯')
+    expect(waterStatus({ when: 'today', lit: 0, n: 7, hour: 9 })).toBe('第 1 杯 10点 前')
+    expect(waterStatus({ when: 'today', lit: 3, n: 7, hour: 13 })).toBe('比刻度快 1 杯，下一杯 16点 前')
+    expect(waterStatus({ when: 'today', lit: 7, n: 7, hour: 19 })).toBe('今天喝够了')
+  })
+  it('将来的日子不催你喝水', () => {
+    expect(waterStatus({ when: 'future', lit: 0, n: 7, hour: 19 })).toBe('还没到这天，目标 7 杯')
+    expect(waterStatus({ when: 'future', lit: 2, n: 7, hour: 19 })).not.toContain('现在')
+  })
+  it('过去的日子只说结果，不说「现在该喝到第几杯」', () => {
+    expect(waterStatus({ when: 'past', lit: 0, n: 7, hour: 19 })).toBe('这天没记饮水')
+    expect(waterStatus({ when: 'past', lit: 4, n: 7, hour: 19 })).toBe('这天记了 4 杯，差 3 杯')
+    expect(waterStatus({ when: 'past', lit: 7, n: 7, hour: 19 })).toBe('这天喝够了')
   })
 })

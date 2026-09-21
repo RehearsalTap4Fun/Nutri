@@ -63,6 +63,28 @@ export function thirst(litCups: number, hour: number, n: number, startH = WATER_
   return Math.max(0, cupsDueAt(hour, n, startH, endH) - litCups)
 }
 
+/** 这一天在今天之前、就是今天、还是在今天之后 */
+export type DayWhen = 'past' | 'today' | 'future'
+
+/**
+ * 饮水卡下面那句话。
+ * 「现在该喝到第几杯」只对今天成立：昨天已经过完了，明天还没开始，
+ * 对着它们说「现在该喝到第 7 杯了，还差 7 杯」既不对也没用。
+ */
+export function waterStatus(input: { when: DayWhen; lit: number; n: number; hour: number }): string {
+  const { when, lit, n, hour } = input
+  const due = cupDueHours(n)
+  if (lit >= n) return when === 'today' ? '今天喝够了' : '这天喝够了'
+  if (when === 'future') return `还没到这天，目标 ${n} 杯`
+  if (when === 'past') return lit === 0 ? '这天没记饮水' : `这天记了 ${lit} 杯，差 ${n - lit} 杯`
+  const shouldHave = cupsDueAt(hour, n)
+  const behind = Math.max(0, shouldHave - lit)
+  if (behind > 0) return `现在该喝到第 ${shouldHave} 杯了，还差 ${behind} 杯`
+  if (lit > shouldHave) return `比刻度快 ${lit - shouldHave} 杯，下一杯 ${fmtHour(due[lit] ?? WATER_END_H)} 前`
+  if (lit === 0) return `第 1 杯 ${fmtHour(due[0])} 前`
+  return `进度正好，下一杯 ${fmtHour(due[lit] ?? WATER_END_H)} 前`
+}
+
 /** 小时数 → 「10点」「13:30」 */
 export function fmtHour(h: number): string {
   const hh = Math.floor(h)

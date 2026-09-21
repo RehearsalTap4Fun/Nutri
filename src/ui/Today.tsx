@@ -78,6 +78,8 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
   const focus = useMemo(() => budgetFocus(remainOf(targets, stat.n), targets).slice(0, 3), [targets, stat])
   // 小管家的气泡台词：只在「今天」念叨到点没到点、喝水落后、某项超标或不足
   const isToday = date === todayStr()
+  // 看别的日子时别再说「今天」：昨天的记录、这天的提醒
+  const when = date === todayStr() ? 'today' as const : date < todayStr() ? 'past' as const : 'future' as const
   const waterMlToday = useMemo(() => water.reduce((s, w) => s + w.ml, 0), [water])
   const habitFinding = useMemo(() => findings.find((f) => f.severity === 'warn' && isHabitFinding(f)), [findings])
   const talkInput = useMemo(
@@ -205,16 +207,16 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
 
       {notes.length > 0 && entries.length === 0 && (
         <div className="card">
-          <div className="section-title"><h2>今天的营养师提醒</h2><button className="btn ghost sm" onClick={goPlan}>看推荐 ›</button></div>
+          <div className="section-title"><h2>{isToday ? '今天的营养师提醒' : '这天的营养师提醒'}</h2><button className="btn ghost sm" onClick={goPlan}>看推荐 ›</button></div>
           <SignalChips notes={notes} />
         </div>
       )}
-      <WaterCard entries={water} targetMl={targets.waterMl} fluidMl={fluidMl} isToday={date === todayStr()} onSet={onSetWater} />
+      <WaterCard entries={water} targetMl={targets.waterMl} fluidMl={fluidMl} when={when} onSet={onSetWater} />
 
-      <CanIEat dishes={dishes} dishMap={dishMap} customFoods={customFoods} favorites={favorites} recentDishIds={recentDishIds} conditions={conditions} targets={targets} todaySoFar={n} nextSlot={nextSlot} onQuickLog={onQuickLog} />
+      <CanIEat dishes={dishes} dishMap={dishMap} customFoods={customFoods} favorites={favorites} recentDishIds={recentDishIds} conditions={conditions} targets={targets} todaySoFar={n} nextSlot={nextSlot} onQuickLog={onQuickLog} isToday={isToday} />
 
       <div className="card">
-        <div className="section-title"><h2>今日记录</h2><span className="small muted">{entries.length ? `${entries.length} 条` : ''}</span></div>
+        <div className="section-title"><h2>{isToday ? '今日记录' : '这天的记录'}</h2><span className="small muted">{entries.length ? `${entries.length} 条` : ''}</span></div>
         {entries.length === 0 && (
           <div className="empty-box">
             <div className="ico"><IconBowl /></div>

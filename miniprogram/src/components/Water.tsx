@@ -14,8 +14,8 @@ import {
   WATER_START_H,
   cupCount,
   cupDueHours,
-  cupsDueAt,
   fmtHour,
+  waterStatus,
 } from '@core/water'
 
 /** 小时小数，如 13.5 */
@@ -48,22 +48,13 @@ export function WaterCard({ entries, targetMl, fluidMl, isToday, onSet }: Props)
     return () => clearInterval(t)
   }, [isToday])
 
-  // 非今天：过去的日子全部到点，未来的日子都没到点
+  // 非今天不画「现在」游标，也不让水塘口渴
   const h = isToday ? hour : WATER_END_H + 1
-  const shouldHave = isToday ? cupsDueAt(hour, n) : n
-  const behind = Math.max(0, shouldHave - lit)
   const done = lit >= n
   const nowPct = Math.max(0, Math.min(100, ((h - WATER_START_H) / (WATER_END_H - WATER_START_H)) * 100))
 
-  const status = done
-    ? '今天喝够了'
-    : behind > 0
-      ? `现在该喝到第 ${shouldHave} 杯了，还差 ${behind} 杯`
-      : lit > shouldHave
-        ? `比刻度快 ${lit - shouldHave} 杯，下一杯 ${fmtHour(due[lit] !== undefined ? due[lit] : WATER_END_H)} 前`
-        : lit === 0
-          ? `第 1 杯 ${fmtHour(due[0])} 前`
-          : `下一杯 ${fmtHour(due[lit] !== undefined ? due[lit] : WATER_END_H)} 前`
+  // 这句话跟网页版共用 @core/water 的 waterStatus，两端不会各说各的
+  const status = waterStatus({ when: isToday ? 'today' : 'past', lit, n, hour })
 
   const tap = (i: number) => onSet(i <= lit ? (i - 1) * CUP_ML : i * CUP_ML)
 
