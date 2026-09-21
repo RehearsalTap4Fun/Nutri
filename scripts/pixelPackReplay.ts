@@ -3,7 +3,9 @@
  * 构建期校验目录 revision 与每张 PNG 摘要/尺寸/二值 alpha，
  * 再用 nutri 自己的 composePlan 按 profile 合成目录里全部 coverage 组合，逐个比对 rgbaSha256（原生 RGBA，不比 PNG 文件）。
  *
- *   npx tsx scripts/pixelPackReplay.ts [--pack ../RandomPet-master/dist/pixel-art/approved] [--preview out.png]
+ *   npx tsx scripts/pixelPackReplay.ts [--pack ../RandomPet-master/dist/pixel-art/approved] [--catalog catalog.candidate.json] [--preview out.png]
+ *
+ * `--catalog` 给候选包用：QMonster 发候选时文件名是 `catalog.candidate.json`，正式包才叫 `catalog.json`。
  *
  * 任一组合不一致即退出码 1。sharp 仍从 RandomPet 的 node_modules 借。
  */
@@ -27,7 +29,7 @@ const PACK = resolve(argOf('--pack') ?? join(RP, 'dist', 'pixel-art', 'approved'
 const sha256 = (b: Uint8Array | Uint8ClampedArray) => createHash('sha256').update(Buffer.from(b.buffer, b.byteOffset, b.byteLength)).digest('hex')
 const N = PIXEL_PACK_SIZE
 
-const catalogFile = join(PACK, 'catalog.json')
+const catalogFile = join(PACK, argOf('--catalog') ?? 'catalog.json')
 if (!existsSync(catalogFile)) throw new Error(`找不到 ${catalogFile}（先在 RandomPet 里 npm run build:pixel）`)
 const raw: unknown = JSON.parse(readFileSync(catalogFile, 'utf8'))
 const pack = openPack(raw)
