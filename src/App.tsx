@@ -63,6 +63,10 @@ export default function App() {
   const dismissWx = () => { setWxHint(false); try { sessionStorage.setItem('nutri.wxhint', '1') } catch { /* ignore */ } }
 
   useEffect(() => saveState(state), [state])
+  // 换页签回到顶部：四个页签共用同一条滚动轴，不回顶就会落在上一页滚到的位置，
+  // 比如从分析页滚到一半点「我的」，开屏是营养模式卡的中间。
+  // 换日期不回顶，那时人多半在原地对照前后两天。
+  useEffect(() => { window.scrollTo(0, 0) }, [tab])
   useEffect(() => {
     registerSW((reload) => show('有新版本', { label: '刷新', run: reload }))
     captureInstallPrompt(setInstallEvt)
