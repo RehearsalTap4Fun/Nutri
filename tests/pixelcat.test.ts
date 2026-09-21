@@ -98,23 +98,42 @@ describe('像素猫：异变只进不退', () => {
   it('upgradesFor：只列「高于当前的最低那一阶」，同阶不互换、不跳级', () => {
     // 额顶缺 R，所以阶梯是 N → L，从空槽先给 N 级的两件
     expect(upgradesFor('crown', 'none').sort()).toEqual(['antlers', 'dragon-horns'])
-    expect(upgradesFor('crown', 'dragon-horns')).toEqual(['halo'])
-    expect(upgradesFor('crown', 'antlers')).toEqual(['halo']) // 缺阶自动跳过
+    expect(upgradesFor('crown', 'dragon-horns')).toEqual(['crystal-horns'])
+    expect(upgradesFor('crown', 'antlers')).toEqual(['crystal-horns'])
     expect(upgradesFor('crown', 'halo')).toEqual([])
     expect(upgradesFor('back', 'none')).toEqual(['small-wings'])
     expect(upgradesFor('back', 'small-wings')).toEqual(['feathered-wings']) // 不跳级到龙翼
     expect(upgradesFor('back', 'feathered-wings')).toEqual(['dragon-wings'])
-    expect(upgradesFor('ears', 'fin-ears')).toEqual([])
+    expect(upgradesFor('ears', 'fin-ears')).toEqual(['feathered-ears'])
     expect(upgradesFor('neck', 'small-lion-mane')).toEqual(['frill-neck'])
+    expect(upgradesFor('tailTip', 'flame-tail')).toEqual(['phoenix-tail'])
+  })
+
+  // 1.6.1 把五个槽位都补成了 N→R→L，暂时没有缺阶的槽位可举例。
+  // 跳阶逻辑还在，所以改成按性质测：无论从哪一阶出发，拿到的都必须是「严格更高的那些里最低的一阶」，
+  // 且同阶全给出。这样以后阵容再变，这条也不用跟着改。
+  it('升一阶：任意槽位任意起点，都只给「高于当前的最低那一阶」', () => {
+    for (const slot of MUTATION_SLOTS) {
+      for (const from of CAT_SLOT_OPTIONS[slot]) {
+        const ups = upgradesFor(slot, from)
+        const higher = (CAT_SLOT_OPTIONS[slot] as readonly string[]).filter((v) => v !== 'none' && tierRank(v) > tierRank(from))
+        if (higher.length === 0) { expect(ups).toEqual([]); continue }
+        const nextRank = Math.min(...higher.map((v) => tierRank(v)))
+        expect(ups.every((v) => tierRank(v) === nextRank), `${slot} ${from} → ${ups}`).toBe(true)
+        expect(ups.sort()).toEqual(higher.filter((v) => tierRank(v) === nextRank).sort())
+      }
+    }
   })
 
   it('阶梯与步数：缺阶的槽位按阶梯位置算步数，不按品质档位', () => {
-    expect(slotLadder('crown')).toEqual([1, 3]) // N 与 L，缺 R
+    // 1.6.1 之后五个槽位都是 N/R/L 三阶；步数仍按阶梯位置算，不按品质档位
+    expect(slotLadder('crown')).toEqual([1, 2, 3])
     expect(slotLadder('back')).toEqual([1, 2, 3])
     expect(slotStep('crown', 'none')).toBe(0)
     expect(slotStep('crown', 'dragon-horns')).toBe(1)
-    expect(slotStep('crown', 'halo')).toBe(2) // 不是 3
-    expect(maxGrowthSteps()).toBe(10) // 2+1+2+3+2
+    expect(slotStep('crown', 'crystal-horns')).toBe(2)
+    expect(slotStep('crown', 'halo')).toBe(3)
+    expect(maxGrowthSteps()).toBe(15) // 3×5
   })
 
   it('顶阶只能升不能生：孵化自带的那件一定是入口阶，不会直接给 L', () => {
@@ -155,12 +174,12 @@ describe('像素猫：异变只进不退', () => {
     const empty: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
     expect(upgradeChance(empty)).toBe(1)
     const grown: CatSpec = { ...empty, crown: 'halo', back: 'dragon-wings', neck: 'frill-neck' }
-    expect(growthSteps(grown)).toBe(2 + 3 + 2)
-    expect(upgradeChance(grown)).toBeCloseTo(1 / (1 + 7 / GROWTH_DECAY), 6)
+    expect(growthSteps(grown)).toBe(3 + 3 + 2)
+    expect(upgradeChance(grown)).toBeCloseTo(1 / (1 + 8 / GROWTH_DECAY), 6)
   })
 
   it('满级后每笔仍有可见变化（换眼型或表情），且不再动异变位与身份性状', () => {
-    const maxed: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'halo', ears: 'fin-ears', neck: 'frill-neck', back: 'dragon-wings', tailTip: 'flame-tail' }
+    const maxed: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'halo', ears: 'celestial-ears', neck: 'sunburst-ruff', back: 'dragon-wings', tailTip: 'phoenix-tail' }
     expect(isFullyGrown(maxed)).toBe(true)
     const rnd = makeRng(5)
     let spec = maxed
@@ -187,11 +206,20 @@ describe('像素猫：渲染计划与素材', () => {
     for (const f of files) expect(existsSync(join(ASSETS, f))).toBe(true)
   })
 
-  it('任何合法组合引用的图层都存在于清单', () => {
+  /**
+   * 毛绒轨（`pixelcatPlush`）的阵容**冻结在接像素包之前**，应用运行时已经不用它了，
+   * 只有 `scripts/pixelCat.ts` 出离线对照图还在用。所以这里不能拿当前的 `CAT_SLOT_OPTIONS` 遍历——
+   * 1.6.1 加的五件部件在毛绒轨里根本没有素材，也不会补。要测的是「毛绒轨自己支持的组合它都画得出来」，
+   * 于是按下面这份冻结名单遍历。
+   */
+  const PLUSH_CROWN = ['none', 'dragon-horns', 'antlers', 'halo'] as const
+  const PLUSH_BACK = ['none', 'small-wings', 'feathered-wings', 'dragon-wings'] as const
+
+  it('毛绒轨：它自己支持的任何组合，引用的图层都在清单里', () => {
     const layers = new Set(Object.keys(manifest.layers))
     for (const coat of CAT_COATS) {
       for (const expression of CAT_SLOT_OPTIONS.expression) {
-        for (const crown of CAT_SLOT_OPTIONS.crown) for (const back of CAT_SLOT_OPTIONS.back) {
+        for (const crown of PLUSH_CROWN) for (const back of PLUSH_BACK) {
           const spec: CatSpec = { coat, body: 'standard', eyes: 'round', expression, crown, ears: 'fin-ears', neck: 'frill-neck', back, tailTip: 'flame-tail' }
           for (const id of layersFor(spec)) expect(layers.has(id), id).toBe(true)
         }

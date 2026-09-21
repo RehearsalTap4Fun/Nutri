@@ -20,10 +20,13 @@ import { hashString, makeRng, weightedPick } from './rng'
 /**
  * 规则版本：写进存档，规则再改时能知道一只猫是按哪版长出来的。
  * v1=均匀随机；v2=品质分层只进不退（同级可互换）；v3=进化链，沿链升一阶、同阶不互换、顶阶只能升不能生；
- * v4=接入 QMonster 像素包：性状加 `body`／`eyes`、去掉 `tongue-tip`、孵化限制在可孵化的岛上。
+ * v4=接入 QMonster 像素包：性状加 `body`／`eyes`、去掉 `tongue-tip`、孵化限制在可孵化的岛上；
+ * v5=像素包 1.6.1 的五件新部件入列（晶角／羽翅耳／星辉翼耳／日冕颈饰／凤凰尾），成长深度 10 → 15 阶。
+ * v5 只扩阵容，成长机制一个字没改；老猫不迁移，下次异变时自然带上新号（`ensureCat` 不比对版本，
+ * 只要求这个字段是字符串）。已经「长齐」的猫会重新变得可成长——这正是补阵容要的效果。
  * **规则实质变化时必须升这个号**，否则同一个字符串会描述两套不同的规则，这个字段就失去意义了。
  */
-export const PIXEL_CAT_RULES = 'pixelcat-rules-v4'
+export const PIXEL_CAT_RULES = 'pixelcat-rules-v5'
 
 export const CAT_COATS = ['brown-tabby', 'orange-white', 'tuxedo', 'calico', 'colorpoint', 'rosetted'] as const
 /** 体型：与花纹同为身份性状，孵化定型后一生不变 */
@@ -32,11 +35,11 @@ export const CAT_SLOT_OPTIONS = {
   /** 眼型与表情是横向性状：无品质高低，提供满级之后的持续变化 */
   eyes: ['round', 'sleepy-almond'],
   expression: ['parted-mouth', 'small-fangs'],
-  crown: ['none', 'dragon-horns', 'antlers', 'halo'],
-  ears: ['none', 'fin-ears'],
-  neck: ['none', 'small-lion-mane', 'frill-neck'],
+  crown: ['none', 'dragon-horns', 'antlers', 'crystal-horns', 'halo'],
+  ears: ['none', 'fin-ears', 'feathered-ears', 'celestial-ears'],
+  neck: ['none', 'small-lion-mane', 'frill-neck', 'sunburst-ruff'],
   back: ['none', 'small-wings', 'feathered-wings', 'dragon-wings'],
-  tailTip: ['none', 'forked-tail-tip', 'flame-tail'],
+  tailTip: ['none', 'forked-tail-tip', 'flame-tail', 'phoenix-tail'],
 } as const
 
 export type CatCoat = (typeof CAT_COATS)[number]
@@ -55,12 +58,15 @@ export const MUTABLE_SLOTS = ['eyes', 'expression', 'crown', 'ears', 'neck', 'ba
 export const MUTATION_SLOTS = ['crown', 'ears', 'neck', 'back', 'tailTip'] as const
 export type MutationSlot = (typeof MUTATION_SLOTS)[number]
 
-/** 品质分层，与孵化器 mutations.ts 登记表一致：现有 6 件小件为 N，批次 1 的颈膜/羽翼/焰尾为 R，光环/龙翼为 L */
+/**
+ * 品质分层，与孵化器 mutations.ts 登记表一致：现有 6 件小件为 N，批次 1 的颈膜/羽翼/焰尾为 R，光环/龙翼为 L；
+ * 像素包 1.6.1 的五件按 QMonster 审批档位入列（晶角/羽翅耳 R，星辉翼耳/日冕颈饰/凤凰尾 L）。
+ */
 export type CatTier = 'N' | 'R' | 'L'
 export const CAT_TIER: Record<CatMutation, CatTier> = {
   'dragon-horns': 'N', antlers: 'N', 'fin-ears': 'N', 'small-lion-mane': 'N', 'small-wings': 'N', 'forked-tail-tip': 'N',
-  'frill-neck': 'R', 'feathered-wings': 'R', 'flame-tail': 'R',
-  halo: 'L', 'dragon-wings': 'L',
+  'frill-neck': 'R', 'feathered-wings': 'R', 'flame-tail': 'R', 'crystal-horns': 'R', 'feathered-ears': 'R',
+  halo: 'L', 'dragon-wings': 'L', 'celestial-ears': 'L', 'sunburst-ruff': 'L', 'phoenix-tail': 'L',
 }
 export const TIER_NAMES: Record<CatTier, string> = { N: '普通', R: '稀有', L: '传说' }
 /** 升级抽取权重：高品质更难抽到 */
@@ -73,14 +79,14 @@ const TIER_RANK: Record<CatTier | 'none', number> = { none: 0, N: 1, R: 2, L: 3 
  * （额顶目前只有 N 和 L，就是 none→N→L 两步）。同链优先，同阶不互换。
  */
 export const CAT_LINES: Record<MutationSlot, Record<string, CatMutation[]>> = {
-  crown: { horn: ['dragon-horns'], antler: ['antlers'], light: ['halo'] },
-  ears: { fin: ['fin-ears'] },
-  neck: { mane: ['small-lion-mane', 'frill-neck'] },
+  crown: { horn: ['dragon-horns', 'crystal-horns'], antler: ['antlers'], light: ['halo'] },
+  ears: { fin: ['fin-ears'], plume: ['feathered-ears', 'celestial-ears'] },
+  neck: { mane: ['small-lion-mane', 'frill-neck'], corona: ['sunburst-ruff'] },
   back: { wing: ['small-wings', 'feathered-wings', 'dragon-wings'] },
-  tailTip: { flame: ['forked-tail-tip', 'flame-tail'] },
+  tailTip: { flame: ['forked-tail-tip', 'flame-tail', 'phoenix-tail'] },
 }
 export const CAT_LINE_NAMES: Record<string, string> = {
-  horn: '角', antler: '鹿', light: '光', fin: '鳍', mane: '鬃', wing: '翼', flame: '焰',
+  horn: '角', antler: '鹿', light: '光', fin: '鳍', plume: '羽', mane: '鬃', corona: '冕', wing: '翼', flame: '焰',
 }
 
 /** 某部件属于哪条链 */
@@ -165,11 +171,11 @@ export const CAT_NAMES: Record<string, string> = {
   standard: '标准', 'shortleg-round': '短腿圆身', 'slender-tall': '修长高挑',
   round: '圆眼', 'sleepy-almond': '半眯眼',
   'parted-mouth': '微张嘴', 'small-fangs': '小牙',
-  'dragon-horns': '小龙角', antlers: '鹿角', halo: '光环',
-  'fin-ears': '鳍耳',
-  'small-lion-mane': '小狮鬃', 'frill-neck': '颈膜',
+  'dragon-horns': '小龙角', antlers: '鹿角', 'crystal-horns': '晶角', halo: '光环',
+  'fin-ears': '鳍耳', 'feathered-ears': '羽翅耳', 'celestial-ears': '星辉翼耳',
+  'small-lion-mane': '小狮鬃', 'frill-neck': '颈膜', 'sunburst-ruff': '日冕颈饰',
   'small-wings': '小翅膀', 'feathered-wings': '羽翼', 'dragon-wings': '龙翼',
-  'forked-tail-tip': '分叉尾', 'flame-tail': '焰尾',
+  'forked-tail-tip': '分叉尾', 'flame-tail': '焰尾', 'phoenix-tail': '凤凰尾',
 }
 export const CAT_SLOT_NAMES: Record<CatSlot, string> = { eyes: '眼型', expression: '表情', crown: '额顶', ears: '耳朵', neck: '颈部', back: '背部', tailTip: '尾巴' }
 

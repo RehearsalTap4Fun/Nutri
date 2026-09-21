@@ -1,14 +1,14 @@
 {
-  "source": "<RandomPet>/dist/pixel-art/v3-approved-1.5.0",
-  "artVersion": "1.5.0",
-  "revision": "0659f6e4112c840b56a6b535b873564d1d2a5c248fda15ea9ce875b2b936ad0d",
+  "source": "<RandomPet>/dist/pixel-art/v3-approved-1.6.1",
+  "artVersion": "1.6.1",
+  "revision": "c622a13cb4f045edaa1fe8efc133d312bcb62f78414d75d8bc58a17d78f69ddf",
   "rendererVersion": "pixel-rgba-v1",
-  "verifiedAt": "2026-09-18",
+  "verifiedAt": "2026-09-21",
   "checks": {
-    "layers": 58,
-    "replayed": 8064,
-    "coverageEquivalent": 8064,
-    "compactPlanMatch": 8064
+    "layers": 63,
+    "replayed": 35840,
+    "coverageEquivalent": 35840,
+    "compactPlanMatch": 35840
   },
   "islands": [
     {
