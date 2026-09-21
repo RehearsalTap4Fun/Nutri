@@ -82,3 +82,38 @@ describe('自定义食物的蔬菜水果份数', () => {
     expect(st.n.kcal).toBeGreaterThan(260 * 1.5)
   })
 })
+
+describe('还没过完的今天', () => {
+  const full = (d: string): LogEntry[] => [
+    { id: d + 'b', date: d, slot: 'breakfast', dishId: 'bf_egg_boiled', portion: 2 },
+    { id: d + 'l', date: d, slot: 'lunch', dishId: 'cn_tomato_egg', portion: 1 },
+    { id: d + 'l2', date: d, slot: 'lunch', dishId: 'st_rice', portion: 1 },
+    { id: d + 'd', date: d, slot: 'dinner', dishId: 'cn_tomato_egg', portion: 1 },
+    { id: d + 'd2', date: d, slot: 'dinner', dishId: 'st_rice', portion: 1 },
+  ]
+  const past = [1, 2, 3].flatMap((i) => full(addDays(today, -i)))
+  // 今天只记到早餐：两条记录，按老规则就算「完整记录日」了
+  const morning: LogEntry[] = [
+    { id: 'tb', date: today, slot: 'breakfast', dishId: 'bf_egg_boiled', portion: 1 },
+    { id: 'tb2', date: today, slot: 'breakfast', dishId: 'st_rice', portion: 0.5 },
+  ]
+
+  it('晚餐还没记、也没吃到目标八成之前，不计入近 7 天日均', () => {
+    const w = windowStats([...past, ...morning], DISH_MAP, today, 7, targets.kcal, today)
+    expect(w.loggedDays.map((d) => d.date)).not.toContain(today)
+    expect(w.loggedDays).toHaveLength(3)
+    // 日均就是那三天吃满的均值，不被早上这两笔拉低
+    const done = windowStats(past, DISH_MAP, today, 7, targets.kcal, today)
+    expect(w.avg.kcal).toBeCloseTo(done.avg.kcal, 5)
+  })
+  it('记上晚餐之后，今天自己就计入了', () => {
+    const withDinner = [...past, ...morning, { id: 'td', date: today, slot: 'dinner' as const, dishId: 'cn_tomato_egg', portion: 1 }]
+    const w = windowStats(withDinner, DISH_MAP, today, 7, targets.kcal, today)
+    expect(w.loggedDays.map((d) => d.date)).toContain(today)
+    expect(w.loggedDays).toHaveLength(4)
+  })
+  it('只是看过去的某一天时，那天照常计入', () => {
+    const w = windowStats([...past, ...morning], DISH_MAP, today, 7, targets.kcal, addDays(today, 1))
+    expect(w.loggedDays.map((d) => d.date)).toContain(today)
+  })
+})

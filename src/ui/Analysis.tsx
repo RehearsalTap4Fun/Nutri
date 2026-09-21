@@ -40,7 +40,7 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
     value: d.n.kcal,
     highlight: d.date === date,
     dim: !d.logged,
-    tip: `${shortDate(d.date)}：${r0(d.n.kcal)} 千卡${d.logged ? '' : '（记录不全）'} · 蛋白 ${r0(d.n.protein)} g`,
+    tip: `${shortDate(d.date)}：${r0(d.n.kcal)} 千卡${d.logged ? '' : d.date === today ? '（今天还没过完，先不计入日均）' : '（记录不全）'} · 蛋白 ${r0(d.n.protein)} g`,
   }))
   const share = macroKcalShare(w.avg)
   const k = w.loggedDays.length

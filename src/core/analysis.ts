@@ -2,7 +2,7 @@ import type { Dish, LogEntry, MealSlot, Nutrients, Profile, Targets, WaterEntry,
 import { avgWater } from './water'
 import { MEAL_SLOTS, ZERO } from './types'
 import { add, entryNutrients, fruitGrams, isProcessedOrFried, macroKcalShare, scale, sum, vegGrams } from './nutrition'
-import { daysBetween, lastNDays } from './dates'
+import { daysBetween, lastNDays, todayStr } from './dates'
 import { conditionFindings } from './conditions'
 
 export interface DayStat {
@@ -70,8 +70,21 @@ export interface WindowStats {
   breakfastProteinShare: number
 }
 
-export function windowStats(entries: LogEntry[], dishMap: Map<string, Dish>, endDate: string, nDays: number, targetKcal: number): WindowStats {
-  const days = lastNDays(endDate, nDays).map((d) => dayStat(d, entries, dishMap, targetKcal))
+/**
+ * 今天还没过完：晚餐还没记、也还没吃到目标的八成，这一天就只是「进行中」。
+ * 拿它去算日均，等于让早上那两笔早餐代表一整天，结论会长期偏低。
+ */
+function stillGoing(d: DayStat, targetKcal: number): boolean {
+  return d.bySlot.dinner.kcal <= 0 && d.n.kcal < targetKcal * 0.8
+}
+
+export function windowStats(entries: LogEntry[], dishMap: Map<string, Dish>, endDate: string, nDays: number, targetKcal: number, today = todayStr()): WindowStats {
+  const days = lastNDays(endDate, nDays).map((d) => {
+    const st = dayStat(d, entries, dishMap, targetKcal)
+    // 进行中的今天照样画柱子（图例里就是「没记全，不计均值」），但不参与均值与调整信号；
+    // 晚餐一记上，或者吃到目标八成，它自己就会计入。
+    return st.date === today && st.logged && stillGoing(st, targetKcal) ? { ...st, logged: false } : st
+  })
   const loggedDays = days.filter((d) => d.logged)
   const k = loggedDays.length
   const avg = k ? scale(sum(loggedDays.map((d) => d.n)), 1 / k) : { ...ZERO }
