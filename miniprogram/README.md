@@ -136,7 +136,11 @@ tabBar 图标由 `npm run tabicons` 生成，路径直接抄自网页版 `src/ui
 
 `npm run pixelpack` 做三件事：把共享目录的 58 张 PNG 同步进包、生成 base64 兜底表、校验目录声明的图层是否齐全。少一张不会让构建失败，只会让某些猫在运行时画不出来，所以在生成这一步就拦掉。像素包更新后记得重跑。
 
-## 上传报 invalid file 怎么办
+## 产物检查：`npm run check`（上传前必跑）
+
+两类问题它都拦，都是踩过之后补的。共同点是**开发者工具里测不出来**：工具跑在 Chromium 里，真机跑在 JSCore 里，两者差得比想象中多。
+
+### 一、上传报 invalid file
 
 开发者工具上传时如果报：
 
@@ -153,6 +157,18 @@ SyntaxError: Unexpected token .
 2. **node_modules 默认不过 babel**。同步用的加密库 `@noble` 源码里有可选链，一样会漏进产物。现在 `config/index.ts` 的 `compile.include` 把它显式纳入编译。
 
 排查时注意：直接 `grep '?\.'` 会误报，压缩后的三元表达式 `x ? .85 : .8` 长得一模一样。要看 `?.` 后面跟的是标识符还是数字，`npm run check` 已经按这个判据写了。
+
+### 二、真机说某个全局 is not defined
+
+正式版 1.0.2 上线后同步报 `TextEncoder is not defined`。开发者工具里一切正常，真机必挂。
+
+原因是 JSCore 没有一票浏览器全局。`src/shared/cryptoPolyfill.ts` 本来就是为此存在的，补了 `btoa`／`atob`／`TextDecoder`／`crypto.getRandomValues`——**但漏了 `TextEncoder`**，因为我们自己的源码一处都没写它，是 `@noble/hashes` 的 `utf8ToBytes` 在用。**要补哪些全局不能只看自己的源码，得看产物。**
+
+现在 `npm run check` 的第二段就干这件事：从 `cryptoPolyfill.ts` 解析出补了哪些全局，再去 `dist` 里找 `new TextEncoder`、`btoa(`、`crypto.getRandomValues` 这类**构造与调用**写法，对不上就让构建失败。只认构造和调用是必要的——Taro 运行时里满是 `URLSearchParams: function(){…}` 这种自己实现的同名导出，按标识符匹配会全是误报。
+
+加全局只改 `cryptoPolyfill.ts`，检查器会自己跟上；别在检查器里开豁免。手写的 UTF-8 编解码单独放在 `src/shared/utf8.ts`（不依赖 Taro），主仓库 `tests/miniUtf8.test.ts` 拿整个 BMP 逐码点和内置 `TextEncoder` 对照过，代理对和孤立代理都覆盖了。
+
+**还有一个没解决的**：`@noble/ciphers` 的 AES-GCM 用了 `BigInt` 和 `DataView.setBigUint64`（产物里搜 `setBigUint64` 能看到）。这两个在 iOS 14 之前的 JSCore 上没有，那种机器同步会挂在这里。没有便宜的修法——要么换掉 GCM，要么放弃老机型。目前选择是放着，先知道有这回事。
 
 ## 云同步是怎么接的
 

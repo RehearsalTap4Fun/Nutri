@@ -1,9 +1,15 @@
 /**
  * 同步用的加密垫片。
  *
- * `src/sync/crypto.ts` 是纯 JS 实现（noble），本身不依赖 WebCrypto，但用到了四个
- * 小程序环境里没有的全局：`btoa`、`atob`、`TextDecoder`，以及 noble 取随机数时会找的
- * `crypto.getRandomValues`。这里把它们补上，补完之后那个文件一行都不用改。
+ * `src/sync/crypto.ts` 是纯 JS 实现（noble），本身不依赖 WebCrypto，但用到了几个
+ * 小程序环境里没有的全局：`btoa`、`atob`、`TextDecoder`、`TextEncoder`，以及 noble
+ * 取随机数时会找的 `crypto.getRandomValues`。这里把它们补上，补完之后那个文件一行都不用改。
+ *
+ * 要补哪些不能只看自己的源码：`TextEncoder` 是 `@noble/hashes` 的 `utf8ToBytes` 在用，
+ * 我们自己一处都没写，所以第一版漏了。开发者工具跑在 Chromium 里，这些全局都有，
+ * 漏了也测不出来；真机的 JSCore 没有，正式版 1.0.2 同步时就抛了 `TextEncoder is not defined`。
+ * 现在由 `scripts/checkSyntax.mjs` 扫产物兜底：它从本文件解析出补了哪些全局，
+ * 再去产物里找 `new X` / `X(`，对不上就让构建失败。加全局请只改本文件，别绕过它。
  *
  * 随机数是这里唯一需要小心的地方：微信只给了异步的 `Taro.getRandomValues`，
  * 而 noble 是同步调用的。所以维护一个熵池，用之前先 `await ensureEntropy()` 灌满，
@@ -11,6 +17,7 @@
  * AES 的 nonce 都不能用伪随机凑合。
  */
 import Taro from '@tarojs/taro'
+import { decodeUtf8, encodeUtf8 } from './utf8'
 
 const POOL_TARGET = 512
 let pool = new Uint8Array(0)
@@ -42,40 +49,6 @@ function drawInto(target: Uint8Array): Uint8Array {
   return target
 }
 
-/** UTF-8 解码。只需要 decode 这一个方法，noble 那边也只用到它 */
-function decodeUtf8(bytes: Uint8Array): string {
-  let out = ''
-  let i = 0
-  while (i < bytes.length) {
-    const b = bytes[i]
-    let cp: number
-    if (b < 0x80) {
-      cp = b
-      i += 1
-    } else if (b < 0xe0) {
-      cp = ((b & 0x1f) << 6) | (bytes[i + 1] & 0x3f)
-      i += 2
-    } else if (b < 0xf0) {
-      cp = ((b & 0x0f) << 12) | ((bytes[i + 1] & 0x3f) << 6) | (bytes[i + 2] & 0x3f)
-      i += 3
-    } else {
-      cp =
-        ((b & 0x07) << 18) |
-        ((bytes[i + 1] & 0x3f) << 12) |
-        ((bytes[i + 2] & 0x3f) << 6) |
-        (bytes[i + 3] & 0x3f)
-      i += 4
-    }
-    if (cp > 0xffff) {
-      cp -= 0x10000
-      out += String.fromCharCode(0xd800 + (cp >> 10), 0xdc00 + (cp & 0x3ff))
-    } else {
-      out += String.fromCharCode(cp)
-    }
-  }
-  return out
-}
-
 let installed = false
 
 /** 幂等。在任何用到 sync/crypto 的地方之前调用 */
@@ -99,6 +72,16 @@ export function installCryptoPolyfill(): void {
         s += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + 0x8000)))
       }
       return s
+    }
+  }
+
+  // noble 拿到返回值后会 copy 一份再把原数组抹零，所以每次都得给一个新的 Uint8Array
+  if (typeof g.TextEncoder !== 'function') {
+    g.TextEncoder = class {
+      readonly encoding = 'utf-8'
+      encode(input = ''): Uint8Array {
+        return encodeUtf8(input)
+      }
     }
   }
 
