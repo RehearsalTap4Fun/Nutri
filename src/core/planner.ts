@@ -33,6 +33,8 @@ export interface DayPlan {
   notes: string[]
   /** 已经吃过、不再规划的餐次 */
   eatenSlots: MealSlot[]
+  /** 这一天已经吃下去的量（含没被关掉的餐次里那一口）；推荐只覆盖剩下的部分 */
+  eatenTotals: Nutrients
 }
 
 export interface PlanInput {
@@ -618,7 +620,14 @@ export function planDay(input: PlanInput): DayPlan {
   }
   const notes: string[] = []
   const eaten = input.eatenToday || {}
-  const eatenSlots = MEAL_SLOTS.filter((s) => (eaten[s]?.kcal || 0) > 50)
+  // 一餐算「吃过了」的门槛：到了这一餐常规量的四成，且至少 80 千卡。
+  // 一杯黑咖啡不该把早餐关掉——关掉了这一餐就再也不给推荐，只剩一句「已吃」。
+  const eatenSlots = MEAL_SLOTS.filter((s) => {
+    const kcal = eaten[s]?.kcal || 0
+    if (kcal <= 0) return false
+    const normal = targets.kcal * targets.slotShare[s]
+    return kcal >= Math.max(80, normal * 0.4)
+  })
   // 今天已经吃过的菜不再推荐，且同一主蛋白降权
   for (const e of input.recentEntries) {
     if (e.date === date && e.dishId) {
@@ -629,16 +638,20 @@ export function planDay(input: PlanInput): DayPlan {
     }
   }
   const toPlan = MEAL_SLOTS.filter((s) => targets.slotShare[s] > 0 && !eatenSlots.includes(s))
-  const eatenKcal = eatenSlots.reduce((s, k) => s + (eaten[k]?.kcal || 0), 0)
-  const eatenProtein = eatenSlots.reduce((s, k) => s + (eaten[k]?.protein || 0), 0)
+  // 预算按今天吃下去的全部算，不只算已关掉的餐次：开着的餐次里那杯咖啡也占额度，
+  // 只算已关的会把同一份额度发两次。
+  const eatenTotals = sum(MEAL_SLOTS.map((s) => eaten[s] || ZERO))
+  const eatenKcal = eatenTotals.kcal
+  const eatenProtein = eatenTotals.protein
+  const anyEaten = eatenKcal > 0
   const shareSum = toPlan.reduce((s, k) => s + targets.slotShare[k], 0) || 1
   const remainingKcal = targets.kcal - eatenKcal
   const remainingProtein = targets.protein - eatenProtein
-  if (eatenSlots.length && remainingKcal < targets.kcal * 0.25 && toPlan.length) {
+  if (anyEaten && remainingKcal < targets.kcal * 0.25 && toPlan.length) {
     notes.push('今天已接近或超出预算，剩下的餐次按最低量给，以蛋白和蔬菜为主')
   }
   const plannedCap = toPlan.reduce((s, k) => s + targets.kcal * targets.slotShare[k] * 1.3, 0)
-  if (eatenSlots.length && toPlan.length && remainingKcal > plannedCap + 150) {
+  if (anyEaten && toPlan.length && remainingKcal > plannedCap + 150) {
     notes.push(`前面吃得少，今天还有约 ${Math.round(remainingKcal - plannedCap)} 千卡余量，可以加一份水果、坚果或牛奶`)
   }
 
@@ -652,7 +665,6 @@ export function planDay(input: PlanInput): DayPlan {
       if (!items) return null // 有一餐没记录过就整体重排
       kept[slot] = items
     }
-    const eatenTotals = sum(eatenSlots.map((k) => eaten[k] || ZERO))
     return keptPlanFits(kept, eatenTotals, targets, input.dishMap) ? kept : null
   })()
 
@@ -663,7 +675,7 @@ export function planDay(input: PlanInput): DayPlan {
     const normalP = targets.protein * share
     let T = normalT
     let P = normalP
-    if (eatenSlots.length) {
+    if (anyEaten) {
       // 按剩余预算分配，但单餐不超过常规量的 1.3 倍、不低于 0.5 倍
       T = Math.min(normalT * 1.3, Math.max(normalT * 0.5, (Math.max(0, remainingKcal) * share) / shareSum))
       P = Math.min(normalP * 1.3, Math.max(normalP * 0.6, (Math.max(0, remainingProtein) * share) / shareSum))
@@ -684,9 +696,8 @@ export function planDay(input: PlanInput): DayPlan {
   }
 
   // 全天收敛。沿用上次推荐时跳过：收敛会换菜，那就等于又重排了一遍
-  const eatenTotal = sum(eatenSlots.map((k) => eaten[k] || ZERO))
   if (!keepAll) {
-    notes.push(...balanceDay(meals, ctx, eatenTotal, makeRng(hashString(`${date}|balance|${seed}`))))
+    notes.push(...balanceDay(meals, ctx, eatenTotals, makeRng(hashString(`${date}|balance|${seed}`))))
   } else {
     notes.push('按上次的推荐保留，没有重排')
   }
@@ -698,7 +709,7 @@ export function planDay(input: PlanInput): DayPlan {
   if (adj.kcalOver) notes.push('近期热量超标，今天按目标量给，别再加餐')
   notes.push(...conditionPlanNotes(input.profile, targets))
 
-  return { date, meals, totals: sum(meals.map((m) => m.totals)), notes, eatenSlots }
+  return { date, meals, totals: sum(meals.map((m) => m.totals)), notes, eatenSlots, eatenTotals }
 }
 
 /** 生成购物清单：按食材汇总克重 */

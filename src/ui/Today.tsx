@@ -9,14 +9,15 @@ import { isHabitFinding } from '../core/analysis'
 import { nowTimeStr, todayStr } from '../core/dates'
 import { creatureLine, creatureMood } from '../core/creatureTalk'
 import { budgetFocus, remainOf, type BudgetPick } from '../core/budget'
-import { entryName, entryNutrients, servingGrams } from '../core/nutrition'
+import { entryName, entryNutrients } from '../core/nutrition'
 import { Meter } from './charts'
 import { useCountUp } from './hooks'
 import { IconBowl, IconClose, IconPlus } from './icons'
-import { SLOT_LABEL, entryPortionText, portionText, r0 } from './format'
+import { SLOT_LABEL, entryPortionText, r0 } from './format'
 import { CONDITION_LABEL } from '../core/conditions'
 import { SignalChips } from './bits'
 import { CanIEat } from './CanIEat'
+import { BudgetPickList } from './BudgetPicks'
 import { EggView, SpeechBubble } from './Creature'
 import type { Creature } from '../core/creature'
 import { PixelCatView } from './PixelCat'
@@ -198,25 +199,7 @@ export function Today({ water, fluidMl, onSetWater, date, entries, targets, stat
       {showBudget && remain > 50 && budgetPicks.length > 0 && onQuickLog && (
         <div className="card budget-card" ref={budgetRef}>
           <div className="section-title"><h2>用剩下的 {r0(remain)} 千卡还能吃什么</h2><div className="row" style={{ gap: 4, flex: 'none', whiteSpace: 'nowrap' }}><span className="small muted">按{SLOT_LABEL[nextSlot]}挑</span><button className="btn ghost sm with-icon" onClick={() => setShowBudget(false)} aria-label="收起还能吃什么">收起<IconClose size={12} /></button></div></div>
-          {focus.length > 0 && (
-            <div className="budget-focus tiny">
-              <span className="muted">按缺口挑</span>
-              {focus.map((f) => <span key={f.key} className={`focus-tag ${f.kind} ${f.key}`}>{f.label}</span>)}
-            </div>
-          )}
-          <div className="list">
-            {budgetPicks.map((p) => (
-              <div key={p.dish.id} className="list-item">
-                <div className="grow">
-                  <div className="ellipsis">{p.dish.name} <span className="muted small">× {portionText(p.portion, servingGrams(p.dish))}</span></div>
-                  <div className="tiny muted">{p.why}{/蛋白/.test(p.why) ? '' : ` · 蛋白 ${r0(p.n.protein)} g`}</div>
-                </div>
-                <div className="num ink2">{r0(p.n.kcal)}</div>
-                {onDislike && <button className="btn ghost sm quiet" title="不喜欢，换一个" onClick={() => onDislike(p.dish.id)} aria-label={`不喜欢${p.dish.name}，换一个`}><IconClose size={16} /></button>}
-                <button className="btn ghost sm" onClick={() => { onQuickLog(nextSlot, p.dish.id, p.portion); setShowBudget(false) }} aria-label={`记一份${p.dish.name}`}><IconPlus size={16} /></button>
-              </div>
-            ))}
-          </div>
+          <BudgetPickList picks={budgetPicks} focus={focus} nextSlot={nextSlot} onQuickLog={onQuickLog} onDislike={onDislike} onAfterLog={() => setShowBudget(false)} />
         </div>
       )}
 

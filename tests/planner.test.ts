@@ -90,6 +90,34 @@ describe('planner', () => {
     expect(dinner.targetKcal).toBeLessThanOrEqual(Math.round(t.kcal * t.slotShare.dinner))
     expect(dinner.targetKcal).toBeGreaterThanOrEqual(Math.round(t.kcal * t.slotShare.dinner * 0.5) - 1)
   })
+  it('一杯咖啡不算吃过早餐：那一餐照给推荐，但这点热量照样占预算', () => {
+    const t = computeTargets(profile, NOW)
+    const coffee = { kcal: 140, protein: 7, fat: 7, carbs: 12, fiber: 0, sodium: 90 }
+    const base = planDay(input())
+    const p = planDay(input(profile, { eatenToday: { breakfast: coffee } }))
+    expect(p.eatenSlots).toEqual([])
+    expect(p.meals.map((m) => m.slot)).toEqual(['breakfast', 'lunch', 'dinner'])
+    expect(p.eatenTotals.kcal).toBe(140)
+    // 三餐的目标加起来 = 全天目标 − 已经喝掉的那杯，而不是当它没发生过
+    const sumT = (x: typeof base) => x.meals.reduce((s, m) => s + m.targetKcal, 0)
+    expect(sumT(base)).toBeGreaterThan(sumT(p))
+    expect(Math.abs(sumT(p) - (t.kcal - 140))).toBeLessThanOrEqual(5)
+  })
+  it('吃到这一餐常规量的四成就算吃过了，不再重复推荐', () => {
+    const t = computeTargets(profile, NOW)
+    const half = Math.round(t.kcal * t.slotShare.breakfast * 0.5)
+    const p = planDay(input(profile, { eatenToday: { breakfast: { kcal: half, protein: 12, fat: 8, carbs: 30, fiber: 2, sodium: 300 } } }))
+    expect(p.eatenSlots).toEqual(['breakfast'])
+    expect(p.meals.map((m) => m.slot)).toEqual(['lunch', 'dinner'])
+  })
+  it('每餐都吃过但全天还差一截：推荐为空，已吃的量如实给出（界面据此补一顿）', () => {
+    const t = computeTargets(profile, NOW)
+    const small = (kcal: number) => ({ kcal, protein: 8, fat: 6, carbs: 20, fiber: 2, sodium: 300 })
+    const p = planDay(input(profile, { eatenToday: { breakfast: small(280), lunch: small(300), dinner: small(260) } }))
+    expect(p.meals).toEqual([])
+    expect(p.eatenTotals.kcal).toBe(840)
+    expect(t.kcal - p.eatenTotals.kcal).toBeGreaterThan(300)
+  })
   it('外卖午餐模式下午餐给一份外卖套餐', () => {
     const plan = planDay(input(profile, { adjustments: { ...NO_ADJUST, enough: true, takeoutLunch: true } }))
     const lunch = plan.meals.find((m) => m.slot === 'lunch')!

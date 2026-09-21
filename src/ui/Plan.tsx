@@ -4,11 +4,13 @@ import { MEAL_SLOTS } from '../core/types'
 import type { DayPlan, MealPlan } from '../core/planner'
 import { shoppingList } from '../core/planner'
 import { addDays, shortDate, todayStr, weekdayLabel } from '../core/dates'
-import { dishNutrientsFor, entryName, entryNutrients, scale, servingGrams, sum } from '../core/nutrition'
+import { dishNutrientsFor, entryName, scale, servingGrams } from '../core/nutrition'
 import { COOK_LABEL, SLOT_LABEL, entryPortionText, portionText, r0 } from './format'
 import { IconClose } from './icons'
 import { Fold, SignalChips, Stats } from './bits'
 import { mealWhy } from '../core/mealWhy'
+import { BudgetPickList } from './BudgetPicks'
+import { budgetFocus, remainOf, type BudgetPick } from '../core/budget'
 
 // 推荐理由整句太长且每道菜重复，收成一个小标签；整句留在 title 里
 const REASON_TAGS: Array<[RegExp, string]> = [[/蛋白/, '高蛋白'], [/粗粮/, '粗粮'], [/主食|碳水/, '低碳'], [/清淡|盐|钠/, '清淡'], [/油/, '少油'], [/蔬菜|菜/, '加菜'], [/水果/, '加水果'], [/外卖/, '外卖优选']]
@@ -17,7 +19,11 @@ function reasonTag(r: string): string {
   return r.length > 6 ? r.slice(0, 6) : r
 }
 
-export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMeal, onDislike, isToday, date, planFor, onRerollWeek, onPickDate, adjustments, profile }: {
+export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMeal, onDislike, isToday, date, planFor, onRerollWeek, onPickDate, adjustments, profile, budgetPicks = [], nextSlot = 'snack', onQuickLog }: {
+  /** 每餐都记过、但全天还有余量时，推荐页给的就是今日页那份「还能吃什么」 */
+  budgetPicks?: BudgetPick[]
+  nextSlot?: MealSlot
+  onQuickLog?: (slot: MealSlot, dishId: string, portion?: number) => void
   /** 「这一餐为什么这么排」要用：近 7 天结论与档案 */
   adjustments: import('../core/analysis').Adjustments
   profile: import('../core/types').Profile
@@ -35,13 +41,18 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
   onDislike: (dishId: string) => void
   isToday: boolean
 }) {
-  // 已吃餐次的实际摄入：顶部数据条按「已吃 + 推荐」对照全天目标
-  const hasEaten = plan.eatenSlots.length > 0
-  const eatenN = useMemo(() => sum(dayEntries.filter((e) => plan.eatenSlots.includes(e.slot)).map((e) => entryNutrients(e, dishMap))), [dayEntries, plan.eatenSlots, dishMap])
+  // 这一天已经吃下去的量：顶部数据条按「已吃 + 推荐」对照全天目标。
+  // 用 planner 算好的那份，口径跟它分配剩余预算时用的完全一致。
+  const eatenN = plan.eatenTotals
+  const hasEaten = eatenN.kcal > 0
   const [showList, setShowList] = useState(false)
   const [view, setView] = useState<'day' | 'week'>('day')
   const list = shoppingList(plan, dishMap)
   const allEaten = plan.meals.length === 0
+  // 每餐都记过了，但全天还差一截：这时候最该说话，不能只说一句「明天再来看」
+  const remainKcal = targets.kcal - eatenN.kcal
+  const focus = useMemo(() => budgetFocus(remainOf(targets, eatenN), targets).slice(0, 3), [targets, eatenN])
+  const canTopUp = allEaten && remainKcal > 50 && budgetPicks.length > 0 && !!onQuickLog
   const today = todayStr()
   const weekDates = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(date, i)), [date])
   const weekPlans = useMemo(() => (view === 'week' ? weekDates.map((d) => ({ date: d, plan: planFor(d) })) : []), [view, weekDates, planFor])
@@ -71,7 +82,7 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
           { label: '推荐热量', value: r0(plan.totals.kcal), of: targets.kcal, unit: '千卡', tone: plan.totals.kcal > targets.kcal * 1.05 ? 'bad' : undefined },
           { label: '推荐蛋白', value: r0(plan.totals.protein), of: targets.protein, unit: 'g' },
         ]} />}
-        {view === 'day' && hasEaten && <p className="tiny muted" style={{ marginTop: 2 }}>已吃{plan.eatenSlots.map((s) => SLOT_LABEL[s]).join('、')}；推荐只覆盖其余餐次，按剩余预算给</p>}
+        {view === 'day' && plan.eatenSlots.length > 0 && <p className="tiny muted" style={{ marginTop: 2 }}>已吃{plan.eatenSlots.map((s) => SLOT_LABEL[s]).join('、')}；推荐只覆盖其余餐次，按剩余预算给</p>}
         {view === 'day' && <SignalChips notes={plan.notes} />}
       </div>
 
@@ -93,7 +104,8 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
                     )
                   }) : <span className="muted">—</span>}
                 </div>
-                <div className="num small ink2 week-kcal">{p ? `${r0(p.totals.kcal)} 千卡` : ''}</div>
+                {/* 已吃 + 推荐：只显示推荐的话，全都记过的那天会写成 0 千卡 */}
+                <div className="num small ink2 week-kcal">{p ? `${r0(p.eatenTotals.kcal + p.totals.kcal)} 千卡` : ''}</div>
               </button>
             ))}
           </div>
@@ -122,7 +134,18 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
         return <MealCard key={slot} meal={m} dishMap={dishMap} onReroll={() => onReroll(m.slot)} onLog={() => onLogMeal(m)} onDislike={onDislike} why={mealWhy({ meal: m, targets, adjustments, profile, redistributed: plan.eatenSlots.length > 0 })} />
       })}
 
-      {view === 'day' && allEaten && <div className="card"><div className="empty">今天的餐都记录了，明天再来看推荐</div></div>}
+      {view === 'day' && canTopUp && (
+        <div className="card budget-card">
+          <div className="section-title">
+            <h2>每餐都记过了，还差 {r0(remainKcal)} 千卡</h2>
+            <span className="small muted">按{SLOT_LABEL[nextSlot]}挑</span>
+          </div>
+          <BudgetPickList picks={budgetPicks} focus={focus} nextSlot={nextSlot} onQuickLog={onQuickLog!} onDislike={onDislike} />
+        </div>
+      )}
+      {view === 'day' && allEaten && !canTopUp && (
+        <div className="card"><div className="empty">{isToday ? '今天的餐都记录了，明天再来看推荐' : '这天的餐都记录了'}</div></div>
+      )}
 
       {view === 'day' && !allEaten && (
         <div className="card">
