@@ -15,6 +15,7 @@ import { Stats } from './bits'
 import type { LlmConfig, SpeakJob } from '../llm/mealParser'
 import { searchFoods, type FoodPick } from './foodSearch'
 import { guessDishFromName, type DishGuess } from '../core/dishGuess'
+import { CUSTOM_CATS, defaultGrams, draftDish, draftReady, kcalFromMacros, type CustomCat } from '../core/customDish'
 
 export type LogSheetResult =
   | { kind: 'save'; entry: LogEntry }
@@ -277,28 +278,6 @@ export function LogSheet({ date, isToday, slot: initialSlot, editing, dishes, di
   )
 }
 
-type CustomCat = 'protein' | 'veg' | 'staple' | 'soup' | 'breakfast' | 'snack'
-const CUSTOM_CATS: Array<[CustomCat, string]> = [['protein', '荤菜/蛋白'], ['veg', '素菜'], ['staple', '主食'], ['soup', '汤'], ['breakfast', '早餐'], ['snack', '小食']]
-const SLOTS_BY_CAT: Record<CustomCat, MealSlot[]> = { protein: ['lunch', 'dinner'], veg: ['lunch', 'dinner'], staple: ['breakfast', 'lunch', 'dinner'], soup: ['lunch', 'dinner'], breakfast: ['breakfast'], snack: ['snack', 'breakfast'] }
-/** 加食材时的默认克重（一人份） */
-function defaultGrams(ing: Ingredient): number {
-  switch (ing.cat) {
-    case 'vegetable': case 'mushroom': return 150
-    case 'meat': case 'poultry': case 'seafood': return 100
-    case 'egg': return 50
-    case 'soy': case 'tuber': return 100
-    case 'grain': return 100
-    case 'dairy': case 'beverage': return 200
-    case 'fruit': return 150
-    case 'oil': return 10
-    case 'condiment': return ing.id === 'salt' ? 1.5 : 10
-    case 'sugar': return 5
-    case 'nut': return 15
-    case 'legume': return 50
-    default: return 50
-  }
-}
-
 function CustomForm({ onCancel, onDone, onDoneDish, barcode, prefill }: { onCancel: () => void; onDone: (f: CustomFood) => void; onDoneDish: (d: Dish) => void; barcode?: string; prefill?: DishGuess | null }) {
   // 默认按食材搭配：营养与蔬菜量自动算出，和菜品库同一套逻辑；看包装成分表时切到「按成分表」
   const [mode, setMode] = useState<'parts' | 'label'>(barcode ? 'label' : 'parts')
@@ -307,7 +286,7 @@ function CustomForm({ onCancel, onDone, onDoneDish, barcode, prefill }: { onCanc
   const [serving, setServing] = useState('1份')
   const [v, setV] = useState({ kcal: '', protein: '', fat: '', carbs: '', fiber: '', vegG: '', fruitG: '' })
   const num = (s: string) => (s === '' ? 0 : Number(s))
-  const macroKcal = num(v.protein) * 4 + num(v.fat) * 9 + num(v.carbs) * 4
+  const macroKcal = kcalFromMacros(num(v.protein), num(v.fat), num(v.carbs))
   const kcal = v.kcal === '' ? macroKcal : num(v.kcal)
   const okLabel = name.trim() && kcal > 0
   // 食材模式
@@ -324,10 +303,10 @@ function CustomForm({ onCancel, onDone, onDoneDish, barcode, prefill }: { onCanc
       .sort((a, b) => rank(a) - rank(b) || (a.cat === 'oil' || a.cat === 'condiment' ? 0 : 1) - (b.cat === 'oil' || b.cat === 'condiment' ? 0 : 1) || a.name.length - b.name.length)
       .slice(0, 8)
   }, [iq, parts])
-  const draft: Dish | null = parts.length ? { id: 'custom_draft', name: name || '自定义', cat, cuisine: 'cn', cook, slots: SLOTS_BY_CAT[cat], serving: `1份(约${Math.round(parts.reduce((s, p) => s + p.g, 0))}g)`, parts } : null
+  const draft = draftDish({ name, cat, cook, parts })
   const dn = draft ? dishNutrients(draft) : null
   const dveg = draft ? vegGrams(draft) : 0
-  const okParts = name.trim() && parts.length > 0 && parts.every((p) => p.g > 0)
+  const okParts = draftReady({ name, cat, cook, parts })
   const saveDish = () => {
     if (!draft) return
     onDoneDish({ ...draft, id: 'custom_' + uid(), name: name.trim() })
