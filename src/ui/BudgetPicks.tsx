@@ -33,8 +33,8 @@ export function BudgetPickList({ picks, focus, nextSlot, onQuickLog, onDislike, 
               <div className="tiny muted">{p.why}{/蛋白/.test(p.why) ? '' : ` · 蛋白 ${r0(p.n.protein)} g`}</div>
             </div>
             <div className="num ink2">{r0(p.n.kcal)}</div>
-            {onDislike && <button className="btn ghost sm quiet" title="不喜欢，换一个" onClick={() => onDislike(p.dish.id)} aria-label={`不喜欢${p.dish.name}，换一个`}><IconClose size={16} /></button>}
-            <button className="btn ghost sm" onClick={() => { onQuickLog(nextSlot, p.dish.id, p.portion); onAfterLog?.() }} aria-label={`记一份${p.dish.name}`}><IconPlus size={16} /></button>
+            {onDislike && <button className="btn ghost quiet icon-btn" title="不喜欢，换一个" onClick={() => onDislike(p.dish.id)} aria-label={`不喜欢${p.dish.name}，换一个`}><IconClose size={16} /></button>}
+            <button className="btn ghost icon-btn" onClick={() => { onQuickLog(nextSlot, p.dish.id, p.portion); onAfterLog?.() }} aria-label={`记一份${p.dish.name}`}><IconPlus size={16} /></button>
           </div>
         ))}
       </div>

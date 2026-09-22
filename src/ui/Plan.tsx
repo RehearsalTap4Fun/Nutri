@@ -182,7 +182,7 @@ function MealCard({ meal, dishMap, onReroll, onLog, onDislike, why }: { meal: Me
                 <div className="tiny muted">{d.serving} · {COOK_LABEL[d.cook]} · 蛋白 {r0(n.protein)} g</div>
               </div>
               <div className="num ink2">{r0(n.kcal)}</div>
-              <button className="btn ghost sm" title="不想吃这个，以后不推荐" onClick={() => onDislike(d.id)} aria-label="不推荐这道菜"><IconClose /></button>
+              <button className="btn ghost quiet icon-btn" title="不想吃这个，以后不推荐" onClick={() => onDislike(d.id)} aria-label={`不推荐「${d.name}」`}><IconClose /></button>
             </div>
           )
         })}
