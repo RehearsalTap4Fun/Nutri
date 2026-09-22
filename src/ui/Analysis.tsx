@@ -53,13 +53,15 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
   const warn = analysis.findings.filter((f) => f.severity === 'warn')
   // 结论按宏量归位：挂到对应的条右侧；归不进去的是饮食习惯，单列
   const byMetric = useMemo(() => {
-    const m: Record<string, Finding[]> = { kcal: [], protein: [], fat: [], veg: [], fiber: [], fruit: [], water: [] }
+    const m: Record<string, Finding[]> = { kcal: [], protein: [], share: [], veg: [], fiber: [], fruit: [], water: [] }
     const habits: Finding[] = []
     for (const f of analysis.findings) {
       const k = f.key
       if (k.startsWith('kcal_')) m.kcal.push(f)
       else if (k === 'protein_low' || k === 'protein_ok') m.protein.push(f)
-      else if (k === 'fat_high') m.fat.push(f)
+      // 脂肪供能比说的是占总热量的比例，不是克数。挂在克数那一行会自相矛盾：
+      // 吃得少的日子里「55/58 g」明明在范围内，右边却亮着「要改」。放到它真正描述的供能比条下面。
+      else if (k === 'fat_high') m.share.push(f)
       else if (k.startsWith('veg_')) m.veg.push(f)
       else if (k === 'fiber_low') m.fiber.push(f)
       else if (k === 'fruit_low') m.fruit.push(f)
@@ -117,7 +119,7 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
             <VarianceAxis />
             <MetricRow findings={byMetric.m.kcal}><Variance label="热量" value={w.avg.kcal} target={targets.kcal} unit="kcal" color="var(--ring)" mode="near" tol={[(profile.conditions || []).some((c) => c === 'pregnancy' || c === 'lactation') ? 0.15 : 0.2, 0.1]} tone={sevOf(byMetric.m.kcal)} /></MetricRow>
             <MetricRow findings={byMetric.m.protein}><Variance label="蛋白" value={w.avg.protein} target={targets.protein} unit="g" color="var(--protein)" mode="atLeast" tol={0.15} tone={sevOf(byMetric.m.protein)} /></MetricRow>
-            <MetricRow findings={byMetric.m.fat}><Variance label="脂肪" value={w.avg.fat} target={targets.fat} unit="g" color="var(--fat)" mode="atMost" tol={0.25} tone={sevOf(byMetric.m.fat)} /></MetricRow>
+            <MetricRow findings={[]}><Variance label="脂肪" value={w.avg.fat} target={targets.fat} unit="g" color="var(--fat)" mode="atMost" tol={0.25} /></MetricRow>
             <MetricRow findings={[]}><Variance label="碳水" value={w.avg.carbs} target={targets.carbs} unit="g" color="var(--carbs)" mode="atMost" tol={0.1} /></MetricRow>
             <MetricRow findings={byMetric.m.fiber}><Variance label="纤维" value={w.avg.fiber} target={targets.fiber} unit="g" color="var(--fiber)" mode="atLeast" tol={0.3} tone={sevOf(byMetric.m.fiber)} /></MetricRow>
             <MetricRow findings={byMetric.m.veg}><Variance label="蔬菜" value={w.avgVegServings} target={targets.vegServings} unit="份" color="var(--accent)" mode="atLeast" tol={0.4} tone={sevOf(byMetric.m.veg)} /></MetricRow>
@@ -125,6 +127,7 @@ export function AnalysisView({ analysis, targets, weights, entries, water = [], 
             {waterAvg.days > 0 && <MetricRow findings={byMetric.m.water}><Variance label="饮水" value={waterAvg.avg} target={targets.waterMl} unit="ml" color="var(--pond)" mode="atLeast" tol={0.3} tone={sevOf(byMetric.m.water)} /></MetricRow>}
             <Legend items={[{ swatch: 'shoal', label: '合适区间' }, { swatch: 'land', label: '达标' }, { swatch: 'sun', label: '要改' }]} />
             <ShareBar protein={share.protein} fat={share.fat} carbs={share.carbs} />
+            {byMetric.m.share.map((f) => <FindingRow key={f.key} f={f} defaultOpen={f.severity === 'warn'} />)}
             <Fold summary="供能比参考范围">蛋白 15~25%、脂肪 25~35%、碳水 45~60%（中国居民膳食营养素参考摄入量 2023 版）。</Fold>
             <TargetBasis profile={profile} targets={targets} adaptive={useAdaptive} />
           </>
