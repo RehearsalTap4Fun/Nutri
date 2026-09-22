@@ -34,8 +34,11 @@ import type { VitalEntry } from '@core/types'
 import { uid } from '../../shared/state'
 import { useAppState } from '../../shared/useAppState'
 import { derive, dishMapOf } from '../../shared/derive'
+import { useDeclareTab } from '../../custom-tab-bar/selection'
 
 export default function Today() {
+  // 告诉导航栏当前是哪个页签（导航栏自己不猜路由，见 custom-tab-bar/selection.ts）
+  useDeclareTab('today')
   const [state, update] = useAppState()
   const date = todayStr()
   const d = useMemo(() => derive(state, date), [state, date])

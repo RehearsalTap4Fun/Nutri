@@ -22,6 +22,7 @@ import { useRememberPlan } from '../../shared/rememberPlan'
 import { mealWhy } from '@core/mealWhy'
 import { Fold } from '../../components/bits'
 import { Icon } from '../../components/Icon'
+import { useDeclareTab } from '../../custom-tab-bar/selection'
 
 // 推荐理由整句太长且每道菜重复，收成一个小标签。规则与网页版一致
 const REASON_TAGS: Array<[RegExp, string]> = [
@@ -40,6 +41,8 @@ function reasonTag(r: string): string {
 }
 
 export default function Plan() {
+  // 告诉导航栏当前是哪个页签（导航栏自己不猜路由，见 custom-tab-bar/selection.ts）
+  useDeclareTab('plan')
   const [state, update] = useAppState()
   const date = todayStr()
   const d = useMemo(() => derive(state, date), [state, date])

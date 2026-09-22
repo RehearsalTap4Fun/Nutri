@@ -24,6 +24,7 @@ import { shortCite, targetBasis } from '@core/sources'
 import { Fold } from '../../components/bits'
 import { CatDexCard } from '../../components/CatDex'
 import { PixelCat } from '../../components/PixelCat'
+import { useDeclareTab } from '../../custom-tab-bar/selection'
 
 const SEX: Array<[Sex, string]> = [
   ['male', '男'],
@@ -69,6 +70,8 @@ function emptyProfile(): Profile {
 }
 
 export default function Me() {
+  // 告诉导航栏当前是哪个页签（导航栏自己不猜路由，见 custom-tab-bar/selection.ts）
+  useDeclareTab('me')
   const [state, update] = useAppState()
   const p = state.profile
 

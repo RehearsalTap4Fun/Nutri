@@ -16,6 +16,7 @@ import { Fold } from '../../components/bits'
 import { dishMapOf } from '../../shared/derive'
 import { avgWater } from '@core/water'
 import { lastNDays } from '@core/dates'
+import { useDeclareTab } from '../../custom-tab-bar/selection'
 
 const r0 = (v: number) => Math.round(v)
 
@@ -31,6 +32,8 @@ function FindingCard({ f }: { f: Finding }) {
 }
 
 export default function Analysis() {
+  // 告诉导航栏当前是哪个页签（导航栏自己不猜路由，见 custom-tab-bar/selection.ts）
+  useDeclareTab('analysis')
   const [state, update] = useAppState()
   const date = todayStr()
   const d = useMemo(() => derive(state, date), [state, date])
