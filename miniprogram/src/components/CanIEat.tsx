@@ -3,6 +3,7 @@
  * 复刻网页版 `src/ui/CanIEat.tsx`，判定规则复用 `@core/verdict`，不重新发明。
  */
 import { useMemo, useState } from 'react'
+import Taro from '@tarojs/taro'
 import { View, Text, Input } from '@tarojs/components'
 import type { Condition, Dish, MealSlot, Nutrients, Targets } from '@core/types'
 import type { CustomFood } from '@store/storage'
@@ -93,9 +94,16 @@ export function CanIEat({
             </View>
           ) : null}
           {q.trim() && results.length === 0 ? (
-            <Text className="empty">
-              没找到「{q}」，试试换个名字，或先在「记一笔」里自建后再来问。
-            </Text>
+            <View>
+              <Text className="empty">没找到「{q}」。换个名字，或者自己录一个再来问。</Text>
+              {/* 以前这里写「先去记一笔里自建」，可那时记一笔并没有自建入口。现在有了，顺手带过去，搜索词也一起带上 */}
+              <Text
+                className="empty link-line"
+                onClick={() => Taro.navigateTo({ url: `/pages/log/index?q=${encodeURIComponent(q.trim())}` })}
+              >
+                去录一个「{q.trim()}」→
+              </Text>
+            </View>
           ) : null}
         </View>
       ) : null}
