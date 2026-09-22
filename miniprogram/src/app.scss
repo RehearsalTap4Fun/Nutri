@@ -1793,3 +1793,34 @@ page {
   color: var(--lobe-ink);
   opacity: 0.85;
 }
+
+/* ── 自己录一个：库里没有这个食物时的出路 ── */
+/* 克重输入：跟在食材名后面，短一点，右对齐好对齐数字 */
+.field .g-input {
+  flex: none;
+  width: 140px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.field .del {
+  flex: none;
+  font-size: 24px;
+  color: var(--muted);
+  padding: 8px 0 8px 16px;
+}
+
+/* 一句可点的提示，比按钮轻，比纯文字明确 */
+.link-line {
+  display: block;
+  padding: 20px 0;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.tiny-note {
+  display: block;
+  margin-top: 20px;
+  font-size: 22px;
+  line-height: 1.5;
+}
