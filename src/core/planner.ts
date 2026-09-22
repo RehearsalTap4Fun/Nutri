@@ -5,6 +5,7 @@ import { INGREDIENT_MAP } from '../data/ingredients'
 import { hashString, makeRng, weightedPick } from './rng'
 import type { Adjustments } from './analysis'
 import { conditionExcludes, conditionPlanNotes, conditionWeight } from './conditions'
+import { addDays } from './dates'
 
 export type Role = 'staple' | 'protein' | 'veg' | 'soup' | 'main' | 'bfprotein' | 'fruit' | 'snack' | 'combo'
 
@@ -173,9 +174,10 @@ function weigh(d: Dish, role: Role, slot: MealSlot, ctx: Ctx): Weighted {
   w *= cookW[d.cook]
   if (p.goal === 'lose') w *= d.cook === 'light' ? 1.15 : d.cook === 'fried' ? 0.6 : 1
 
-  // 避重
+  // 避重。昨天刚出现过的单独压一档：一周视图里前一天排的菜也算「昨天」，
+  // 0.15 还不足以把它压下去，同一道酱牛肉会连着两天出现在午餐里
   const daysAgo = ctx.recentDishDays.get(d.id)
-  if (daysAgo !== undefined) w *= daysAgo <= 2 ? 0.15 : 0.5
+  if (daysAgo !== undefined) w *= daysAgo <= 1 ? 0.05 : daysAgo <= 2 ? 0.15 : 0.5
   const mp = mainProteinIng(d)
   if (mp && ctx.usedProteins.has(mp) && (role === 'protein' || role === 'combo')) w *= 0.3
 
@@ -710,6 +712,48 @@ export function planDay(input: PlanInput): DayPlan {
   notes.push(...conditionPlanNotes(input.profile, targets))
 
   return { date, meals, totals: sum(meals.map((m) => m.totals)), notes, eatenSlots, eatenTotals }
+}
+
+/** 一周视图里每天各自的参数（换一换计数、已吃、沿用的推荐） */
+export interface WeekDayInput {
+  seed: number
+  mealSeeds?: Partial<Record<MealSlot, number>>
+  eatenToday?: Partial<Record<MealSlot, Nutrients>>
+  keep?: Partial<Record<MealSlot, PlanItem[]>>
+}
+
+/**
+ * 一周的推荐：按日期顺序往下排，并把前几天刚排出来的菜也交给后一天当「最近吃过」。
+ * 每天各排各的会撞车——避重只看得见真实记录，而往后那几天还没有记录，
+ * 于是周二和周三很容易出现同一道晚餐。
+ * `recentEntries` 给全量真实记录即可，这里按每天各自的 7 天窗口筛。
+ */
+export function planWeek(
+  base: Omit<PlanInput, 'date' | 'seed' | 'mealSeeds' | 'eatenToday' | 'keep'>,
+  dates: string[],
+  perDay: (date: string) => WeekDayInput,
+): Array<{ date: string; plan: DayPlan }> {
+  const planned: LogEntry[] = []
+  return dates.map((date) => {
+    const day = perDay(date)
+    const from = addDays(date, -7)
+    const plan = planDay({
+      ...base,
+      date,
+      seed: day.seed,
+      mealSeeds: day.mealSeeds,
+      eatenToday: day.eatenToday,
+      keep: day.keep,
+      recentEntries: [
+        ...base.recentEntries.filter((e) => e.date >= from && e.date <= date),
+        ...planned.filter((e) => e.date >= from && e.date < date),
+      ],
+    })
+    for (const m of plan.meals) {
+      for (const it of m.items) planned.push({ id: `plan-${date}-${m.slot}-${it.dishId}`, updatedAt: 0, date, slot: m.slot, dishId: it.dishId, portion: it.portion })
+    }
+    return { date, plan }
+  })
 }
 
 /** 生成购物清单：按食材汇总克重 */

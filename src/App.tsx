@@ -4,7 +4,7 @@ import { fluidFromDrinks } from './core/water'
 import { MEAL_SLOTS } from './core/types'
 import { computeTargets } from './core/energy'
 import { analyze, dayStat, NO_ADJUST } from './core/analysis'
-import { planDay } from './core/planner'
+import { planDay, planWeek } from './core/planner'
 import { remainOf, suggestForBudget } from './core/budget'
 import { frequentBySlot, frequentDishes } from './core/recent'
 import type { MealPlan, PlanItem } from './core/planner'
@@ -154,15 +154,22 @@ export default function App() {
     if (!profile || !targets || !stat) return []
     return suggestForBudget({ remain: remainOf(targets, stat.n), targets, slot: nextSlot, dishes: allDishes, profile, favorites: state.favorites, recentIds: recentDishIds })
   }, [profile, targets, stat, nextSlot, state.favorites, recentDishIds, allDishes])
-  // 任意一天的推荐（一周视图用）：已吃的餐视为完成，其余按剩余预算给
-  const planFor = useCallback((d: string) => {
-    if (!profile || !targets || !analysis) return null
-    const statD = dayStat(d, state.entries, dishMap, targets.kcal)
-    const eaten: Partial<Record<MealSlot, Nutrients>> = {}
-    for (const s of MEAL_SLOTS) eaten[s] = statD.bySlot[s]
-    const seeds = state.planSeeds[d] || { day: 0, meals: {} }
-    return planDay({ profile, targets, dishes: allDishes, dishMap: dishMap, date: d, seed: seeds.day, mealSeeds: seeds.meals, recentEntries: state.entries.filter((e) => e.date >= addDays(d, -7) && e.date <= d), adjustments: analysis.adjustments, eatenToday: eaten })
-  }, [profile, targets, analysis, state.entries, state.planSeeds])
+  // 一周的推荐：已吃的餐视为完成，其余按剩余预算给。串行避重的规则在 core/planner 的 planWeek 里
+  const planWeekFor = useCallback((dates: string[]) => {
+    if (!profile || !targets || !analysis) return dates.map((d) => ({ date: d, plan: null }))
+    return planWeek(
+      { profile, targets, dishes: allDishes, dishMap, recentEntries: state.entries, adjustments: analysis.adjustments },
+      dates,
+      (d) => {
+        const statD = dayStat(d, state.entries, dishMap, targets.kcal)
+        const eaten: Partial<Record<MealSlot, Nutrients>> = {}
+        for (const s of MEAL_SLOTS) eaten[s] = statD.bySlot[s]
+        const seeds = state.planSeeds[d] || { day: 0, meals: {} }
+        // 单日视图沿用的那份推荐，这里也沿用，两个视图对同一天不该给出两套菜
+        return { seed: seeds.day, mealSeeds: seeds.meals, eatenToday: eaten, keep: state.planPicks[d] }
+      },
+    )
+  }, [profile, targets, analysis, state.entries, state.planSeeds, state.planPicks, dishMap, allDishes])
   const llm: LlmConfig = { provider: state.settings.provider, apiKey: state.settings.provider === 'deepseek' ? state.settings.deepseekKey : state.settings.anthropicKey }
 
   // ---- 云同步 ----
@@ -436,7 +443,7 @@ export default function App() {
           <Today date={date} entries={dayEntries} targets={targets} stat={stat} dishMap={dishMap} dishes={allDishes} customFoods={state.customFoods} favorites={state.favorites} onAdd={openAdd} onEdit={(e) => setSheet({ slot: e.slot, editing: e })} planNotes={plan?.notes || []} goPlan={() => setTab('plan')} goModes={goModes} conditions={profile.conditions} trainingDay={profile.conditions.includes('training') ? isTrainingDay : undefined} onToggleTrainingDay={toggleTrainingDay} quickBySlot={quickBySlot} recentDishIds={recentDishIds} onQuickLog={quickLog} onRemove={removeEntry} budgetPicks={budgetPicks} nextSlot={nextSlot} onDislike={dislikeDish} water={dayWater} fluidMl={fluidMl} onSetWater={setWater} creature={state.creature} findings={analysis?.findings ?? []} />
         )}
         {tab === 'plan' && plan && targets && (
-          <PlanView adjustments={analysis?.adjustments ?? NO_ADJUST} profile={profile} date={date} planFor={planFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} budgetPicks={budgetPicks} nextSlot={nextSlot} onQuickLog={quickLog} />
+          <PlanView adjustments={analysis?.adjustments ?? NO_ADJUST} profile={profile} date={date} planWeek={planWeekFor} onRerollWeek={rerollWeek} onPickDate={setDate} plan={plan} targets={targets} dishMap={dishMap} dayEntries={dayEntries} onReroll={reroll} onLogMeal={logMeal} onDislike={dislikeDish} isToday={date === today} budgetPicks={budgetPicks} nextSlot={nextSlot} onQuickLog={quickLog} />
         )}
         {tab === 'analysis' && analysis && targets && (
           <AnalysisView vitals={state.vitals} onAddVital={addVital} onRemoveVital={removeVital} analysis={analysis} targets={targets} weights={state.weights} entries={state.entries} water={state.water} onAddWeight={addWeight} useAdaptive={state.settings.useAdaptiveTdee} onToggleAdaptive={setAdaptive} date={date} profile={profile} dishMap={dishMap} />

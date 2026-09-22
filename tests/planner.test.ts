@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { DISHES, DISH_MAP } from '../src/data/dishes/index'
 import { computeTargets } from '../src/core/energy'
 import { NO_ADJUST } from '../src/core/analysis'
-import { planDay, shoppingList } from '../src/core/planner'
+import { planDay, planWeek, shoppingList } from '../src/core/planner'
 import type { PlanInput } from '../src/core/planner'
 import { dishAllergens, isVegetarian } from '../src/core/nutrition'
 import type { Profile } from '../src/core/types'
+import { addDays } from '../src/core/dates'
 
 const profile: Profile = {
   sex: 'female', birthYear: 1994, heightCm: 163, weightKg: 58, bodyFatPct: 26, activity: 'light', goal: 'lose',
@@ -169,5 +170,50 @@ describe('全天收敛', () => {
     expect(okKcal, 'kcal').toBeGreaterThanOrEqual(10)
     expect(okFat, 'fat').toBeGreaterThanOrEqual(10)
     expect(okProt, 'protein').toBeGreaterThanOrEqual(10)
+  })
+})
+
+describe('一周的推荐', () => {
+  const dates = Array.from({ length: 6 }, (_, i) => addDays(date, i))
+  const base = { profile, targets: computeTargets(profile, NOW), dishes: DISHES, dishMap: DISH_MAP, recentEntries: [], adjustments: { ...NO_ADJUST, enough: true, proteinLow: true, vegLow: true } }
+  /** 相邻两天撞上同一道菜的次数；整餐一模一样另算 */
+  function repeats(week: ReturnType<typeof planWeek>) {
+    let dish = 0
+    let meal = 0
+    for (let i = 1; i < week.length; i++) {
+      const prev = week[i - 1].plan
+      const cur = week[i].plan
+      const prevIds = prev.meals.flatMap((m) => m.items.map((it) => it.dishId))
+      for (const it of cur.meals.flatMap((m) => m.items)) if (prevIds.includes(it.dishId)) dish++
+      for (const m of cur.meals) {
+        const p = prev.meals.find((x) => x.slot === m.slot)
+        const a = p ? p.items.map((it) => it.dishId).sort().join() : ''
+        const b = m.items.map((it) => it.dishId).sort().join()
+        if (a && a === b) meal++
+      }
+    }
+    return { dish, meal }
+  }
+
+  it('后一天避开前一天刚排的菜：整餐不重样，同一道菜也很少连着两天', () => {
+    let dish = 0
+    for (let seed = 0; seed < 4; seed++) {
+      const week = planWeek(base, dates, () => ({ seed }))
+      expect(week.map((w) => w.date)).toEqual(dates)
+      const r = repeats(week)
+      expect(r.meal).toBe(0)
+      dish += r.dish
+    }
+    // 每天各排各的时这个数在 15 以上（避重只看得见真实记录，而往后几天没有记录）
+    expect(dish).toBeLessThanOrEqual(6)
+  })
+
+  it('不串起来排就会撞车：同样的四个种子，重复明显更多', () => {
+    let dish = 0
+    for (let seed = 0; seed < 4; seed++) {
+      const week = dates.map((d) => ({ date: d, plan: planDay({ ...base, date: d, seed }) }))
+      dish += repeats(week).dish
+    }
+    expect(dish).toBeGreaterThan(6)
   })
 })

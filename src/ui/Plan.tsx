@@ -19,7 +19,7 @@ function reasonTag(r: string): string {
   return r.length > 6 ? r.slice(0, 6) : r
 }
 
-export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMeal, onDislike, isToday, date, planFor, onRerollWeek, onPickDate, adjustments, profile, budgetPicks = [], nextSlot = 'snack', onQuickLog }: {
+export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMeal, onDislike, isToday, date, planWeek, onRerollWeek, onPickDate, adjustments, profile, budgetPicks = [], nextSlot = 'snack', onQuickLog }: {
   /** 每餐都记过、但全天还有余量时，推荐页给的就是今日页那份「还能吃什么」 */
   budgetPicks?: BudgetPick[]
   nextSlot?: MealSlot
@@ -29,7 +29,8 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
   profile: import('../core/types').Profile
   /** 当前日期与一周视图 */
   date: string
-  planFor: (d: string) => DayPlan | null
+  /** 一周七天一次排完：后面几天会避开前面几天刚排的菜 */
+  planWeek: (dates: string[]) => Array<{ date: string; plan: DayPlan | null }>
   onRerollWeek: (dates: string[]) => void
   onPickDate: (d: string) => void
   plan: DayPlan
@@ -55,7 +56,7 @@ export function PlanView({ plan, targets, dishMap, dayEntries, onReroll, onLogMe
   const canTopUp = allEaten && remainKcal > 50 && budgetPicks.length > 0 && !!onQuickLog
   const today = todayStr()
   const weekDates = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(date, i)), [date])
-  const weekPlans = useMemo(() => (view === 'week' ? weekDates.map((d) => ({ date: d, plan: planFor(d) })) : []), [view, weekDates, planFor])
+  const weekPlans = useMemo(() => (view === 'week' ? planWeek(weekDates) : []), [view, weekDates, planWeek])
   const weekList = useMemo(() => {
     const m = new Map<string, { ing: string; name: string; g: number }>()
     for (const { plan: p } of weekPlans) if (p) for (const x of shoppingList(p, dishMap)) { const cur = m.get(x.ing); if (cur) cur.g += x.g; else m.set(x.ing, { ...x }) }
