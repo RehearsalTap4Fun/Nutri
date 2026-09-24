@@ -4,6 +4,10 @@ import { viteSingleFile } from 'vite-plugin-singlefile'
 import { swPlugin } from './scripts/swPlugin'
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const ROOT = path.dirname(fileURLToPath(import.meta.url))
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }
 const now = new Date()
@@ -32,5 +36,12 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    // 小程序源码里引共享代码用的别名（与 miniprogram/config/index.ts 一致），测小程序模块时要用到
+    alias: {
+      '@core': path.resolve(ROOT, 'src/core'),
+      '@data': path.resolve(ROOT, 'src/data'),
+      '@store': path.resolve(ROOT, 'src/store'),
+      '@sync': path.resolve(ROOT, 'src/sync'),
+    },
   },
 } as any)

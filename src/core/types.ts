@@ -90,6 +90,8 @@ export interface Dish {
   serving: string
   tags?: string[]
   aliases?: string[]
+  /** 只有自建菜有：最后修改时间（毫秒），多设备合并时同 id 取新的 */
+  updatedAt?: number
 }
 
 export interface LogEntry {

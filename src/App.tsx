@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { Dish, LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WaterEntry, WeightEntry } from './core/types'
+import type { Dish, LogEntry, MealSlot, Nutrients, Profile, VitalEntry, WeightEntry } from './core/types'
 import { fluidFromDrinks } from './core/water'
 import { MEAL_SLOTS } from './core/types'
 import { computeTargets } from './core/energy'
@@ -30,7 +30,8 @@ import { SLOT_LABEL, defaultTimeForSlot, entryPortionText, guessSlot, portionTex
 import { entryName, servingGrams } from './core/nutrition'
 import { captureInstallPrompt, isIOS, isStandalone, isWeChat, registerSW } from './pwa'
 import { deleteRemote, syncOnce, SyncError } from './sync/client'
-import { applySyncState, fingerprint, mergeSync, toSyncState } from './sync/merge'
+import { adoptSynced, fingerprint, toSyncState } from './sync/merge'
+import * as act from './store/actions'
 import { generateSyncCode } from './sync/crypto'
 import { hatch, mutate, retire } from './core/creature'
 import { recordSpec } from './core/catDex'
@@ -66,7 +67,9 @@ export default function App() {
   // 换页签回到顶部：四个页签共用同一条滚动轴，不回顶就会落在上一页滚到的位置，
   // 比如从分析页滚到一半点「我的」，开屏是营养模式卡的中间。
   // 换日期不回顶，那时人多半在原地对照前后两天。
-  useEffect(() => { window.scrollTo(0, 0) }, [tab])
+  // 进出建档表单同理：表单很长，填完点「开始使用」要从今日页顶上的热量卡看起。
+  const inProfileForm = !state.profile || editingProfile
+  useEffect(() => { window.scrollTo(0, 0) }, [tab, inProfileForm])
   useEffect(() => {
     registerSW((reload) => show('有新版本', { label: '刷新', run: reload }))
     captureInstallPrompt(setInstallEvt)
@@ -189,7 +192,7 @@ export default function App() {
     try {
       const r = await syncOnce(cur, cfg.code)
       if (r.pulledChanges) {
-        setState((s) => applySyncState(s, mergeSync(toSyncState(s), toSyncState(r.state))))
+        setState((s) => adoptSynced(s, r.state))
         if (!silentIfSame) show('已从云端合并最新记录')
       } else if (!silentIfSame) show(r.pushed ? '已推送到云端' : '云端已是最新')
       lastSyncedFp.current = fingerprint(toSyncState(r.state))
@@ -223,18 +226,12 @@ export default function App() {
   }, [syncFp, syncEnabled, runSync])
   const enableSync = (code: string, mode: 'new' | 'join') => {
     const now = Date.now()
-    update((s) => ({
-      ...s,
-      settings: { ...s.settings, sync: { code, enabled: true } },
-      // 首台设备：给档案与设置盖上当前时间，避免被后来加入的新设备的默认档案覆盖；
-      // 加入的设备：清零，让云端的档案与设置优先（它的记录仍会并入）
-      meta: mode === 'new' ? { profileAt: s.meta.profileAt || now, settingsAt: s.meta.settingsAt || now } : { profileAt: 0, settingsAt: 0 },
-    }))
+    update((s) => act.enableSync(s, code, mode, now))
     show(mode === 'new' ? '云同步已开启，正在上传…' : '已接入，正在合并云端数据…')
   }
   const disableSync = async (removeRemote: boolean) => {
     const code = state.settings.sync.code
-    update((s) => ({ ...s, settings: { ...s.settings, sync: { code: '', enabled: false } } }))
+    update((s) => act.disableSync(s))
     lastSyncedFp.current = ''
     if (removeRemote && code) { try { await deleteRemote(code) } catch { /* 网络问题也不阻塞关闭 */ } }
     show(removeRemote ? '已关闭同步并删除云端副本' : '已在本机关闭同步，云端副本保留')
@@ -269,7 +266,7 @@ export default function App() {
 
   // ---- actions ----
   const saveProfile = (p: Profile) => {
-    update((s) => ({ ...s, profile: p, meta: { ...s.meta, profileAt: Date.now() } }))
+    update((s) => act.patchProfile(s, p, Date.now(), p))
     setEditingProfile(false)
   }
 
@@ -289,19 +286,18 @@ export default function App() {
   const consumeSpeakJob = () => setSpeakJob(null)
   const openSpeakJob = () => { if (speakJob) { setDate(speakJob.date); setSheet({ slot: speakJob.slot }) } }
 
-  const tomb = (coll: AppState['tombstones'][number]['coll'], ids: string[]) => ids.map((id) => ({ coll, id, at: Date.now() }))
-  const removeEntries = (ids: string[]) => update((s) => ({ ...s, entries: s.entries.filter((e) => !ids.includes(e.id)), tombstones: [...s.tombstones, ...tomb('entries', ids)] }))
-  const restoreEntries = (list: LogEntry[]) => update((s) => ({ ...s, entries: [...s.entries, ...list.map((e) => ({ ...e, updatedAt: Date.now() }))], tombstones: s.tombstones.filter((t) => !(t.coll === 'entries' && list.some((e) => e.id === t.id))) }))
+  const removeEntries = (ids: string[]) => update((s) => act.removeEntries(s, ids, Date.now()))
+  const restoreEntries = (list: LogEntry[]) => update((s) => act.addEntries(s, list, Date.now()))
 
   const onSheetResult = (r: LogSheetResult) => {
     if (r.kind === 'save') {
       const isEdit = !!r.entry.id && state.entries.some((e) => e.id === r.entry.id)
-      const entry = { ...r.entry, id: r.entry.id || uid(), updatedAt: Date.now() }
-      update((s) => ({ ...s, entries: isEdit ? s.entries.map((e) => (e.id === entry.id ? entry : e)) : [...s.entries, entry] }))
+      const entry = { ...r.entry, id: r.entry.id || uid() }
+      update((s) => act.saveEntry(s, entry, Date.now()))
       if (!isEdit) noticeAfterLog(`已记录 · ${entryName(entry, dishMap)} × ${entryPortionText(entry, dishMap)}`, () => removeEntries([entry.id]))
       else show('已保存修改')
     } else if (r.kind === 'saveMany') {
-      update((s) => ({ ...s, entries: [...s.entries, ...r.entries], customFoods: [...r.customFoods, ...s.customFoods].slice(0, 200) }))
+      update((s) => act.saveCustomFoods(act.addEntries(s, r.entries, Date.now()), r.customFoods, Date.now()))
       noticeAfterLog(`已记录 ${r.entries.length} 条`, () => removeEntries(r.entries.map((e) => e.id)))
     } else if (r.kind === 'delete') {
       const removed = state.entries.find((e) => e.id === r.id)
@@ -314,17 +310,13 @@ export default function App() {
   }
 
   const addCustomDish = (d: Dish) => {
-    update((s) => ({ ...s, customDishes: [...s.customDishes.filter((x) => x.id !== d.id), d] }))
+    update((s) => act.saveCustomDish(s, d, Date.now()))
     show(`已保存自建菜「${d.name}」，以后搜索、推荐都能用`)
   }
-  const addCustomFood = (f: CustomFood) => update((s) => ({ ...s, customFoods: [f, ...s.customFoods.filter((x) => x.id !== f.id)] }))
+  const addCustomFood = (f: CustomFood) => update((s) => act.saveCustomFoods(s, [f], Date.now()))
   const toggleFavorite = (id: string) => update((s) => ({ ...s, favorites: s.favorites.includes(id) ? s.favorites.filter((x) => x !== id) : [...s.favorites, id] }))
 
-  const reroll = (slot?: MealSlot) => update((s) => {
-    const cur = s.planSeeds[date] || { day: 0, meals: {} }
-    const next = slot ? { ...cur, meals: { ...cur.meals, [slot]: (cur.meals[slot] || 0) + 1 } } : { day: cur.day + 1, meals: {} }
-    return { ...s, planSeeds: { ...s.planSeeds, [date]: next } }
-  })
+  const reroll = (slot?: MealSlot) => update((s) => act.reroll(s, [date], slot))
 
   const logMeal = (meal: MealPlan) => {
     const time = date === today ? nowTimeStr() : defaultTimeForSlot(meal.slot)
@@ -347,48 +339,39 @@ export default function App() {
     show(`已删除 · ${entryName(e, dishMap)} × ${entryPortionText(e, dishMap)}`, { label: '撤销', run: () => restoreEntries([e]) })
   }
 
-  const rerollWeek = (dates: string[]) => update((s) => {
-    const next = { ...s.planSeeds }
-    const picks = { ...s.planPicks }
-    for (const d of dates) { const cur = next[d] || { day: 0, meals: {} }; next[d] = { day: cur.day + 1, meals: {} }; delete picks[d] }
-    return { ...s, planSeeds: next, planPicks: picks }
-  })
+  const rerollWeek = (dates: string[]) => update((s) => act.reroll(s, dates))
   const addVital = (v: Omit<VitalEntry, 'id'>) => {
     const entry: VitalEntry = { ...v, id: uid() }
-    update((s) => ({ ...s, vitals: [...s.vitals, entry] }))
-    show(v.kind === 'bp' ? `已记录血压 ${v.sys}/${v.dia}` : `已记录血糖 ${v.mmol} mmol/L`, { label: '撤销', run: () => update((s) => ({ ...s, vitals: s.vitals.filter((x) => x.id !== entry.id) })) })
+    update((s) => act.addVital(s, entry, Date.now()))
+    show(v.kind === 'bp' ? `已记录血压 ${v.sys}/${v.dia}` : `已记录血糖 ${v.mmol} mmol/L`, { label: '撤销', run: () => removeVital(entry.id) })
   }
-  const removeVital = (id: string) => update((s) => ({ ...s, vitals: s.vitals.filter((x) => x.id !== id), tombstones: [...s.tombstones, ...tomb('vitals', [id])] }))
+  const removeVital = (id: string) => update((s) => act.removeVital(s, id, Date.now()))
 
   const dislikeDish = (id: string) => {
-    update((s) => (s.profile ? { ...s, profile: { ...s.profile, dislikedDishes: [...new Set([...s.profile.dislikedDishes, id])] } } : s))
+    update((s) => act.dislikeDish(s, id, Date.now()))
     show(`以后不再推荐「${dishMap.get(id)?.name || id}」`, { label: '撤销', run: () => undislikeDish(id) })
   }
-  const undislikeDish = (id: string) => update((s) => (s.profile ? { ...s, profile: { ...s.profile, dislikedDishes: s.profile.dislikedDishes.filter((x) => x !== id) } } : s))
+  const undislikeDish = (id: string) => update((s) => act.undislikeDish(s, id, Date.now()))
 
   // 饮水按杯点亮：把这一天的总量设为 ml（旧记录打墓碑，新写一条），toast 可撤销
   const setWater = (ml: number) => {
     const prev = state.water.filter((w) => w.date === date)
     const prevMl = prev.reduce((s, w) => s + w.ml, 0)
-    const entry: WaterEntry = { id: uid(), updatedAt: Date.now(), date, time: date === today ? nowTimeStr() : undefined, ml: Math.round(ml) }
-    update((s) => ({ ...s, water: [...s.water.filter((w) => w.date !== date), ...(ml > 0 ? [entry] : [])], tombstones: [...s.tombstones, ...tomb('water', prev.map((w) => w.id))] }))
+    const newId = uid()
+    update((s) => act.setWater(s, date, ml, Date.now(), newId, date === today ? nowTimeStr() : undefined))
     if (ml > prevMl) bumpCreature()
     const cupsN = Math.round(ml / 250)
     show(ml > 0 ? `喝到第 ${cupsN} 杯 · ${Math.round(ml)} ml` : '今天的饮水清零了', {
       label: '撤销',
-      run: () => update((s) => ({
-        ...s,
-        water: [...s.water.filter((w) => w.date !== date), ...prev.map((w) => ({ ...w, updatedAt: Date.now() }))],
-        tombstones: [...s.tombstones.filter((t) => !(t.coll === 'water' && prev.some((w) => w.id === t.id))), ...(ml > 0 ? tomb('water', [entry.id]) : [])],
-      })),
+      run: () => update((s) => act.restoreWater(s, date, prev, ml > 0 ? newId : null, Date.now())),
     })
   }
   const addWeight = (w: WeightEntry) => {
-    update((s) => ({ ...s, weights: [...s.weights.filter((x) => x.date !== w.date), w].sort((a, b) => a.date.localeCompare(b.date)) }))
+    update((s) => act.setWeight(s, w.date, w.kg, Date.now()))
     show(`已记录体重 ${w.kg} kg`)
   }
   const setConditions = (c: Condition[], trimester?: 1 | 2 | 3) => {
-    update((s) => (s.profile ? { ...s, profile: { ...s.profile, conditions: c, pregnancyTrimester: trimester }, meta: { ...s.meta, profileAt: Date.now() } } : s))
+    update((s) => act.patchProfile(s, { conditions: c, pregnancyTrimester: trimester }, Date.now()))
     show(c.length ? `营养模式已更新：${c.length} 个` : '营养模式已全部关闭')
   }
   const goModes = () => {
@@ -396,9 +379,9 @@ export default function App() {
     window.setTimeout(() => document.getElementById('modes-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
   }
   const toggleTrainingDay = () => update((s) => ({ ...s, trainingDays: s.trainingDays.includes(date) ? s.trainingDays.filter((d) => d !== date) : [...s.trainingDays, date] }))
-  const setAdaptive = (v: boolean) => update((s) => ({ ...s, settings: { ...s.settings, useAdaptiveTdee: v }, meta: { ...s.meta, settingsAt: Date.now() } }))
-  const setProvider = (p: Provider) => update((s) => ({ ...s, settings: { ...s.settings, provider: p }, meta: { ...s.meta, settingsAt: Date.now() } }))
-  const markContributed = (id: string) => update((s) => ({ ...s, settings: { ...s.settings, contributedFoodIds: [...new Set([...s.settings.contributedFoodIds, id])] }, meta: { ...s.meta, settingsAt: Date.now() } }))
+  const setAdaptive = (v: boolean) => update((s) => act.patchSettings(s, { useAdaptiveTdee: v }, Date.now()))
+  const setProvider = (p: Provider) => update((s) => act.patchSettings(s, { provider: p }, Date.now()))
+  const markContributed = (id: string) => update((s) => act.patchSettings(s, { contributedFoodIds: [...new Set([...s.settings.contributedFoodIds, id])] }, Date.now()))
   const setKey = (p: Provider, k: string) => update((s) => ({ ...s, settings: { ...s.settings, [p === 'deepseek' ? 'deepseekKey' : 'anthropicKey']: k.trim() } }))
   // 导入的数据不带 key，保留本机已填的
   const importState = (ns: AppState) => setState((s) => ({ ...ns, settings: { ...ns.settings, anthropicKey: s.settings.anthropicKey, deepseekKey: s.settings.deepseekKey, sync: s.settings.sync } }))
@@ -453,7 +436,7 @@ export default function App() {
         )}
       </div>
 
-      {tab === 'today' && !sheet && dayEntries.length > 0 && <button className="fab" onClick={() => openAdd()} aria-label="记录餐食"><IconPlus /></button>}
+      {tab === 'today' && !sheet && <button className="fab" onClick={() => openAdd()} aria-label="记录餐食"><IconPlus /></button>}
 
       <nav className="nav">
         <svg className="nav-shore" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden focusable="false"><path d="M0 10V6.5C18 3 34 9 52 5.5C70 2 84 8 100 4.5V10Z" /></svg>

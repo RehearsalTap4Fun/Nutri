@@ -15,6 +15,7 @@ import { useAppState } from '../../shared/useAppState'
 import { logEntry } from '../../shared/log'
 import { allDishesOf, dishMapOf } from '../../shared/derive'
 import { CustomFood } from '../../components/CustomFood'
+import * as act from '@store/actions'
 
 /** 小程序会把 query 解码好，H5 不会；两边都可能，解不动就按原样用 */
 function param(v: unknown): string {
@@ -93,14 +94,14 @@ export default function Log() {
   }
 
   const pickDish = (d: import('@core/types').Dish) => {
-    update((st) => ({ ...st, customDishes: [...st.customDishes.filter((x) => x.id !== d.id), d] }))
+    update((st) => act.saveCustomDish(st, d, Date.now()))
     setCustom(null)
     setPicked({ kind: 'dish', dish: d })
     setPortion(1)
     Taro.showToast({ title: `已存下「${d.name}」`, icon: 'none' })
   }
   const pickFood = (f: import('../../shared/state').CustomFood) => {
-    update((st) => ({ ...st, customFoods: [f, ...st.customFoods.filter((x) => x.id !== f.id)].slice(0, 200) }))
+    update((st) => act.saveCustomFoods(st, [f], Date.now()))
     setCustom(null)
     setPicked({ kind: 'custom', food: f })
     setPortion(1)

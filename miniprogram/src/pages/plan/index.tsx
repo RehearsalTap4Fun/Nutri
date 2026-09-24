@@ -23,6 +23,7 @@ import { mealWhy } from '@core/mealWhy'
 import { Fold } from '../../components/bits'
 import { Icon } from '../../components/Icon'
 import { useDeclareTab } from '../../custom-tab-bar/selection'
+import * as act from '@store/actions'
 
 // 推荐理由整句太长且每道菜重复，收成一个小标签。规则与网页版一致
 const REASON_TAGS: Array<[RegExp, string]> = [
@@ -76,15 +77,7 @@ export default function Plan() {
    * 同时清掉当天的沿用缓存，否则新种子算出来的推荐又会被旧选择顶回去。
    */
   const reroll = (slot?: MealSlot) => {
-    update((s) => {
-      const cur = s.planSeeds[date] || { day: 0, meals: {} }
-      const next = slot
-        ? { ...cur, meals: { ...cur.meals, [slot]: (cur.meals[slot] || 0) + 1 } }
-        : { day: cur.day + 1, meals: {} }
-      const picks = { ...s.planPicks }
-      delete picks[date]
-      return { ...s, planSeeds: { ...s.planSeeds, [date]: next }, planPicks: picks }
-    })
+    update((s) => act.reroll(s, [date], slot))
   }
 
   /** 照这个吃：把一餐里的每道菜都记为已吃 */
@@ -106,13 +99,7 @@ export default function Plan() {
   /** 不想吃：进不推荐名单，列表随即补上下一个候选 */
   const dislike = (dishId: string) => {
     const name = dishMap.get(dishId)?.name || dishId
-    update((s) => ({
-      ...s,
-      profile: s.profile
-        ? { ...s.profile, dislikedDishes: [...s.profile.dislikedDishes, dishId] }
-        : s.profile,
-      meta: { ...s.meta, profileAt: Date.now() },
-    }))
+    update((s) => act.dislikeDish(s, dishId, Date.now()))
     Taro.showToast({ title: `以后不再推荐${name}`, icon: 'none' })
   }
 

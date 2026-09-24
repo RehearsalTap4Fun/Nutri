@@ -35,6 +35,7 @@ import { uid } from '../../shared/state'
 import { useAppState } from '../../shared/useAppState'
 import { derive, dishMapOf } from '../../shared/derive'
 import { useDeclareTab } from '../../custom-tab-bar/selection'
+import * as act from '@store/actions'
 
 export default function Today() {
   // 告诉导航栏当前是哪个页签（导航栏自己不猜路由，见 custom-tab-bar/selection.ts）
@@ -82,11 +83,7 @@ export default function Today() {
 
   /** 左滑露出删除已经是明确动作，不再叠一层确认弹窗 */
   const removeEntry = (id: string) => {
-    update((s) => ({
-      ...s,
-      entries: s.entries.filter((e) => e.id !== id),
-      tombstones: [...s.tombstones, { coll: 'entries' as const, id, at: Date.now() }],
-    }))
+    update((s) => act.removeEntries(s, [id], Date.now()))
     Taro.showToast({ title: '已删除', icon: 'none' })
   }
 
@@ -107,22 +104,10 @@ export default function Today() {
     const prevMl = state.water.filter((w) => w.date === date).reduce((a, w) => a + w.ml, 0)
     const now = Date.now()
 
+    const newId = uid()
     const writeWater = (s: typeof state) => {
-      const mine = s.water.filter((w) => w.date === date)
-      const rec = {
-        id: uid(),
-        date,
-        time: date === todayStr() ? nowTimeStr() : undefined,
-        ml: Math.round(ml),
-        updatedAt: now,
-      }
-      return {
-        water: [...s.water.filter((w) => w.date !== date), ...(ml > 0 ? [rec] : [])],
-        tombstones: [
-          ...s.tombstones,
-          ...mine.map((w) => ({ coll: 'water' as const, id: w.id, at: now })),
-        ],
-      }
+      const next = act.setWater(s, date, ml, now, newId, date === todayStr() ? nowTimeStr() : undefined)
+      return { water: next.water, tombstones: next.tombstones }
     }
 
     if (ml > prevMl) {
@@ -144,14 +129,10 @@ export default function Today() {
   }
 
   const addVital = (v: Omit<VitalEntry, 'id'>) =>
-    update((s) => ({ ...s, vitals: [...s.vitals, { ...v, id: uid() }] }))
+    update((s) => act.addVital(s, { ...v, id: uid() }, Date.now()))
 
   const removeVital = (id: string) =>
-    update((s) => ({
-      ...s,
-      vitals: s.vitals.filter((v) => v.id !== id),
-      tombstones: [...s.tombstones, { coll: 'vitals' as const, id, at: Date.now() }],
-    }))
+    update((s) => act.removeVital(s, id, Date.now()))
 
   const [showBudget, setShowBudget] = useState(false)
 

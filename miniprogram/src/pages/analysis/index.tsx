@@ -17,6 +17,7 @@ import { dishMapOf } from '../../shared/derive'
 import { avgWater } from '@core/water'
 import { lastNDays } from '@core/dates'
 import { useDeclareTab } from '../../custom-tab-bar/selection'
+import * as act from '@store/actions'
 
 const r0 = (v: number) => Math.round(v)
 
@@ -127,12 +128,7 @@ export default function Analysis() {
       Taro.showToast({ title: '体重看起来不对', icon: 'none' })
       return
     }
-    update((s) => ({
-      ...s,
-      weights: [...s.weights.filter((x) => x.date !== date), { date, kg: v, updatedAt: Date.now() }],
-      profile: s.profile ? { ...s.profile, weightKg: v } : s.profile,
-      meta: { ...s.meta, profileAt: Date.now() },
-    }))
+    update((s) => act.setWeight(s, date, v, Date.now()))
     setKg('')
     Taro.showToast({ title: '记下了', icon: 'none' })
   }
@@ -324,11 +320,7 @@ export default function Analysis() {
               checked={state.settings.useAdaptiveTdee}
               color="#8ed462"
               onChange={(e) =>
-                update((s) => ({
-                  ...s,
-                  settings: { ...s.settings, useAdaptiveTdee: e.detail.value },
-                  meta: { ...s.meta, settingsAt: Date.now() },
-                }))
+                update((s) => act.patchSettings(s, { useAdaptiveTdee: e.detail.value }, Date.now()))
               }
             />
           </View>

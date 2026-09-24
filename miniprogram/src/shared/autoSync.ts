@@ -7,7 +7,7 @@
  *  - **同步自己会写状态**，写完又会触发订阅。所以推送成功后先记下新指纹，
  *    再写状态；订阅回调看到指纹没变就不会再排一次，避免自激。
  */
-import { fingerprint, toSyncState } from '@sync/merge'
+import { adoptSynced, fingerprint, toSyncState } from '@sync/merge'
 import type { AppState } from './state'
 import { getState, setState, subscribe } from './state'
 import { runSync } from './sync'
@@ -61,7 +61,10 @@ export async function autoSyncNow(): Promise<void> {
     const r = await runSync(before, code)
     // 先记指纹再写状态，避免写状态触发订阅又排一次同步
     lastFp = fingerprint(toSyncState(r.state))
-    setState(() => r.state)
+    // r.state 是按发起时的快照算的，不能直接替换：往返这几秒里新记的会被冲掉
+    if (r.pulledChanges) setState((s) => adoptSynced(s, r.state))
+    // 这期间的改动排的那次同步被 running 挡掉了；和刚同步的不一样就补排一次
+    schedule(getState())
     report(true, r.pulledChanges ? '已拉到云端改动' : r.pushed ? '已上传' : '已是最新')
   } catch (e) {
     report(false, e instanceof Error ? e.message : String(e))

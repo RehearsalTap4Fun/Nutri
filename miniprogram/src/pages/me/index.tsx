@@ -15,6 +15,8 @@ import { profileProblems } from '@core/profile'
 import { retire } from '@core/creature'
 import { describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
 import { getLatest, useAppState } from '../../shared/useAppState'
+import type { AppState } from '../../shared/state'
+import { adoptSynced } from '@sync/merge'
 import { derive } from '../../shared/derive'
 import { todayStr } from '@core/dates'
 import { diagnose, dropRemote, newSyncCode, normalizeSyncCode, runSync } from '../../shared/sync'
@@ -25,6 +27,7 @@ import { Fold } from '../../components/bits'
 import { CatDexCard } from '../../components/CatDex'
 import { PixelCat } from '../../components/PixelCat'
 import { useDeclareTab } from '../../custom-tab-bar/selection'
+import * as act from '@store/actions'
 
 const SEX: Array<[Sex, string]> = [
   ['male', '男'],
@@ -76,11 +79,7 @@ export default function Me() {
   const p = state.profile
 
   const setProfile = (patch: Partial<Profile>) =>
-    update((s) => ({
-      ...s,
-      profile: { ...(s.profile || emptyProfile()), ...patch },
-      meta: { ...s.meta, profileAt: Date.now() },
-    }))
+    update((s) => act.patchProfile(s, patch, Date.now(), emptyProfile()))
 
   // 目标依据那一节要用到算好的目标
   const d = useMemo(() => derive(state, todayStr()), [state])
@@ -177,13 +176,9 @@ export default function Me() {
   const [syncing, setSyncing] = useState(false)
   const sync = state.settings.sync
 
-  const setSync = (next: { code: string; enabled: boolean }) => {
+  const setSync = (fn: (s: AppState) => AppState) => {
     resetAutoSyncFingerprint()
-    return update((s) => ({
-      ...s,
-      settings: { ...s.settings, sync: next },
-      meta: { ...s.meta, settingsAt: Date.now() },
-    }))
+    return update(fn)
   }
 
   const doSync = async (code: string) => {
@@ -193,7 +188,8 @@ export default function Me() {
     try {
       const before = getLatest()
       const r = await runSync(before, code)
-      update(() => r.state)
+      // 不能直接用 r.state 替换：它按发起时的快照算，同步这几秒里新记的会被冲掉
+      if (r.pulledChanges) update((s) => adoptSynced(s, r.state))
       Taro.hideLoading()
       const added = r.state.entries.length - before.entries.length
       const note = r.pulledChanges
@@ -219,7 +215,7 @@ export default function Me() {
   const enableNew = async () => {
     try {
       const code = await newSyncCode()
-      setSync({ code, enabled: true })
+      setSync((s) => act.enableSync(s, code, 'new', Date.now()))
       await doSync(code)
     } catch (e) {
       Taro.showModal({ title: '开不了同步', content: String(e), showCancel: false })
@@ -232,7 +228,7 @@ export default function Me() {
       Taro.showToast({ title: '同步码格式不对', icon: 'none' })
       return
     }
-    setSync({ code: norm, enabled: true })
+    setSync((s) => act.enableSync(s, norm, 'join', Date.now()))
     setCodeInput('')
     void doSync(norm)
   }
@@ -259,7 +255,7 @@ export default function Me() {
       confirmText: '连云端一起删',
       success: (r) => {
         const code = sync.code
-        setSync({ code: r.confirm ? '' : code, enabled: false })
+        setSync((s) => act.disableSync(s, !r.confirm))
         if (r.confirm && code) void dropRemote(code).catch(() => undefined)
       },
     })

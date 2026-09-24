@@ -17,6 +17,8 @@ export interface CustomFood {
   dairyG?: number
   /** 包装食品条码（扫码或手动录入时记住，下次直接命中） */
   barcode?: string
+  /** 最后修改时间（毫秒），多设备合并时同 id 取新的 */
+  updatedAt?: number
 }
 
 export interface PlanSeed {

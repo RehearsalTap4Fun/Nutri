@@ -126,6 +126,14 @@ export function toSyncState(s: AppState): SyncState {
   }
 }
 
+/**
+ * 同步回来后该写进界面的状态。同步要往返几秒，`synced` 是按**发起那一刻**的快照算的，
+ * 这期间用户可能又记了一笔；所以不能直接用 `synced` 替换，要和**此刻**的状态再合一次。
+ */
+export function adoptSynced(current: AppState, synced: AppState): AppState {
+  return applySyncState(current, mergeSync(toSyncState(current), toSyncState(synced)))
+}
+
 /** 把合并结果写回 AppState，保留设备本地的 key 与同步配置 */
 export function applySyncState(s: AppState, st: SyncState): AppState {
   return {

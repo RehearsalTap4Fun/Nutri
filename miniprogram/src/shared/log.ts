@@ -12,6 +12,7 @@ import { catDiff } from '@core/pixelcat'
 import { makeRng, hashString } from '@core/rng'
 import type { AppState } from './state'
 import { uid } from './state'
+import * as act from '@store/actions'
 
 export interface LogResult {
   /** 形象发生的变化，用来给一句提示；没变化时是 null */
@@ -57,6 +58,6 @@ export function bumpCreature(
 /** 写入一条记录并喂一次。返回值用于提示 */
 export function logEntry(update: Update, entry: Omit<LogEntry, 'id' | 'updatedAt'>): LogResult {
   return bumpCreature(update, (s) => ({
-    entries: [...s.entries, { ...entry, id: uid(), updatedAt: Date.now() }],
+    entries: act.addEntries(s, [{ ...entry, id: uid() }], Date.now()).entries,
   }))
 }
