@@ -44,6 +44,13 @@ function writeRec(id, rec) {
   fs.renameSync(tmp, fileOf(id))
 }
 const EMPTY = { version: 0, blob: null, updatedAt: 0 }
+/** 请求体收完之后的处理放进来：里面抛什么都只回 500，不能让一个坏请求把整个进程带走 */
+function guarded(res, fn) {
+  try { fn() } catch (e) {
+    console.error('request failed:', e)
+    if (!res.headersSent) send(res, 500, { error: 'internal error' })
+  }
+}
 
 /** 贡献草稿粗校验：必须有名字和一份的营养值，其余字段随意（作者审核时自己判断） */
 function looksLikeDraft(j) {
@@ -66,7 +73,7 @@ const server = http.createServer((req, res) => {
       if (size > MAX_CONTRIB) { aborted = true; send(res, 413, { error: 'too large' }); req.destroy(); return }
       body += c
     })
-    req.on('end', () => {
+    req.on('end', () => guarded(res, () => {
       if (aborted) return
       let j
       try { j = JSON.parse(body) } catch { return send(res, 400, { error: 'bad json' }) }
@@ -74,7 +81,7 @@ const server = http.createServer((req, res) => {
       // 明文追加，不记录 ip / 任何用户标识，与 /sync 的密文存储完全分开
       fs.appendFileSync(path.join(CONTRIB_DIR, 'contributions.jsonl'), JSON.stringify({ ...j, receivedAt: Date.now() }) + '\n')
       return send(res, 200, { ok: true })
-    })
+    }))
     return
   }
   const m = url.pathname.match(/^\/sync\/([a-f0-9]{64})$/)
@@ -91,10 +98,12 @@ const server = http.createServer((req, res) => {
     if (size > MAX_BLOB + 4096) { aborted = true; send(res, 413, { error: 'too large' }); req.destroy(); return }
     body += c
   })
-  req.on('end', () => {
+  req.on('end', () => guarded(res, () => {
     if (aborted) return
     let j
     try { j = JSON.parse(body) } catch { return send(res, 400, { error: 'bad json' }) }
+    // `null`、数字、字符串都是合法 JSON，但不是对象；直接读 j.blob 会在 null 上抛错
+    if (!j || typeof j !== 'object') return send(res, 400, { error: 'bad body' })
     if (typeof j.blob !== 'string' || j.blob.length === 0 || j.blob.length > MAX_BLOB) return send(res, 400, { error: 'bad blob' })
     const cur = readRec(id)
     const curV = cur ? cur.version : 0
@@ -102,6 +111,6 @@ const server = http.createServer((req, res) => {
     const rec = { version: curV + 1, blob: j.blob, updatedAt: Date.now() }
     writeRec(id, rec)
     send(res, 200, { version: rec.version, updatedAt: rec.updatedAt })
-  })
+  }))
 })
 server.listen(PORT, '127.0.0.1', () => console.log(`nutri-sync listening on 127.0.0.1:${PORT}, data ${DATA}`))
