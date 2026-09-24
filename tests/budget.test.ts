@@ -129,11 +129,34 @@ describe('健康小管家存储：性格字段是后加的，老数据要能兼�
     expect(catKey(s.creatureHistory[0].cat)).toBe(catKey(catForCreature({ id: 'pet-4', mutations: 2 })))
   })
   it('存档里已有合法 cat 就原样保留，不按规则重算', () => {
-    const cat = { coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+    const cat = { coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none', backdrop: 'none' }
     const c = { id: 'pet-5', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 3, cat, catRules: 'pixelcat-rules-v1' }
     const s = normalizeState({ profile: base, entries: [], creature: c })
     expect(s.creature!.cat).toEqual(cat)
     expect(s.creature!.catRules).toBe('pixelcat-rules-v1')
+  })
+
+  // backdrop 是第六个成长槽（场景包 1.0.0 起）。补它的时候最怕把老猫弄丢，所以这三条单独钉住。
+  it('老存档没有 backdrop：补成 none，花纹与已长出的部件一个不动', () => {
+    const cat = { coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'fin-ears', neck: 'frill-neck', back: 'dragon-wings', tailTip: 'flame-tail' }
+    const c = { id: 'pet-bd1', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 9, cat, catRules: 'pixelcat-rules-v5' }
+    const s = normalizeState({ profile: base, entries: [], creature: c })
+    expect(s.creature!.cat).toEqual({ ...cat, backdrop: 'none' })
+  })
+
+  it('已经长出背景的猫：不会被补成 none', () => {
+    const cat = { coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none', backdrop: 'doodle-leaf-shadow' }
+    const c = { id: 'pet-bd2', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 9, cat, catRules: PIXEL_CAT_RULES }
+    const s = normalizeState({ profile: base, entries: [], creature: c })
+    expect(s.creature!.cat.backdrop).toBe('doodle-leaf-shadow')
+  })
+
+  it('backdrop 存了不认识的值：不静默改写成 none，按「补不动」整只重推', () => {
+    const cat = { coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none', backdrop: 'doodle-nonexistent' }
+    const c = { id: 'pet-bd3', traits, personality: 'bossy', bornAt: 1, lastMutatedAt: 1, mutations: 3, cat, catRules: PIXEL_CAT_RULES }
+    const s = normalizeState({ profile: base, entries: [], creature: c })
+    expect(s.creature!.cat.backdrop).not.toBe('doodle-nonexistent')
+    expect(catKey(s.creature!.cat)).toBe(catKey(catForCreature({ id: 'pet-bd3', mutations: 3 })))
   })
   it('图鉴是后加的：存档没有就按当前猫与历史猫的最终外观补种', () => {
     const cat = { coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }

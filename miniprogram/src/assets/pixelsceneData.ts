@@ -1,0 +1,21 @@
+/**
+ * 自动生成，请勿手改。来源：../../src/assets/pixelscene/*.png
+ * 重新生成：node scripts/genScenePack.mjs
+ *
+ * 共 3 张背景，原始 1.2 KB，画布 96×64。
+ *
+ * 主路径是包内 PNG 文件（SCENE_PATH），这张 base64 表只作为兜底。
+ */
+export const SCENE_PATH = '/assets/pixelscene'
+
+export const SCENE_IDS: string[] = [
+  'scene-17821cc32d36b651',
+  'scene-2f4eaff9b6ed478d',
+  'scene-f6acae86a1a7c92a',
+]
+
+export const SCENE_DATA: Record<string, string> = {
+  'scene-17821cc32d36b651': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABABAMAAAAXGm89AAAAD1BMVEVMaXHcz/Hwpm14ytD069DqIUIEAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAD6AAAA+gBtXtSawAAASxJREFUSIntldmNwzAMRGmnAY2sAmJWkIAVGFD/NS0kBYmty1Sy2P3JfBrzyBF1mOirv5TRmNCQGTHXoQka0aAfL0Lph3m7A42uIUgdZ6ch8wRARJHkZV+kAWChXNuW/C1Abkc/tpin5UdOxG8icu/MSPZEqtH1AzkQ81heq2bmbLKxQfA3Ac52AiGQ5TZwzed6kVin7gdKgGjq+BGLlUzv/DFzZcM7gGVeyw3vyTJDKhveC7Uucjd6wMYWAwAK4LzFuoysGrY4IGdPBw9UDzrY24ciKcsyp1Pk2oA7+C/hggDONQnn9sQUb9RJB+zf1cfN9N6H16Mm7/1WAuoOND8SaddAND/LNAnKhF986lH/6ab5jlIYSwaFjDbQU590oPd+pDRkzqUyffU/+gFQb3hEd9KCjQAAAABJRU5ErkJggg==',
+  'scene-2f4eaff9b6ed478d': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABABAMAAAAXGm89AAAADFBMVEVMaXHu59fLv67muYFhzNXnAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAD6AAAA+gBtXtSawAAAQNJREFUSIntlgEKgzAMRb/bBfrbC8ycYCP3v9uwVtaqrQ1sjsE+iGD+4yeNiMBfZ8r12bgjVzMPrAs2+6SeXlqdDccAjQEsI8wJsM4A8ymhicintyZrv4ypkO4reZFb4fciqbAPiIwFQZHZKVWAPie8SIxYgrbASObAlBifVQKifN7TlDhfvXtmnKsV4NZ7WObo9AO4NAMq++aBYAW46oxBTQSphwBzgqEOhFQJ9xxQfdQATSXNAbQCVDcBABoBGiPunccaVON8hfnamCDog6qFfVi6rABu20sjYO/tfp1018a65M4EYPXj69967tg7OoMV4HaQIz/NhDPNjvf9Af31E3oCduByA10WsfsAAAAASUVORK5CYII=',
+  'scene-f6acae86a1a7c92a': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABABAMAAAAXGm89AAAADFBMVEVMaXHN5MuRupH07tzGfkcKAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAD6AAAA+gBtXtSawAAASJJREFUSIntVltyxCAMc9ILROwFirlAi+9/t05CPxaDDWxmOv1Y/WSSWMiSyYPojT/ENleGHg5rTTigubVtnW1Yj1plph7HogCeJa7zwFZlYO3ikuBsEnJskgKQrss9PHLsTOMjJ7Hqk/THZ7WUhGNn4vu3mU8+CdrFbjk4wSXBykJZxACncqwITj2CNBK72BYA4XL7uSd3fwTJrWuXkc6WVKy+BMd6Dr+52YTPesTBDRVtL4G9jICmd7a3aoH2msytWvDIisB+PZBqQuDoe4DqaRASGtejKUDlOhzbcftVOfU6E9IYEFi+1hRCikv1OLNfIoD5HoEmeqKllKCeurEG9TA/6c1b+1hrBZ1negyaD+fFjy7d8DAi0QSsP543/g1+ABumchosRmwNAAAAAElFTkSuQmCC',
+}

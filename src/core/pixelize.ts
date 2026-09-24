@@ -53,18 +53,22 @@ export function clearPolygon(data: Rgba, n: number, poly: readonly (readonly num
 /**
  * 选择性描边：给不透明区域外面描一圈 1px，颜色取相邻不透明像素的平均色再压暗（比纯黑柔和，且随部件色相走）。
  * 只看四邻，边角处自然留空，是像素画常见的圆角描边手感。
+ *
+ * `w` 是宽，`h` 不给就当正方形——猫是 64×64，场景背景是 96×64，两边**必须**是同一份实现：
+ * scene 契约（`pixel-scene-rgba-v1`）写死了描边归渲染器做、四邻、均色 ×0.36，
+ * 另写一份迟早会和猫那边飘开。
  */
-export function outlineRgba(src: Rgba, n: number, darken = 0.36): Rgba {
+export function outlineRgba(src: Rgba, w: number, darken = 0.36, h = w): Rgba {
   const out = new Uint8ClampedArray(src)
-  for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      const i = (y * n + x) * 4
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4
       if (src[i + 3] !== 0) continue
       let r = 0, g = 0, b = 0, c = 0
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const nx = x + dx, ny = y + dy
-        if (nx < 0 || ny < 0 || nx >= n || ny >= n) continue
-        const j = (ny * n + nx) * 4
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue
+        const j = (ny * w + nx) * 4
         if (src[j + 3] === 0) continue
         r += src[j]; g += src[j + 1]; b += src[j + 2]; c++
       }

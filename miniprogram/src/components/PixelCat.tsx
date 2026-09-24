@@ -28,15 +28,18 @@ import Taro from '@tarojs/taro'
 import { Canvas, View, Text, Image } from '@tarojs/components'
 import { ART_SIZE, artLayersFor, artPlanForCat } from '@core/catArt'
 import type { CatSpecLike } from '@core/catArt'
+import { SCENE_GEOMETRY, SCENE_H, SCENE_W, backdropLayer } from '@core/catScene'
 import { composePlan } from '@core/pixelize'
 import type { Rgba } from '@core/pixelize'
+import { composeScene } from '@core/pixelscene'
 import { hashString } from '@core/rng'
 import { LAYER_DATA, LAYER_PATH } from '../assets/pixelpackData'
+import { SCENE_DATA, SCENE_PATH } from '../assets/pixelsceneData'
 
 interface Props {
   id?: string
-  spec: CatSpecLike
-  /** 显示边长（CSS px） */
+  spec: CatSpecLike & { backdrop?: string }
+  /** 显示**高度**（CSS px）。宽按场景比例（96:64）推出来，画布不是方的 */
   size?: number
 }
 
@@ -53,6 +56,19 @@ function pixelRatio(): number {
     if (r) return r
   }
   return Taro.getSystemInfoSync().pixelRatio || 2
+}
+
+/** 图层 id 属于猫包还是场景包：两个包的 id 前缀不同，不会撞 */
+function sourcesFor(layerId: string): string[] {
+  const out: string[] = []
+  if (SCENE_DATA[layerId]) {
+    out.push(`${SCENE_PATH}/${layerId}.png`)
+    out.push(SCENE_DATA[layerId])
+  } else {
+    out.push(`${LAYER_PATH}/${layerId}.png`)
+    if (LAYER_DATA[layerId]) out.push(LAYER_DATA[layerId])
+  }
+  return out
 }
 
 /** 拿到一张能画的图。先试包内文件，再试 base64，各自带超时 */
@@ -72,23 +88,24 @@ function loadImage(canvas: any, layerId: string): Promise<any> {
       img.src = src
     })
 
-  return tryOne(`${LAYER_PATH}/${layerId}.png`).catch(() => {
-    const data = LAYER_DATA[layerId]
-    if (!data) throw new Error(`缺图层 ${layerId}`)
-    return tryOne(data)
+  const [first, fallback] = sourcesFor(layerId)
+  return tryOne(first).catch(() => {
+    if (!fallback) throw new Error(`缺图层 ${layerId}`)
+    return tryOne(fallback)
   })
 }
 
-/** 最近邻放大。不用 drawImage 缩放，因为关平滑在部分机型上不生效 */
-function scaleRgba(src: Rgba, n: number, k: number): Uint8ClampedArray {
+/** 最近邻放大。不用 drawImage 缩放，因为关平滑在部分机型上不生效。场景不是方的，所以宽高分开算 */
+function scaleRgba(src: Rgba, w: number, h: number, k: number): Uint8ClampedArray {
   if (k === 1) return src
-  const N = n * k
-  const out = new Uint8ClampedArray(N * N * 4)
-  for (let y = 0; y < N; y++) {
+  const W = w * k
+  const H = h * k
+  const out = new Uint8ClampedArray(W * H * 4)
+  for (let y = 0; y < H; y++) {
     const sy = (y / k) | 0
-    for (let x = 0; x < N; x++) {
-      const si = ((sy * n + ((x / k) | 0)) << 2)
-      const di = ((y * N + x) << 2)
+    for (let x = 0; x < W; x++) {
+      const si = ((sy * w + ((x / k) | 0)) << 2)
+      const di = ((y * W + x) << 2)
       out[di] = src[si]
       out[di + 1] = src[si + 1]
       out[di + 2] = src[si + 2]
@@ -140,33 +157,38 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
       const N = ART_SIZE
 
       try {
-        // ── 解码：把画布临时调成 64×64，逐张图层画上去再读像素 ──
+        // ── 解码：画布临时调到图层自己的尺寸，逐张画上去再读像素 ──
+        // 猫的图层是 64×64，背景是 96×64，不能一律按方图读，否则背景会被截掉右边三分之一
+        const bdId = backdropLayer(spec.backdrop || 'none')
         const ids = artLayersFor(ops)
-        const need = ids.filter((i) => !pixelCache.has(i))
-        if (need.length) {
-          canvas.width = N
-          canvas.height = N
-          for (const layerId of need) {
-            const img = await loadImage(canvas, layerId)
-            if (cancelled) return
-            ctx.clearRect(0, 0, N, N)
-            ctx.drawImage(img, 0, 0, N, N)
-            pixelCache.set(layerId, new Uint8ClampedArray(ctx.getImageData(0, 0, N, N).data))
-          }
+        const need = [...ids, ...(bdId ? [bdId] : [])].filter((i) => !pixelCache.has(i))
+        for (const layerId of need) {
+          const isScene = layerId === bdId
+          const lw = isScene ? SCENE_W : N
+          const lh = isScene ? SCENE_H : N
+          canvas.width = lw
+          canvas.height = lh
+          const img = await loadImage(canvas, layerId)
+          if (cancelled) return
+          ctx.clearRect(0, 0, lw, lh)
+          ctx.drawImage(img, 0, 0, lw, lh)
+          pixelCache.set(layerId, new Uint8ClampedArray(ctx.getImageData(0, 0, lw, lh).data))
         }
 
         // ── 合成：纯数组运算，与网页版同一份代码 ──
-        const rgba = composePlan(ops, (i) => pixelCache.get(i)!, N)
+        const cat = composePlan(ops, (i) => pixelCache.get(i)!, N)
+        const rgba = composeScene(bdId ? pixelCache.get(bdId)! : null, cat, SCENE_GEOMETRY)
 
-        // ── 放大与输出 ──
+        // ── 放大与输出（96×64，不是方的） ──
         const dpr = pixelRatio()
-        const targetW = Math.max(1, Math.round((cssW || size) * dpr))
-        const k = Math.max(1, Math.round(targetW / N))
-        const out = scaleRgba(rgba, N, k)
-        const side = N * k
-        canvas.width = side
-        canvas.height = side
-        const imageData = ctx.createImageData(side, side)
+        const targetW = Math.max(1, Math.round((cssW || size * (SCENE_W / SCENE_H)) * dpr))
+        const k = Math.max(1, Math.round(targetW / SCENE_W))
+        const out = scaleRgba(rgba, SCENE_W, SCENE_H, k)
+        const outW = SCENE_W * k
+        const outH = SCENE_H * k
+        canvas.width = outW
+        canvas.height = outH
+        const imageData = ctx.createImageData(outW, outH)
         imageData.data.set(out)
         ctx.putImageData(imageData, 0, 0)
 
@@ -176,10 +198,10 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
             canvas,
             x: 0,
             y: 0,
-            width: side,
-            height: side,
-            destWidth: side,
-            destHeight: side,
+            width: outW,
+            height: outH,
+            destWidth: outW,
+            destHeight: outH,
             fileType: 'png',
             success: (r) => resolve(r.tempFilePath),
             fail: (e) => reject(new Error(e && e.errMsg ? e.errMsg : '导出失败')),
@@ -202,17 +224,20 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
     }
   }, [id, spec, size])
 
+  // size 是高，宽按场景比例推：画布是 96×64 的一幕，不是方图
+  const boxW = Math.round(size * (SCENE_W / SCENE_H))
+
   return (
-    <View className="cat-holder" style={{ width: `${size}px`, height: `${size}px` }}>
+    <View className="cat-holder" style={{ width: `${boxW}px`, height: `${size}px` }}>
       {/* 合成用的画布，挪到屏幕外，不参与版面也不会压住导航 */}
-      <Canvas type="2d" id={id} className="cat-stage" style={{ width: `${size}px`, height: `${size}px` }} />
+      <Canvas type="2d" id={id} className="cat-stage" style={{ width: `${boxW}px`, height: `${size}px` }} />
       {url ? (
         <Image
           className="cat-img"
           src={url}
           mode="scaleToFill"
           style={{
-            width: `${size}px`,
+            width: `${boxW}px`,
             height: `${size}px`,
             // 每只猫错开相位，同屏几只不会一起起伏
             animationDelay: `${-((hashString(JSON.stringify(spec)) % 340) / 100)}s`,

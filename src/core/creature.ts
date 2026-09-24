@@ -82,10 +82,14 @@ export function hatch(id: string, now: number, rnd: () => number): Creature {
 /**
  * 老存档的形象迁移。按代价从小到大依次尝试：
  *   1. 已经合法且画得出来 → 原样返回，不动一只已经长好的猫。
- *   2. 只是缺了后加的性状（`body`／`eyes`），或表情是已下线的 `tongue-tip` → **就地补齐**。
+ *   2. 只是缺了后加的性状（`body`／`eyes`／`backdrop`），或表情是已下线的 `tongue-tip` → **就地补齐**。
  *      补出来的都落在「6 毛色 × 标准体型 × 圆眼 × 两种表情」里，而像素包完整覆盖这个范围，
  *      所以这条路总能成功，猫的花纹与已长出的部件全部保留。
  *   3. 实在补不动（存了不认识的部件等）→ 按 id + 异变次数重新推导一只。
+ *
+ * 补齐只填**缺的**字段，不覆盖已有值：`raw.backdrop ?? 'none'` 对 `undefined` 才生效，
+ * 存了值的猫（哪怕是不认识的值）不会被悄悄改成 `none`——那样会把用户长出来的背景抹掉。
+ * 不认识的值走第 3 条，和存了不认识的部件同样处理。
  */
 export function ensureCat<T extends Creature>(c: T): T {
   const withArt = isCatArtIdentity(c.catArt) ? c : { ...c, catArt: ART_IDENTITY }
@@ -98,6 +102,8 @@ export function ensureCat<T extends Creature>(c: T): T {
     eyes: raw.eyes ?? 'round',
     // 'tongue-tip' 是接像素包时下线的表情，老存档里可能还有；用 string 比较避免类型层面被判为不可能
     expression: (raw.expression as string) === 'tongue-tip' || raw.expression === undefined ? 'small-fangs' : raw.expression,
+    // 背景是第六个成长槽（场景包 1.0.0 起），老存档没有这个字段，按「还没长出背景」补
+    backdrop: raw.backdrop ?? 'none',
   } as CatSpec
   if (isCatSpec(patched) && artPlanForCat(patched)) return { ...withArt, cat: patched, catRules: PIXEL_CAT_RULES }
 

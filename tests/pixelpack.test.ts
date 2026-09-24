@@ -37,7 +37,7 @@ const catalog: PixelCatalog = {
 
 describe('pixelpack：与 QMonster 契约逐条对应', () => {
   it('phenotypeKey 是 8 个性状按固定顺序的 JSON 数组；phenotypeOf 默认标准体型', () => {
-    const cat: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'flame-tail' }
+    const cat: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'flame-tail', backdrop: 'none' }
     expect(phenotypeKey(phenotypeOf(cat))).toBe('["standard","calico","small-fangs","halo","none","none","none","flame-tail"]')
     expect(phenotypeOf(cat, 'shortleg-round').body).toBe('shortleg-round')
   })
@@ -123,7 +123,7 @@ describe('pixelpack v2：严格区分 v1/v2', () => {
     expect(() => phenotypeKeyV2(base as unknown as PhenotypeV2)).toThrow()
   })
   it('phenotypeV2Of 必须显式给 body 与 eyes，不隐式补默认值', () => {
-    const cat: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
+    const cat: CatSpec = { coat: 'calico', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'halo', ears: 'none', neck: 'none', back: 'none', tailTip: 'none', backdrop: 'none' }
     expect(phenotypeV2Of(cat, 'slender-tall', 'round').eyes).toBe('round')
     expect(phenotypeV2Of(cat, 'slender-tall', 'round').body).toBe('slender-tall')
   })

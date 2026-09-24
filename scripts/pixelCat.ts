@@ -244,13 +244,13 @@ async function preview(outFile: string, dirs: string[]): Promise<void> {
   type Spec = Parameters<typeof renderOps>[0]
   const samples: Array<[string, Spec]> = [
     // 批 0 对照：橘白微张嘴母版 + 小龙角 + 焰尾（平涂源图路线的三张）
-    ['橘白 · 普通', { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }],
-    ['橘白 · 小龙角+焰尾', { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'dragon-horns', ears: 'none', neck: 'none', back: 'none', tailTip: 'flame-tail' }],
-    ['三花 · 鳍耳+分叉尾', { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'none', ears: 'fin-ears', neck: 'none', back: 'none', tailTip: 'forked-tail-tip' }],
-    ['棕虎斑 · 鹿角+小狮鬃', { coat: 'brown-tabby', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'antlers', ears: 'none', neck: 'small-lion-mane', back: 'none', tailTip: 'none' }],
-    ['燕尾服 · 小龙角+小翅膀+焰尾', { coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'dragon-horns', ears: 'none', neck: 'none', back: 'small-wings', tailTip: 'flame-tail' }],
-    ['豹点 · 光环+龙翼+颈膜', { coat: 'rosetted', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'halo', ears: 'none', neck: 'frill-neck', back: 'dragon-wings', tailTip: 'none' }],
-    ['橘白 · 羽翼', { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'feathered-wings', tailTip: 'none' }],
+    ['橘白 · 普通', { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none', backdrop: 'none' }],
+    ['橘白 · 小龙角+焰尾', { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'dragon-horns', ears: 'none', neck: 'none', back: 'none', tailTip: 'flame-tail', backdrop: 'none' }],
+    ['三花 · 鳍耳+分叉尾', { coat: 'calico', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'none', ears: 'fin-ears', neck: 'none', back: 'none', tailTip: 'forked-tail-tip', backdrop: 'none' }],
+    ['棕虎斑 · 鹿角+小狮鬃', { coat: 'brown-tabby', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'antlers', ears: 'none', neck: 'small-lion-mane', back: 'none', tailTip: 'none', backdrop: 'none' }],
+    ['燕尾服 · 小龙角+小翅膀+焰尾', { coat: 'tuxedo', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'dragon-horns', ears: 'none', neck: 'none', back: 'small-wings', tailTip: 'flame-tail', backdrop: 'none' }],
+    ['豹点 · 光环+龙翼+颈膜', { coat: 'rosetted', body: 'standard', eyes: 'round', expression: 'parted-mouth', crown: 'halo', ears: 'none', neck: 'frill-neck', back: 'dragon-wings', tailTip: 'none', backdrop: 'none' }],
+    ['橘白 · 羽翼', { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'feathered-wings', tailTip: 'none', backdrop: 'none' }],
     ['重点色 · 普通', catForCreature({ id: 'demo-2', mutations: 0 })],
   ]
   // 每个目录一栏：2 倍显示（实际大小）+ 5 倍放大；多目录并排即为对比图

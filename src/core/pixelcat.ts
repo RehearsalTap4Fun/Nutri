@@ -21,12 +21,14 @@ import { hashString, makeRng, weightedPick } from './rng'
  * 规则版本：写进存档，规则再改时能知道一只猫是按哪版长出来的。
  * v1=均匀随机；v2=品质分层只进不退（同级可互换）；v3=进化链，沿链升一阶、同阶不互换、顶阶只能升不能生；
  * v4=接入 QMonster 像素包：性状加 `body`／`eyes`、去掉 `tongue-tip`、孵化限制在可孵化的岛上；
- * v5=像素包 1.6.1 的五件新部件入列（晶角／羽翅耳／星辉翼耳／日冕颈饰／凤凰尾），成长深度 10 → 15 阶。
+ * v5=像素包 1.6.1 的五件新部件入列（晶角／羽翅耳／星辉翼耳／日冕颈饰／凤凰尾），成长深度 10 → 15 阶；
+ * v6=第六个成长槽「背景」（场景包 1.0.0 的三档涂鸦背景），15 → 18 阶。背景不进猫的表现型，
+ * 它是另一个 catalog 的东西，只是同样按品质升阶；老存档缺这个字段的按 `none` 补，见 creature.ts 的 ensureCat。
  * v5 只扩阵容，成长机制一个字没改；老猫不迁移，下次异变时自然带上新号（`ensureCat` 不比对版本，
  * 只要求这个字段是字符串）。已经「长齐」的猫会重新变得可成长——这正是补阵容要的效果。
  * **规则实质变化时必须升这个号**，否则同一个字符串会描述两套不同的规则，这个字段就失去意义了。
  */
-export const PIXEL_CAT_RULES = 'pixelcat-rules-v5'
+export const PIXEL_CAT_RULES = 'pixelcat-rules-v6'
 
 export const CAT_COATS = ['brown-tabby', 'orange-white', 'tuxedo', 'calico', 'colorpoint', 'rosetted'] as const
 /** 体型：与花纹同为身份性状，孵化定型后一生不变 */
@@ -40,13 +42,19 @@ export const CAT_SLOT_OPTIONS = {
   neck: ['none', 'small-lion-mane', 'frill-neck', 'sunburst-ruff'],
   back: ['none', 'small-wings', 'feathered-wings', 'dragon-wings'],
   tailTip: ['none', 'forked-tail-tip', 'flame-tail', 'phoenix-tail'],
+  /**
+   * 背景：第六个成长槽，来自**场景包**而不是猫的像素包（见 catScene.ts）。
+   * 它不进猫的表现型（`phenotypeOfCat` 只列九个字段），所以不影响猫的美术映射与 35,840 条 coverage。
+   * 取值必须与场景包里的一致，由 tests/catScene.test.ts 守着。
+   */
+  backdrop: ['none', 'doodle-horizon', 'doodle-leaf-shadow', 'doodle-rainbow-trail'],
 } as const
 
 export type CatCoat = (typeof CAT_COATS)[number]
 export type CatBody = (typeof CAT_BODIES)[number]
 export type CatSlot = keyof typeof CAT_SLOT_OPTIONS
 export type CatSpec = { coat: CatCoat; body: CatBody } & { [K in CatSlot]: (typeof CAT_SLOT_OPTIONS)[K][number] }
-export type CatMutation = Exclude<CatSpec['crown' | 'ears' | 'neck' | 'back' | 'tailTip'], 'none'>
+export type CatMutation = Exclude<CatSpec['crown' | 'ears' | 'neck' | 'back' | 'tailTip' | 'backdrop'], 'none'>
 
 /** 身份性状：孵化定型，一生不变 */
 export const IDENTITY_TRAITS = ['coat', 'body'] as const
@@ -54,8 +62,8 @@ export const IDENTITY_TRAITS = ['coat', 'body'] as const
 export const LATERAL_SLOTS = ['eyes', 'expression'] as const satisfies readonly CatSlot[]
 
 /** 每次记录可能变化的槽位（身份性状不在其中） */
-export const MUTABLE_SLOTS = ['eyes', 'expression', 'crown', 'ears', 'neck', 'back', 'tailTip'] as const satisfies readonly CatSlot[]
-export const MUTATION_SLOTS = ['crown', 'ears', 'neck', 'back', 'tailTip'] as const
+export const MUTABLE_SLOTS = ['eyes', 'expression', 'crown', 'ears', 'neck', 'back', 'tailTip', 'backdrop'] as const satisfies readonly CatSlot[]
+export const MUTATION_SLOTS = ['crown', 'ears', 'neck', 'back', 'tailTip', 'backdrop'] as const
 export type MutationSlot = (typeof MUTATION_SLOTS)[number]
 
 /**
@@ -67,6 +75,8 @@ export const CAT_TIER: Record<CatMutation, CatTier> = {
   'dragon-horns': 'N', antlers: 'N', 'fin-ears': 'N', 'small-lion-mane': 'N', 'small-wings': 'N', 'forked-tail-tip': 'N',
   'frill-neck': 'R', 'feathered-wings': 'R', 'flame-tail': 'R', 'crystal-horns': 'R', 'feathered-ears': 'R',
   halo: 'L', 'dragon-wings': 'L', 'celestial-ears': 'L', 'sunburst-ruff': 'L', 'phoenix-tail': 'L',
+  // 背景三档，档位取自场景包的 backdrops[].rarity
+  'doodle-horizon': 'N', 'doodle-leaf-shadow': 'R', 'doodle-rainbow-trail': 'L',
 }
 export const TIER_NAMES: Record<CatTier, string> = { N: '普通', R: '稀有', L: '传说' }
 /** 升级抽取权重：高品质更难抽到 */
@@ -84,9 +94,10 @@ export const CAT_LINES: Record<MutationSlot, Record<string, CatMutation[]>> = {
   neck: { mane: ['small-lion-mane', 'frill-neck'], corona: ['sunburst-ruff'] },
   back: { wing: ['small-wings', 'feathered-wings', 'dragon-wings'] },
   tailTip: { flame: ['forked-tail-tip', 'flame-tail', 'phoenix-tail'] },
+  backdrop: { doodle: ['doodle-horizon', 'doodle-leaf-shadow', 'doodle-rainbow-trail'] },
 }
 export const CAT_LINE_NAMES: Record<string, string> = {
-  horn: '角', antler: '鹿', light: '光', fin: '鳍', plume: '羽', mane: '鬃', corona: '冕', wing: '翼', flame: '焰',
+  horn: '角', antler: '鹿', light: '光', fin: '鳍', plume: '羽', mane: '鬃', corona: '冕', wing: '翼', flame: '焰', doodle: '景',
 }
 
 /** 某部件属于哪条链 */
@@ -176,8 +187,9 @@ export const CAT_NAMES: Record<string, string> = {
   'small-lion-mane': '小狮鬃', 'frill-neck': '颈膜', 'sunburst-ruff': '日冕颈饰',
   'small-wings': '小翅膀', 'feathered-wings': '羽翼', 'dragon-wings': '龙翼',
   'forked-tail-tip': '分叉尾', 'flame-tail': '焰尾', 'phoenix-tail': '凤凰尾',
+  'doodle-horizon': '随手地平线', 'doodle-leaf-shadow': '叶影涂鸦', 'doodle-rainbow-trail': '虹弧星轨',
 }
-export const CAT_SLOT_NAMES: Record<CatSlot, string> = { eyes: '眼型', expression: '表情', crown: '额顶', ears: '耳朵', neck: '颈部', back: '背部', tailTip: '尾巴' }
+export const CAT_SLOT_NAMES: Record<CatSlot, string> = { eyes: '眼型', expression: '表情', crown: '额顶', ears: '耳朵', neck: '颈部', back: '背部', tailTip: '尾巴', backdrop: '背景' }
 
 function pick<T>(arr: readonly T[], rnd: () => number): T {
   return arr[Math.floor(rnd() * arr.length) % arr.length]
@@ -225,7 +237,7 @@ export function hatchCat(rnd: () => number): CatSpec {
     body: pair.body as CatBody,
     eyes: pick(available.eyes.length ? available.eyes : ART_EYES, rnd) as CatSpec['eyes'],
     expression: pick(available.expressions.length ? available.expressions : ART_EXPRESSIONS, rnd) as CatSpec['expression'],
-    crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none',
+    crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none', backdrop: 'none',
   }
   // 一半概率自带一件异变（只可能是入口阶，顶阶只能升不能生）
   if (rnd() < 0.5) {
@@ -257,7 +269,7 @@ export function isCatSpec(x: unknown): x is CatSpec {
 
 /** 缓存键：外观的全部信息 */
 export function catKey(spec: CatSpec): string {
-  return [spec.coat, spec.body, spec.eyes, spec.expression, spec.crown, spec.ears, spec.neck, spec.back, spec.tailTip].join('|')
+  return [spec.coat, spec.body, spec.eyes, spec.expression, spec.crown, spec.ears, spec.neck, spec.back, spec.tailTip, spec.backdrop].join('|')
 }
 
 export function describeCat(spec: CatSpec): string {

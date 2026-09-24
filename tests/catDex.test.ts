@@ -4,8 +4,8 @@ import { dexOwned, dexTotals, emptyDex, isCatDex, recordSpec, seedDex } from '..
 import { CAT_LINES, MUTATION_SLOTS, catForCreature, isFullyGrown, mutateCat, type CatSpec } from '../src/core/pixelcat'
 import { makeRng } from '../src/core/rng'
 
-const base: CatSpec = { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none' }
-const maxed: CatSpec = { ...base, crown: 'halo', ears: 'celestial-ears', neck: 'sunburst-ruff', back: 'dragon-wings', tailTip: 'phoenix-tail' }
+const base: CatSpec = { coat: 'orange-white', body: 'standard', eyes: 'round', expression: 'small-fangs', crown: 'none', ears: 'none', neck: 'none', back: 'none', tailTip: 'none', backdrop: 'none' }
+const maxed: CatSpec = { ...base, crown: 'halo', ears: 'celestial-ears', neck: 'sunburst-ruff', back: 'dragon-wings', tailTip: 'phoenix-tail', backdrop: 'doodle-rainbow-trail' }
 
 describe('称号配方', () => {
   it('每个称号都有名字与凑法，id 不重复', () => {
@@ -68,7 +68,7 @@ describe('图鉴账本', () => {
   })
   it('dexOwned 只数见过的', () => {
     expect(dexOwned(emptyDex())).toEqual({ parts: 0, titles: 0 })
-    expect(dexOwned(seedDex([maxed])).parts).toBe(5)
+    expect(dexOwned(seedDex([maxed])).parts).toBe(6) // 六个成长槽各一件，背景也进图鉴
   })
   it('一只猫养到满级，图鉴收齐它路过的每一件', () => {
     let dex = emptyDex()

@@ -17,6 +17,7 @@
     "build:h5": "taro build --type h5",
     "typecheck": "tsc --noEmit",
     "pixelpack": "node scripts/genPixelPack.mjs",
+    "scenepack": "node scripts/genScenePack.mjs",
     "tabicons": "node scripts/genTabIcons.mjs",
     "landedge": "node scripts/genLandEdge.mjs",
     "icons": "node scripts/genIcons.mjs"

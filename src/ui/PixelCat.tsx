@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ART_DISPLAY, ART_SIZE, artLayersFor, artPlanForCat } from '../core/catArt'
+import { ART_SIZE, artLayersFor, artPlanForCat } from '../core/catArt'
+import { SCENE_DISPLAY_H, SCENE_GEOMETRY, SCENE_H, SCENE_W, backdropLayer } from '../core/catScene'
 import { catKey, type CatSpec } from '../core/pixelcat'
 import { composePlan, type Rgba } from '../core/pixelize'
+import { composeScene } from '../core/pixelscene'
 import type { Mood } from '../core/creatureTalk'
 import { hashString } from '../core/rng'
 import { CREATURE_KEYFRAMES, MoodAccent, POOF_SWAP_AT_MS, POOF_TOTAL_MS, SmokePoof, prefersReducedMotion } from './Creature'
@@ -13,14 +15,19 @@ import { CREATURE_KEYFRAMES, MoodAccent, POOF_SWAP_AT_MS, POOF_TOTAL_MS, SmokePo
  * `catArt` 按包里的 profile 推导。图层是 64px 的小色板 PNG，Vite 会把它们内联成 data URI，
  * 所以单文件形态也能用。显示按整数倍 `image-rendering: pixelated` 放大，像素格才整齐。
  *
- * 心情点缀、冒烟换脸、减少动态偏好沿用 SVG 小管家那套。
+ * 画布是 **96×64 的场景**，不是 64×64 的猫：背景由场景包提供，猫按 (16,0) 落进去（见 catScene.ts）。
+ * 没有背景时画布尺寸不变，只是背景那一圈空着——否则长出背景的那一刻版面会跳。
+ *
+ * 心情点缀、冒烟换脸、减少动态偏好沿用 SVG 小管家那套。心情点缀对齐的是**猫**不是场景，
+ * 所以它那层 SVG 按锚点偏移，不铺满画布。
  */
 
 const LAYER_URLS = import.meta.glob('../assets/pixelpack/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const SCENE_URLS = import.meta.glob('../assets/pixelscene/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 function layerUrl(id: string): string {
-  const url = LAYER_URLS[`../assets/pixelpack/${id}.png`]
-  if (!url) throw new Error(`缺像素包图层 ${id}`)
+  const url = LAYER_URLS[`../assets/pixelpack/${id}.png`] ?? SCENE_URLS[`../assets/pixelscene/${id}.png`]
+  if (!url) throw new Error(`缺图层 ${id}`)
   return url
 }
 
@@ -42,37 +49,43 @@ function loadLayer(id: string): Promise<HTMLImageElement> {
   return p
 }
 
+// 解码用的暂存画布。猫是 64×64、背景是 96×64，按需要调尺寸，不为两种尺寸各留一块
 let scratch: { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null
-function scratchCanvas() {
+function scratchCanvas(w: number, h: number) {
   if (!scratch) {
     const canvas = document.createElement('canvas')
-    canvas.width = N
-    canvas.height = N
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     if (!ctx) throw new Error('canvas 2d 不可用')
-    ctx.imageSmoothingEnabled = false
     scratch = { canvas, ctx }
   }
+  if (scratch.canvas.width !== w || scratch.canvas.height !== h) {
+    scratch.canvas.width = w
+    scratch.canvas.height = h
+  }
+  scratch.ctx.imageSmoothingEnabled = false
   return scratch
 }
 
 /** 图层像素数组缓存：PNG 只解码一次 */
 const pixels = new Map<string, Rgba>()
-async function layerPixels(id: string): Promise<Rgba> {
+async function layerPixels(id: string, w = N, h = N): Promise<Rgba> {
   const hit = pixels.get(id)
   if (hit) return hit
   const img = await loadLayer(id)
-  const { ctx } = scratchCanvas()
-  ctx.clearRect(0, 0, N, N)
+  const { ctx } = scratchCanvas(w, h)
+  ctx.clearRect(0, 0, w, h)
   ctx.drawImage(img, 0, 0)
-  const data = new Uint8ClampedArray(ctx.getImageData(0, 0, N, N).data)
+  const data = new Uint8ClampedArray(ctx.getImageData(0, 0, w, h).data)
   pixels.set(id, data)
   return data
 }
 
 const composed = new Map<string, Promise<ImageData | null>>()
 
-/** 合成一只猫；包里画不出来时返回 null（孵化被限制在可孵化的岛上，正常不该出现） */
+/**
+ * 合成一整幕场景（96×64）：先猫后背景，再按锚点叠。包里画不出这只猫时返回 null
+ * （孵化被限制在可孵化的岛上，正常不该出现）。
+ */
 export function composeCat(spec: CatSpec): Promise<ImageData | null> {
   const key = catKey(spec)
   let p = composed.get(key)
@@ -82,12 +95,15 @@ export function composeCat(spec: CatSpec): Promise<ImageData | null> {
       if (!ops) return null
       const loaded = new Map<string, Rgba>()
       await Promise.all(artLayersFor(ops).map(async (id) => loaded.set(id, await layerPixels(id))))
-      const px = composePlan(ops, (id) => {
+      const cat = composePlan(ops, (id) => {
         const data = loaded.get(id)
         if (!data) throw new Error(`缺像素包图层 ${id}`)
         return data
       }, N)
-      const out = new ImageData(N, N)
+      const bdId = backdropLayer(spec.backdrop)
+      const backdrop = bdId ? await layerPixels(bdId, SCENE_W, SCENE_H) : null
+      const px = composeScene(backdrop, cat, SCENE_GEOMETRY)
+      const out = new ImageData(SCENE_W, SCENE_H)
       out.data.set(px)
       return out
     })()
@@ -103,9 +119,12 @@ const PIXEL_KEYFRAMES = `
 @media (prefers-reduced-motion: reduce) { .pixelcat-breathe { animation: none !important; } }
 `
 
-/** 一只像素小管家。size 默认 ART_DISPLAY（原生 ×2），换值请保持整数倍，否则像素格会不均匀。
- *  spec 变化时先把新样子合成好，再冒烟、烟最浓时换脸，散开时已是新长相 */
-export function PixelCatView({ spec, size = ART_DISPLAY, className, mood = 'neutral' }: { spec: CatSpec; size?: number; className?: string; mood?: Mood }) {
+/**
+ * 一只像素小管家。`size` 是**高**（默认原生 ×2），宽按 96:64 推出来——画布是场景不是方图。
+ * 换值请保持整数倍，否则像素格会不均匀。
+ * spec 变化时先把新样子合成好，再冒烟、烟最浓时换脸，散开时已是新长相。
+ */
+export function PixelCatView({ spec, size = SCENE_DISPLAY_H, className, mood = 'neutral' }: { spec: CatSpec; size?: number; className?: string; mood?: Mood }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [displayed, setDisplayed] = useState(spec)
   const [poofKey, setPoofKey] = useState(0)
@@ -141,7 +160,7 @@ export function PixelCatView({ spec, size = ART_DISPLAY, className, mood = 'neut
       .then((img) => {
         const ctx = canvasRef.current?.getContext('2d')
         if (cancelled || !ctx) return
-        ctx.clearRect(0, 0, N, N)
+        ctx.clearRect(0, 0, SCENE_W, SCENE_H)
         if (img) ctx.putImageData(img, 0, 0)
       })
       .catch(() => {})
@@ -150,20 +169,26 @@ export function PixelCatView({ spec, size = ART_DISPLAY, className, mood = 'neut
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
 
+  const scale = size / SCENE_H
+  const width = SCENE_W * scale
+  // 点缀与烟雾跟着猫走，不跟着场景：猫只占画布中间那 64 格
+  const catLeft = SCENE_GEOMETRY.subject.anchor.x * scale
+  const catSize = SCENE_GEOMETRY.subject.width * scale
+
   return (
-    <div className={className} style={{ position: 'relative', width: size, height: size, flex: 'none' }} role="img" aria-label="健康小管家">
+    <div className={className} style={{ position: 'relative', width, height: size, flex: 'none' }} role="img" aria-label="健康小管家">
       <style>{CREATURE_KEYFRAMES + PIXEL_KEYFRAMES}</style>
       <canvas
         ref={canvasRef}
-        width={N}
-        height={N}
+        width={SCENE_W}
+        height={SCENE_H}
         className="pixelcat-breathe"
         style={{
-          position: 'absolute', inset: 0, width: size, height: size, imageRendering: 'pixelated',
+          position: 'absolute', inset: 0, width, height: size, imageRendering: 'pixelated',
           transformOrigin: '50% 100%', animation: 'pixelcat-breathe 3.4s ease-in-out infinite', animationDelay: `${-((seed % 340) / 100)}s`,
         }}
       />
-      <svg viewBox="-10 -14 120 120" width={size} height={size} style={{ position: 'absolute', inset: 0, overflow: 'visible' }} aria-hidden>
+      <svg viewBox="-10 -14 120 120" width={catSize} height={catSize} style={{ position: 'absolute', left: catLeft, top: 0, overflow: 'visible' }} aria-hidden>
         <g transform="translate(6,-4)"><MoodAccent mood={mood} /></g>
         {poofing && <SmokePoof key={poofKey} onDone={() => setPoofing(false)} />}
       </svg>

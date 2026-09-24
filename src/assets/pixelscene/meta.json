@@ -1,0 +1,16 @@
+{
+  "source": "<RandomPet>/dist/pixel-scene/backdrop-candidate",
+  "sceneVersion": "1.0.0-candidate.1",
+  "revision": "02d81288bc74c19435e53b0cfd12a6422556ecafe0809e71f44062799cf9799c",
+  "rendererVersion": "pixel-scene-rgba-v1",
+  "subjectArtVersion": "1.6.1",
+  "verifiedAt": "2026-09-24",
+  "checks": {
+    "backdrops": 3,
+    "canvas": "96x64",
+    "anchor": {
+      "x": 16,
+      "y": 0
+    }
+  }
+}
