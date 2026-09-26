@@ -104,11 +104,7 @@ export default function Today() {
     const prevMl = state.water.filter((w) => w.date === date).reduce((a, w) => a + w.ml, 0)
     const now = Date.now()
 
-    const newId = uid()
-    const writeWater = (s: typeof state) => {
-      const next = act.setWater(s, date, ml, now, newId, date === todayStr() ? nowTimeStr() : undefined)
-      return { water: next.water, tombstones: next.tombstones }
-    }
+    const writeWater = (s: typeof state) => ({ water: act.setWater(s, date, ml, now, date === todayStr() ? nowTimeStr() : undefined).water })
 
     if (ml > prevMl) {
       const r = bumpCreature(update, writeWater)

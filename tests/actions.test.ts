@@ -8,20 +8,20 @@ import { describe, expect, it } from 'vitest'
 import * as act from '../src/store/actions'
 import { defaultState } from '../src/store/storage'
 import type { AppState } from '../src/store/storage'
-import { adoptSynced, mergeSync, toSyncState } from '../src/sync/merge'
+import { adoptSynced, applySyncState, fingerprint, mergeSync, toSyncState } from '../src/sync/merge'
 import type { LogEntry, Profile } from '../src/core/types'
 
 const profile = { sex: 'female', age: 30, heightCm: 165, weightKg: 60, activity: 'light', goal: 'maintain', dislikedDishes: [], conditions: [] } as unknown as Profile
 const base = (): AppState => ({ ...defaultState(), profile, meta: { profileAt: 1, settingsAt: 1 } })
 const entry = (id: string): LogEntry => ({ id, date: '2026-09-24', slot: 'lunch', dishId: 'd1', portion: 1 })
 
-/** A 和 B 互相同步一轮：各自拿对方的状态合并 */
+/** A 和 B 互相同步一轮：各自把对方的数据合并进来（和 syncOnce 拉到改动后做的一样） */
 function syncBoth(a: AppState, b: AppState): [AppState, AppState] {
-  const merged = mergeSync(toSyncState(a), toSyncState(b))
-  const merged2 = mergeSync(toSyncState(b), toSyncState(a))
-  return [adoptSynced(a, fromSync(a, merged)), adoptSynced(b, fromSync(b, merged2))]
+  return [
+    applySyncState(a, mergeSync(toSyncState(a), toSyncState(b))),
+    applySyncState(b, mergeSync(toSyncState(b), toSyncState(a))),
+  ]
 }
-const fromSync = (s: AppState, st: ReturnType<typeof mergeSync>): AppState => ({ ...s, settings: { ...s.settings, ...st.settings }, profile: st.profile, entries: st.entries, water: st.water, weights: st.weights, vitals: st.vitals as unknown as AppState['vitals'], customFoods: st.customFoods, customDishes: st.customDishes, favorites: st.favorites, trainingDays: st.trainingDays, planSeeds: st.planSeeds, tombstones: st.tombstones, meta: st.meta })
 
 describe('写操作都盖时间戳', () => {
   it('记录的增、改、删、恢复', () => {
@@ -63,14 +63,24 @@ describe('写操作都盖时间戳', () => {
     const d = act.saveCustomDish(base(), { id: 'custom_1', name: 'x', cat: 'main', cuisine: 'cn', cook: 'stir', slots: ['lunch'], parts: [], serving: '1份' } as never, 100)
     expect(d.customDishes[0].updatedAt).toBe(100)
   })
-  it('饮水：改总量再撤销，回到原来那条且没有残留墓碑', () => {
-    let s = act.setWater(base(), '2026-09-24', 500, 100, 'w1')
-    const prev = s.water
-    s = act.setWater(s, '2026-09-24', 750, 200, 'w2')
-    expect(s.water.map((w) => w.id)).toEqual(['w2'])
-    s = act.restoreWater(s, '2026-09-24', prev, 'w2', 300)
-    expect(s.water.map((w) => [w.id, w.ml])).toEqual([['w1', 500]])
-    expect(s.tombstones).toEqual([{ coll: 'water', id: 'w2', at: 300 }])
+  it('饮水：一天一条、id 由日期定；清零写 0 而不是删', () => {
+    let s = act.setWater(base(), '2026-09-24', 500, 100)
+    s = act.setWater(s, '2026-09-24', 750, 200)
+    expect(s.water).toEqual([{ id: 'water_2026-09-24', date: '2026-09-24', ml: 750, updatedAt: 200 }])
+    s = act.setWater(s, '2026-09-24', 0, 300)
+    expect(s.water).toEqual([{ id: 'water_2026-09-24', date: '2026-09-24', ml: 0, updatedAt: 300 }])
+    expect(s.tombstones).toEqual([])
+  })
+  it('收藏：取消打墓碑，再加入撤墓碑并记加入时间', () => {
+    let s = act.toggleFavorite(base(), 'd1', 100)
+    expect(s.favorites).toEqual(['d1'])
+    expect(s.meta.addedAt).toEqual({ 'favorites:d1': 100 })
+    s = act.toggleFavorite(s, 'd1', 200)
+    expect(s.favorites).toEqual([])
+    expect(s.tombstones).toEqual([{ coll: 'favorites', id: 'd1', at: 200 }])
+    s = act.toggleFavorite(s, 'd1', 300)
+    expect(s.tombstones).toEqual([])
+    expect(s.meta.addedAt).toEqual({ 'favorites:d1': 300 })
   })
 })
 
@@ -110,5 +120,82 @@ describe('两台设备互相同步后收敛', () => {
     const synced = act.addEntries(before, [entry('remote')], 100)
     const now = act.addEntries(before, [entry('local-new')], 150)
     expect(adoptSynced(now, synced).entries.map((e) => e.id).sort()).toEqual(['local-new', 'remote'])
+  })
+})
+
+describe('饮水两台设备同时改', () => {
+  it('同一天各设一次总量：取后设的那个，不相加', () => {
+    const [a, b] = [act.setWater(base(), '2026-09-24', 500, 100), act.setWater(base(), '2026-09-24', 750, 200)]
+    const [a2, b2] = syncBoth(a, b)
+    expect(a2.water).toEqual(b2.water)
+    expect(a2.water.map((w) => w.ml)).toEqual([750])
+  })
+  it('一边清零、一边后来又加：后做的算数', () => {
+    const a = act.setWater(act.setWater(base(), '2026-09-24', 500, 100), '2026-09-24', 0, 200)
+    const b = act.setWater(base(), '2026-09-24', 250, 300)
+    expect(syncBoth(a, b)[0].water.map((w) => w.ml)).toEqual([250])
+    expect(syncBoth(a, { ...b, water: [{ ...b.water[0], updatedAt: 150 }] })[0].water.map((w) => w.ml)).toEqual([0])
+  })
+  it('旧版数据：随机 id 的总量记录被新版那条取代；只有旧记录的一天（快捷加水时代）相加；已删的旧记录不复活', () => {
+    const old = { ...base(), water: [
+      { id: 'x1', date: '2026-09-24', ml: 500, updatedAt: 100 },
+      { id: 'q1', date: '2026-09-01', ml: 100, updatedAt: 10 },
+      { id: 'q2', date: '2026-09-01', ml: 200, updatedAt: 20 },
+      { id: 'gone', date: '2026-09-02', ml: 300, updatedAt: 30 },
+    ] }
+    const neu = { ...act.setWater(base(), '2026-09-24', 750, 200), tombstones: [{ coll: 'water' as const, id: 'gone', at: 40 }] }
+    const [o2, n2] = syncBoth(old, neu)
+    expect(o2.water).toEqual(n2.water)
+    const byDate = Object.fromEntries(o2.water.map((w) => [w.date, [w.id, w.ml]]))
+    expect(byDate).toEqual({ '2026-09-24': ['water_2026-09-24', 750], '2026-09-01': ['water_2026-09-01', 300] })
+  })
+})
+
+describe('收藏与训练日：取消也能同步', () => {
+  it('一台取消收藏，另一台不会再把它加回来', () => {
+    const both = act.toggleFavorite(base(), 'd1', 100)
+    const a = act.toggleFavorite(both, 'd1', 200)
+    const [a2, b2] = syncBoth(a, both)
+    expect(a2.favorites).toEqual([])
+    expect(b2.favorites).toEqual([])
+  })
+  it('取消之后另一台又重新收藏：以后做的为准', () => {
+    const both = act.toggleFavorite(base(), 'd1', 100)
+    const a = act.toggleFavorite(both, 'd1', 200)
+    const b = act.toggleFavorite(act.toggleFavorite(both, 'd1', 250), 'd1', 300)
+    const [a2, b2] = syncBoth(a, b)
+    expect(a2.favorites).toEqual(['d1'])
+    expect(b2.favorites).toEqual(['d1'])
+  })
+  it('没有加入时间的旧收藏，碰上墓碑算删了；训练日同理', () => {
+    const legacy = { ...base(), favorites: ['d1'], trainingDays: ['2026-09-24'] }
+    const a = act.toggleTrainingDay(act.toggleFavorite(legacy, 'd1', 100), '2026-09-24', 100)
+    const [, b2] = syncBoth(a, legacy)
+    expect(b2.favorites).toEqual([])
+    expect(b2.trainingDays).toEqual([])
+  })
+})
+
+describe('墓碑不过期', () => {
+  it('离线半年的设备回来，不会把早就删掉的记录带回来', () => {
+    const longAgo = Date.now() - 200 * 86400000
+    const offline = act.addEntries(base(), [entry('e1')], longAgo)
+    const online = act.removeEntries(offline, ['e1'], longAgo + 1000)
+    const [o2, n2] = syncBoth(offline, online)
+    expect(o2.entries).toEqual([])
+    expect(n2.entries).toEqual([])
+    expect(n2.tombstones.map((t) => t.id)).toEqual(['e1'])
+  })
+  it('旧版饮水墓碑三个月后照样清掉（量最大，新版已用不上）', () => {
+    const s = { ...base(), tombstones: [{ coll: 'water' as const, id: 'x', at: Date.now() - 100 * 86400000 }] }
+    expect(syncBoth(s, base())[0].tombstones).toEqual([])
+  })
+})
+
+describe('指纹', () => {
+  it('addedAt 键的顺序不影响指纹，否则每次同步都白推一次', () => {
+    const a = { ...base(), meta: { profileAt: 1, settingsAt: 1, addedAt: { 'favorites:a': 1, 'favorites:b': 2 } } }
+    const b = { ...base(), meta: { profileAt: 1, settingsAt: 1, addedAt: { 'favorites:b': 2, 'favorites:a': 1 } } }
+    expect(fingerprint(toSyncState(a))).toBe(fingerprint(toSyncState(b)))
   })
 })

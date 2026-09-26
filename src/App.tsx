@@ -314,7 +314,7 @@ export default function App() {
     show(`已保存自建菜「${d.name}」，以后搜索、推荐都能用`)
   }
   const addCustomFood = (f: CustomFood) => update((s) => act.saveCustomFoods(s, [f], Date.now()))
-  const toggleFavorite = (id: string) => update((s) => ({ ...s, favorites: s.favorites.includes(id) ? s.favorites.filter((x) => x !== id) : [...s.favorites, id] }))
+  const toggleFavorite = (id: string) => update((s) => act.toggleFavorite(s, id, Date.now()))
 
   const reroll = (slot?: MealSlot) => update((s) => act.reroll(s, [date], slot))
 
@@ -357,13 +357,13 @@ export default function App() {
   const setWater = (ml: number) => {
     const prev = state.water.filter((w) => w.date === date)
     const prevMl = prev.reduce((s, w) => s + w.ml, 0)
-    const newId = uid()
-    update((s) => act.setWater(s, date, ml, Date.now(), newId, date === today ? nowTimeStr() : undefined))
+    const prevTime = prev.map((w) => w.time).filter(Boolean).sort().pop()
+    update((s) => act.setWater(s, date, ml, Date.now(), date === today ? nowTimeStr() : undefined))
     if (ml > prevMl) bumpCreature()
     const cupsN = Math.round(ml / 250)
     show(ml > 0 ? `喝到第 ${cupsN} 杯 · ${Math.round(ml)} ml` : '今天的饮水清零了', {
       label: '撤销',
-      run: () => update((s) => act.restoreWater(s, date, prev, ml > 0 ? newId : null, Date.now())),
+      run: () => update((s) => act.setWater(s, date, prevMl, Date.now(), prevTime)),
     })
   }
   const addWeight = (w: WeightEntry) => {
@@ -378,7 +378,7 @@ export default function App() {
     setTab('me')
     window.setTimeout(() => document.getElementById('modes-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
   }
-  const toggleTrainingDay = () => update((s) => ({ ...s, trainingDays: s.trainingDays.includes(date) ? s.trainingDays.filter((d) => d !== date) : [...s.trainingDays, date] }))
+  const toggleTrainingDay = () => update((s) => act.toggleTrainingDay(s, date, Date.now()))
   const setAdaptive = (v: boolean) => update((s) => act.patchSettings(s, { useAdaptiveTdee: v }, Date.now()))
   const setProvider = (p: Provider) => update((s) => act.patchSettings(s, { provider: p }, Date.now()))
   const markContributed = (id: string) => update((s) => act.patchSettings(s, { contributedFoodIds: [...new Set([...s.settings.contributedFoodIds, id])] }, Date.now()))

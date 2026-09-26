@@ -12,6 +12,8 @@
  */
 import type { Dish, LogEntry, MealSlot, Profile, VitalEntry, WaterEntry } from '../core/types'
 import type { AppState, CustomFood } from './storage'
+import { markKey, waterId } from '../sync/merge'
+import type { MarkColl } from '../sync/merge'
 
 type Coll = AppState['tombstones'][number]['coll']
 
@@ -41,26 +43,16 @@ export function removeEntries(s: AppState, ids: string[], now: number): AppState
   return { ...s, entries: s.entries.filter((e) => !ids.includes(e.id)), tombstones: [...s.tombstones, ...tombs('entries', ids, now)] }
 }
 
-// ── 饮水：一天一个总量，改总量 = 旧记录打墓碑 + 新写一条 ──
+// ── 饮水：一天一条总量记录，id 由日期定（见 merge.ts 的 waterId）──
 
-export function setWater(s: AppState, date: string, ml: number, now: number, id: string, time?: string): AppState {
-  const prev = s.water.filter((w) => w.date === date)
-  const rec: WaterEntry = { id, date, ...(time ? { time } : {}), ml: Math.round(ml), updatedAt: now }
-  return {
-    ...s,
-    water: [...s.water.filter((w) => w.date !== date), ...(ml > 0 ? [rec] : [])],
-    tombstones: [...s.tombstones, ...tombs('water', prev.map((w) => w.id), now)],
-  }
-}
-
-/** 撤销一次 setWater：把那天换回之前的记录，撤掉它们的墓碑，给刚写的那条打墓碑 */
-export function restoreWater(s: AppState, date: string, prev: WaterEntry[], writtenId: string | null, now: number): AppState {
-  const prevIds = prev.map((w) => w.id)
-  return {
-    ...s,
-    water: [...s.water.filter((w) => w.date !== date), ...prev.map((w) => ({ ...w, updatedAt: now }))],
-    tombstones: [...dropTombs(s, 'water', prevIds), ...(writtenId ? tombs('water', [writtenId], now) : [])],
-  }
+/**
+ * 把这一天的饮水总量设成 ml。清零也写一条 0 ml，而不是删掉打墓碑：
+ * 两台设备改的是同一条，合并时按 updatedAt 取新的，清零和加水谁后做谁算数。
+ * 撤销也就是再设一次原来的总量。
+ */
+export function setWater(s: AppState, date: string, ml: number, now: number, time?: string): AppState {
+  const rec: WaterEntry = { id: waterId(date), date, ...(time ? { time } : {}), ml: Math.max(0, Math.round(ml)), updatedAt: now }
+  return { ...s, water: [...s.water.filter((w) => w.date !== date), rec] }
 }
 
 // ── 体重：按日期一条 ──
@@ -124,6 +116,24 @@ type SyncedSettings = Pick<AppState['settings'], 'useAdaptiveTdee' | 'provider' 
 export function patchSettings(s: AppState, patch: Partial<SyncedSettings>, now: number): AppState {
   return { ...s, settings: { ...s.settings, ...patch }, meta: { ...s.meta, settingsAt: now } }
 }
+
+// ── 收藏 / 训练日：只是一串 id，加入记时间、取消打墓碑，合并时比先后（见 merge.ts 的 mergeMarks）──
+
+function toggleMark(s: AppState, coll: MarkColl, id: string, now: number): AppState {
+  const list = s[coll]
+  if (list.includes(id)) {
+    return { ...s, [coll]: list.filter((x) => x !== id), tombstones: [...s.tombstones, ...tombs(coll, [id], now)] }
+  }
+  return {
+    ...s,
+    [coll]: [...list, id],
+    tombstones: dropTombs(s, coll, [id]),
+    meta: { ...s.meta, addedAt: { ...(s.meta.addedAt || {}), [markKey(coll, id)]: now } },
+  }
+}
+
+export const toggleFavorite = (s: AppState, dishId: string, now: number) => toggleMark(s, 'favorites', dishId, now)
+export const toggleTrainingDay = (s: AppState, date: string, now: number) => toggleMark(s, 'trainingDays', date, now)
 
 // ── 推荐：换一换 ──
 

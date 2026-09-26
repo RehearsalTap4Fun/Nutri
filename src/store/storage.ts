@@ -47,9 +47,9 @@ export interface AppState {
   /** 标记为训练日的日期（健身增肌模式） */
   trainingDays: string[]
   /** 多设备合并用：删除记录的墓碑 */
-  tombstones: Array<{ coll: 'entries' | 'water' | 'weights' | 'vitals' | 'customFoods' | 'customDishes'; id: string; at: number }>
+  tombstones: Array<{ coll: 'entries' | 'water' | 'weights' | 'vitals' | 'customFoods' | 'customDishes' | 'favorites' | 'trainingDays'; id: string; at: number }>
   /** 档案与设置的最后修改时间（毫秒），合并时取新的 */
-  meta: { profileAt: number; settingsAt: number }
+  meta: { profileAt: number; settingsAt: number; addedAt?: Record<string, number> }
   /** 血压 / 血糖记录 */
   vitals: VitalEntry[]
   /** 健康小管家：null 是还没孵化的蛋 */
@@ -112,7 +112,10 @@ export function normalizeState(raw: unknown): AppState {
   if (Array.isArray(raw.favorites)) s.favorites = raw.favorites.filter((x) => typeof x === 'string') as string[]
   if (Array.isArray(raw.trainingDays)) s.trainingDays = raw.trainingDays.filter((x) => typeof x === 'string') as string[]
   if (Array.isArray(raw.tombstones)) s.tombstones = raw.tombstones.filter((t) => isObj(t) && typeof t.coll === 'string' && typeof t.id === 'string' && typeof t.at === 'number') as AppState['tombstones']
-  if (isObj(raw.meta)) s.meta = { profileAt: Number(raw.meta.profileAt) || 0, settingsAt: Number(raw.meta.settingsAt) || 0 }
+  if (isObj(raw.meta)) {
+    s.meta = { profileAt: Number(raw.meta.profileAt) || 0, settingsAt: Number(raw.meta.settingsAt) || 0 }
+    if (isObj(raw.meta.addedAt)) s.meta.addedAt = Object.fromEntries(Object.entries(raw.meta.addedAt).filter(([, v]) => typeof v === 'number')) as Record<string, number>
+  }
   if (Array.isArray(raw.vitals)) s.vitals = raw.vitals.filter((v) => isObj(v) && typeof v.date === 'string' && (v.kind === 'bp' || v.kind === 'glucose')) as VitalEntry[]
   const isTraits = (t: unknown): t is CreatureTraits => isObj(t)
     && (BODIES as readonly string[]).includes(t.body as string) && (COLORS as readonly string[]).includes(t.color as string)
