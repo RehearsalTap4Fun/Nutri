@@ -12,8 +12,7 @@ import {
 } from '@core/conditions'
 import { ageOf, bmi, bmiLabel } from '@core/energy'
 import { profileProblems } from '@core/profile'
-import { retire } from '@core/creature'
-import { describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
+import { SPECIES_NAMES, describeCat, isFullyGrown, growthSteps, maxGrowthSteps } from '@core/pixelcat'
 import { getLatest, useAppState } from '../../shared/useAppState'
 import type { AppState } from '../../shared/state'
 import { adoptSynced } from '@sync/merge'
@@ -261,20 +260,18 @@ export default function Me() {
     })
   }
 
+  /** 毕业：一步选完下一颗蛋孵什么。取消就是不毕业 */
   const graduate = () => {
     if (!creature) return
-    Taro.showModal({
-      title: '让它毕业？',
-      content: '会换一颗新蛋重新养。现在这只进图鉴，长出来的部件和称号都留着。',
+    const choices = ['cat', 'dog'] as const
+    Taro.showActionSheet({
+      alertText: '现在这只进图鉴，长出来的部件和称号都留着。下一颗蛋孵出：',
+      itemList: choices.map((sp) => `毕业，下一只养${SPECIES_NAMES[sp]}`),
       success: (r) => {
-        if (!r.confirm) return
-        const now = Date.now()
-        update((s) => ({
-          ...s,
-          creature: null,
-          creatureHistory: s.creature ? [...s.creatureHistory, retire(s.creature, now)] : s.creatureHistory,
-        }))
-        Taro.showToast({ title: '已毕业，换一颗新蛋', icon: 'none' })
+        const sp = choices[r.tapIndex]
+        if (!sp) return
+        update((s) => act.graduateCreature(s, sp, Date.now()))
+        Taro.showToast({ title: `已毕业，换了一颗${SPECIES_NAMES[sp]}蛋`, icon: 'none' })
       },
     })
   }
@@ -486,7 +483,7 @@ export default function Me() {
             </Button>
           </View>
         ) : (
-          <Text className="muted">还是一颗蛋。去「今日」记下第一笔就会孵化。</Text>
+          <Text className="muted">还是一颗{SPECIES_NAMES[state.eggSpecies ?? 'cat']}蛋。去「今日」记下第一笔就会孵化。</Text>
         )}
       </View>
 

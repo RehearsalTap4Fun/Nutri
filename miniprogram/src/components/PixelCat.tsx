@@ -33,12 +33,14 @@ import { composePlan } from '@core/pixelize'
 import type { Rgba } from '@core/pixelize'
 import { composeScene } from '@core/pixelscene'
 import { hashString } from '@core/rng'
+import { composeDog, dogLayersFor, dogPlanFor } from '@core/dogArt'
 import { LAYER_DATA, LAYER_PATH } from '../assets/pixelpackData'
 import { SCENE_DATA, SCENE_PATH } from '../assets/pixelsceneData'
+import { CANINE_PATH } from '../assets/caninepackData'
 
 interface Props {
   id?: string
-  spec: CatSpecLike & { backdrop?: string }
+  spec: CatSpecLike & { backdrop?: string; species?: 'dog' }
   /** 显示**高度**（CSS px）。宽按场景比例（96:64）推出来，画布不是方的 */
   size?: number
 }
@@ -58,10 +60,12 @@ function pixelRatio(): number {
   return Taro.getSystemInfoSync().pixelRatio || 2
 }
 
-/** 图层 id 属于猫包还是场景包：两个包的 id 前缀不同，不会撞 */
-function sourcesFor(layerId: string): string[] {
+/** 图层 id 属于哪个包：猫包、场景包、狗狗包的 id 前缀各不相同，不会撞 */
+function sourcesFor(layerId: string, dog: boolean): string[] {
   const out: string[] = []
-  if (SCENE_DATA[layerId]) {
+  if (dog) {
+    out.push(`${CANINE_PATH}/${layerId}.png`)
+  } else if (SCENE_DATA[layerId]) {
     out.push(`${SCENE_PATH}/${layerId}.png`)
     out.push(SCENE_DATA[layerId])
   } else {
@@ -72,7 +76,7 @@ function sourcesFor(layerId: string): string[] {
 }
 
 /** 拿到一张能画的图。先试包内文件，再试 base64，各自带超时 */
-function loadImage(canvas: any, layerId: string): Promise<any> {
+function loadImage(canvas: any, layerId: string, dog = false): Promise<any> {
   const tryOne = (src: string) =>
     new Promise<any>((resolve, reject) => {
       const img = canvas.createImage()
@@ -88,7 +92,7 @@ function loadImage(canvas: any, layerId: string): Promise<any> {
       img.src = src
     })
 
-  const [first, fallback] = sourcesFor(layerId)
+  const [first, fallback] = sourcesFor(layerId, dog)
   return tryOne(first).catch(() => {
     if (!fallback) throw new Error(`缺图层 ${layerId}`)
     return tryOne(fallback)
@@ -125,9 +129,12 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
     if (lastKey.current === key) return
     let cancelled = false
 
-    const ops = artPlanForCat(spec)
-    if (!ops) {
-      setErr('这只猫没有对应的美术')
+    // 猫走像素包的计划，狗走狗狗包的计划；两边都只是「要哪些图层 + 怎么叠」，合成都是纯数组运算
+    const isDog = spec.species === 'dog'
+    const ops = isDog ? null : artPlanForCat(spec)
+    const dogPlan = isDog ? dogPlanFor(spec) : null
+    if (!ops && !dogPlan) {
+      setErr(isDog ? '这只狗没有对应的美术' : '这只猫没有对应的美术')
       return
     }
 
@@ -160,7 +167,7 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
         // ── 解码：画布临时调到图层自己的尺寸，逐张画上去再读像素 ──
         // 猫的图层是 64×64，背景是 96×64，不能一律按方图读，否则背景会被截掉右边三分之一
         const bdId = backdropLayer(spec.backdrop || 'none')
-        const ids = artLayersFor(ops)
+        const ids = dogPlan ? dogLayersFor(dogPlan) : artLayersFor(ops!)
         const need = [...ids, ...(bdId ? [bdId] : [])].filter((i) => !pixelCache.has(i))
         for (const layerId of need) {
           const isScene = layerId === bdId
@@ -168,7 +175,7 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
           const lh = isScene ? SCENE_H : N
           canvas.width = lw
           canvas.height = lh
-          const img = await loadImage(canvas, layerId)
+          const img = await loadImage(canvas, layerId, !!dogPlan && !isScene)
           if (cancelled) return
           ctx.clearRect(0, 0, lw, lh)
           ctx.drawImage(img, 0, 0, lw, lh)
@@ -176,7 +183,7 @@ export function PixelCat({ id = 'pixelCat', spec, size = 128 }: Props) {
         }
 
         // ── 合成：纯数组运算，与网页版同一份代码 ──
-        const cat = composePlan(ops, (i) => pixelCache.get(i)!, N)
+        const cat = dogPlan ? composeDog(dogPlan, (i) => pixelCache.get(i)!) : composePlan(ops!, (i) => pixelCache.get(i)!, N)
         const rgba = composeScene(bdId ? pixelCache.get(bdId)! : null, cat, SCENE_GEOMETRY)
 
         // ── 放大与输出（96×64，不是方的） ──

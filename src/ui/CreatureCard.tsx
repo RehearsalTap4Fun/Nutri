@@ -3,7 +3,7 @@ import type { Creature, RetiredCreature } from '../core/creature'
 import { PERSONALITY_LABEL } from '../core/creature'
 import {
   CAT_LINE_NAMES, CAT_LINES, CAT_NAMES, MUTATION_SLOTS,
-  CAT_SLOT_NAMES, TIER_NAMES, CAT_TIER, describeCat, isFullyGrown, type CatSpec,
+  CAT_SLOT_NAMES, TIER_NAMES, CAT_TIER, SPECIES_NAMES, describeCat, isFullyGrown, speciesOf, type CatSpec, type Species,
 } from '../core/pixelcat'
 import { ART_DISPLAY, ART_SIZE } from '../core/catArt'
 import { CAT_TITLES, titlesFor } from '../core/catTitles'
@@ -89,20 +89,23 @@ function PartDex({ dex, current }: { dex: CatDex; current: CatSpec | null }) {
 }
 
 /** 「我的」页：当前的健康小管家、毕业换一只，与图鉴 */
-export function CreatureCard({ creature, history, dex, onReforge }: {
+export function CreatureCard({ creature, history, dex, eggSpecies, onReforge }: {
   creature: Creature | null
   history: RetiredCreature[]
   dex: CatDex
-  onReforge: () => void
+  /** 还是蛋的时候，这颗蛋会孵成什么 */
+  eggSpecies: Species
+  onReforge: (species: Species) => void
 }) {
   const [confirm, setConfirm] = useState(false)
   const cat = creature ? creature.cat : null
   const grown = cat ? isFullyGrown(cat) : false
   const owned = dexOwned(dex)
   const totals = dexTotals()
+  const noun = cat ? SPECIES_NAMES[speciesOf(cat)] : SPECIES_NAMES[eggSpecies]
   const intro = creature
     ? `${cat ? `${describeCat(cat)}，` : ''}性格「${PERSONALITY_LABEL[creature.personality]}」，已经异变 ${creature.mutations} 次。`
-    : '记第一笔（三餐或喝水）就会孵化，长什么样、性格是什么都是随机的。'
+    : `这是一颗${noun}蛋。记第一笔（三餐或喝水）就会孵化，长什么样、性格是什么都是随机的。`
   return (
     <div className="card">
       <h2>健康小管家</h2>
@@ -115,7 +118,9 @@ export function CreatureCard({ creature, history, dex, onReforge }: {
             !confirm
               ? <button className="btn ghost sm" onClick={() => setConfirm(true)}>{grown ? '让它毕业' : '提前毕业'}</button>
               : (
-                <span className="row wrap"><span className="small">现在这只会存进图鉴，换一颗新蛋？</span><button className="btn danger sm" onClick={() => { onReforge(); setConfirm(false) }}>确定</button><button className="btn sm" onClick={() => setConfirm(false)}>取消</button></span>
+                <span className="row wrap"><span className="small">现在这只会存进图鉴。下一颗蛋孵出：</span>
+                  {(['cat', 'dog'] as const).map((sp) => <button key={sp} className="btn primary sm" onClick={() => { onReforge(sp); setConfirm(false) }}>{SPECIES_NAMES[sp]}</button>)}
+                  <button className="btn sm" onClick={() => setConfirm(false)}>取消</button></span>
               )
           )}
         </div>

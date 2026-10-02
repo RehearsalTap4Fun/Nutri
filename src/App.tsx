@@ -33,7 +33,8 @@ import { deleteRemote, syncOnce, SyncError } from './sync/client'
 import { adoptSynced, fingerprint, toSyncState } from './sync/merge'
 import * as act from './store/actions'
 import { generateSyncCode } from './sync/crypto'
-import { hatch, mutate, retire } from './core/creature'
+import { hatch, mutate } from './core/creature'
+import { SPECIES_NAMES, type Species } from './core/pixelcat'
 import { recordSpec } from './core/catDex'
 import { hashString, makeRng } from './core/rng'
 import type { SyncStatus } from './ui/CloudSync'
@@ -242,15 +243,14 @@ export default function App() {
     const rnd = makeRng(hashString(uid() + now))
     update((s) => {
       const prev = s.creature
-      const next = prev ? mutate(prev, now, rnd) : hatch(uid(), now, rnd)
+      const next = prev ? mutate(prev, now, rnd) : hatch(uid(), now, rnd, s.eggSpecies ?? 'cat')
       // 图鉴在这里记：新出现的部件与新达成的称号各 +1。孵化时 prev 传 null，自带的那件也要记
       return { ...s, creature: next, creatureDex: recordSpec(s.creatureDex, prev ? prev.cat : null, next.cat) }
     })
   }
-  const reforgeCreature = () => {
-    const now = Date.now()
-    update((s) => ({ ...s, creature: null, creatureHistory: s.creature ? [...s.creatureHistory, retire(s.creature, now)] : s.creatureHistory }))
-    show('已毕业，换一颗新蛋')
+  const reforgeCreature = (species: Species) => {
+    update((s) => act.graduateCreature(s, species, Date.now()))
+    show(`已毕业，换了一颗${SPECIES_NAMES[species]}蛋`)
   }
 
   /** 记一笔的提示：第一次记录、这台设备还没配过同步码时，顺手自动开起来（可在「我的」手动关闭）；顺带喂一下小管家 */

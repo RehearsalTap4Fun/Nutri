@@ -1,0 +1,14 @@
+{
+  "source": "<RandomPet>/dist/canine/approved-1.0.0/pixel",
+  "artVersion": "canine-1.0.0",
+  "revision": "a19f005d23a80f835f35e9caa7b8e5a0effe3205bee1aa6d902bbfd56ac83c3e",
+  "rendererVersion": "canine-rgba-v1",
+  "runtimeSha256": "2e8ad8ae170f62e0a659e15ffcac0c8b75ef0d5a3d8f8238e717c8b3ae5acae3",
+  "deliverySha256": "dfaec5f74107bddb397d6b2e25027434f5cde24bee3f1d572ea76e81609f58c9",
+  "verifiedAt": "2026-10-02",
+  "checks": {
+    "resources": 414,
+    "bodies": 72,
+    "profiles": 18
+  }
+}

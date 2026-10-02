@@ -13,8 +13,14 @@
  *
  * 形象素材来自 QMonster 像素包（见 `catArt.ts`）。孵化只落在可孵化的岛上，
  * 这条保证一只猫终其一生都画得出来。
+ *
+ * **狗也走这套规则**（`species: 'dog'`）。狗狗像素包和猫同构：犬种占猫的 `coat` 那一格（同为身份性状），
+ * 体型／眼型／表情取值相同，五个部件槽的 16 件部件一一对应（打包时逐个犬型核过），所以进化链、
+ * 品质、成长节奏、图鉴与称号全部共用，不另立一套。不同的只有美术来源与合成器（见 `dogArt.ts`）。
+ * 外观里没有 `species` 字段的就是猫——老存档与猫的缓存键、回放都因此一个字节不变。
  */
 import { ART_EYES, ART_EXPRESSIONS, ART_IDENTITY_PAIRS, artLateralFor } from './catArt'
+import { DOG_BREEDS, DOG_IDENTITY_PAIRS, DOG_NAMES, dogLateralFor, type DogBreed } from './dogArt'
 import { hashString, makeRng, weightedPick } from './rng'
 
 /**
@@ -28,7 +34,8 @@ import { hashString, makeRng, weightedPick } from './rng'
  * 只要求这个字段是字符串）。已经「长齐」的猫会重新变得可成长——这正是补阵容要的效果。
  * **规则实质变化时必须升这个号**，否则同一个字符串会描述两套不同的规则，这个字段就失去意义了。
  */
-export const PIXEL_CAT_RULES = 'pixelcat-rules-v6'
+export const PIXEL_CAT_RULES = 'pixelcat-rules-v7'
+// v7=小管家可以是狗（狗狗像素包 canine-1.0.0）：毕业换蛋时选猫或狗，狗沿用猫的全部成长规则。猫的规则一字未改。
 
 export const CAT_COATS = ['brown-tabby', 'orange-white', 'tuxedo', 'calico', 'colorpoint', 'rosetted'] as const
 /** 体型：与花纹同为身份性状，孵化定型后一生不变 */
@@ -53,7 +60,22 @@ export const CAT_SLOT_OPTIONS = {
 export type CatCoat = (typeof CAT_COATS)[number]
 export type CatBody = (typeof CAT_BODIES)[number]
 export type CatSlot = keyof typeof CAT_SLOT_OPTIONS
-export type CatSpec = { coat: CatCoat; body: CatBody } & { [K in CatSlot]: (typeof CAT_SLOT_OPTIONS)[K][number] }
+/** 物种：外观里不写就是猫 */
+export const SPECIES = ['cat', 'dog'] as const
+export type Species = (typeof SPECIES)[number]
+export const SPECIES_NAMES: Record<Species, string> = { cat: '猫', dog: '狗' }
+
+/** `coat` 是身份性状：猫放毛色，狗放犬种 */
+export type CatSpec = { coat: CatCoat | DogBreed; body: CatBody; species?: 'dog' } & { [K in CatSlot]: (typeof CAT_SLOT_OPTIONS)[K][number] }
+
+export function speciesOf(spec: Pick<CatSpec, 'species'>): Species {
+  return spec.species === 'dog' ? 'dog' : 'cat'
+}
+
+/** 某物种某身份下有图的眼型与表情（孵化与横向变化都只能在这里面挑） */
+function lateralFor(species: Species, coat: string, body: string): { eyes: string[]; expressions: string[] } {
+  return species === 'dog' ? dogLateralFor(coat, body) : artLateralFor(coat, body)
+}
 export type CatMutation = Exclude<CatSpec['crown' | 'ears' | 'neck' | 'back' | 'tailTip' | 'backdrop'], 'none'>
 
 /** 身份性状：孵化定型，一生不变 */
@@ -178,6 +200,7 @@ export function upgradeChance(spec: CatSpec): number {
 }
 
 export const CAT_NAMES: Record<string, string> = {
+  ...DOG_NAMES,
   'brown-tabby': '棕虎斑', 'orange-white': '橘白', tuxedo: '燕尾服', calico: '三花', colorpoint: '重点色', rosetted: '金豹点',
   standard: '标准', 'shortleg-round': '短腿圆身', 'slender-tall': '修长高挑',
   round: '圆眼', 'sleepy-almond': '半眯眼',
@@ -201,7 +224,7 @@ function pick<T>(arr: readonly T[], rnd: () => number): T {
  * 岛里没有的取值画不出来，不能凭规则硬给。
  */
 function lateralChange(spec: CatSpec, rnd: () => number): CatSpec {
-  const available = artLateralFor(spec.coat, spec.body)
+  const available = lateralFor(speciesOf(spec), spec.coat, spec.body)
   const pools: Record<string, readonly string[]> = { eyes: available.eyes, expression: available.expressions }
   const usable = LATERAL_SLOTS.filter((s) => pools[s].filter((v) => v !== spec[s]).length > 0)
   if (usable.length === 0) return spec // 该岛没有可换的横向取值（理论上不会发生，可孵化的岛都 ≥2 个落点）
@@ -229,11 +252,13 @@ export function mutateCat(spec: CatSpec, rnd: () => number): CatSpec {
  * 为什么必须从岛里挑：身份性状一生不变，所以孵化那一刻就决定了这只猫余生能不能画出来。
  * 落在没有美术的身份上，等于生下一只永远画不出来的猫。
  */
-export function hatchCat(rnd: () => number): CatSpec {
-  const pair = pick(ART_IDENTITY_PAIRS, rnd)
-  const available = artLateralFor(pair.coat, pair.body)
+export function hatchCat(rnd: () => number, species: Species = 'cat'): CatSpec {
+  // 猫这条路的随机数消耗必须保持原样：catForCreature 靠它给老存档推导出同一只猫
+  const pair = pick(species === 'dog' ? DOG_IDENTITY_PAIRS : ART_IDENTITY_PAIRS, rnd)
+  const available = lateralFor(species, pair.coat, pair.body)
   let spec: CatSpec = {
-    coat: pair.coat as CatCoat,
+    ...(species === 'dog' ? { species: 'dog' as const } : {}),
+    coat: pair.coat as CatSpec['coat'],
     body: pair.body as CatBody,
     eyes: pick(available.eyes.length ? available.eyes : ART_EYES, rnd) as CatSpec['eyes'],
     expression: pick(available.expressions.length ? available.expressions : ART_EXPRESSIONS, rnd) as CatSpec['expression'],
@@ -251,9 +276,9 @@ export function hatchCat(rnd: () => number): CatSpec {
  * 老存档兼容：没存过 spec 的小管家，由 id + 异变次数按当前规则推导一次（之后写进存档，不再重算）。
  * 同一 id 的随机流固定，第 k 次异变的结果是前缀确定的。这个函数的行为要保持稳定，改它会让还没迁移的老猫换样。
  */
-export function catForCreature(c: { id: string; mutations: number }): CatSpec {
-  const rnd = makeRng(hashString(`pixelcat|${c.id}`))
-  let spec = hatchCat(rnd)
+export function catForCreature(c: { id: string; mutations: number }, species: Species = 'cat'): CatSpec {
+  const rnd = makeRng(hashString(`${species === 'dog' ? 'pixeldog' : 'pixelcat'}|${c.id}`))
+  let spec = hatchCat(rnd, species)
   for (let i = 0; i < Math.max(0, c.mutations); i++) spec = mutateCat(spec, rnd)
   return spec
 }
@@ -262,14 +287,18 @@ export function catForCreature(c: { id: string; mutations: number }): CatSpec {
 export function isCatSpec(x: unknown): x is CatSpec {
   if (typeof x !== 'object' || x === null) return false
   const o = x as Record<string, unknown>
-  if (!(CAT_COATS as readonly string[]).includes(o.coat as string)) return false
+  if (o.species !== undefined && o.species !== 'dog') return false
+  const coats: readonly string[] = o.species === 'dog' ? DOG_BREEDS : CAT_COATS
+  if (!coats.includes(o.coat as string)) return false
   if (!(CAT_BODIES as readonly string[]).includes(o.body as string)) return false
   return (Object.keys(CAT_SLOT_OPTIONS) as CatSlot[]).every((slot) => (CAT_SLOT_OPTIONS[slot] as readonly string[]).includes(o[slot] as string))
 }
 
 /** 缓存键：外观的全部信息 */
 export function catKey(spec: CatSpec): string {
-  return [spec.coat, spec.body, spec.eyes, spec.expression, spec.crown, spec.ears, spec.neck, spec.back, spec.tailTip, spec.backdrop].join('|')
+  const key = [spec.coat, spec.body, spec.eyes, spec.expression, spec.crown, spec.ears, spec.neck, spec.back, spec.tailTip, spec.backdrop].join('|')
+  // 猫的键保持原样（缓存、回放都按它）；犬种和毛色名字不重叠，加前缀只是让键自己说清是哪个物种
+  return spec.species === 'dog' ? `dog|${key}` : key
 }
 
 export function describeCat(spec: CatSpec): string {

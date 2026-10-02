@@ -50,6 +50,9 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
       patterns: [
         // 像素猫图层按真实文件进包，运行时用 `/assets/pixelpack/xxx.png` 加载
         { from: 'src/assets/pixelpack/', to: 'dist/assets/pixelpack/' },
+        // 背景与狗狗图层同理（之前漏了背景这一条，真机上背景只能走 base64 兜底，那条路不可靠）
+        { from: 'src/assets/pixelscene/', to: 'dist/assets/pixelscene/' },
+        { from: 'src/assets/caninepack/', to: 'dist/assets/caninepack/' },
         // tabBar 只吃位图，图标由 scripts/genTabIcons.mjs 从网页版同一组 SVG 路径生成
         { from: 'src/assets/tabbar/', to: 'dist/assets/tabbar/' },
         // 陆地岸线，由 scripts/genLandEdge.mjs 从网页版同一段 SVG 路径渲染

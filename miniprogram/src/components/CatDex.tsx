@@ -50,7 +50,7 @@ function PartDex({ dex, current }: { dex: CatDex; current: CatSpec | null }) {
         </View>
       ))}
       <Text className="entry-sub">
-        深色描边的是现在身上这件。括号里的数字是养过的猫里出现过几只。
+        深色描边的是现在身上这件。括号里的数字是养过的小管家里出现过几只。
       </Text>
     </View>
   )

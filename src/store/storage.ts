@@ -58,6 +58,8 @@ export interface AppState {
   creatureHistory: RetiredCreature[]
   /** 图鉴：跨猫的收集账本（部件与称号各出现过几次） */
   creatureDex: CatDex
+  /** 下一颗蛋孵出来是猫还是狗（毕业换蛋时选）；没选过就是猫。只在本机，不进同步——小管家本来就是每台设备各养各的 */
+  eggSpecies?: 'cat' | 'dog'
   settings: {
     useAdaptiveTdee: boolean; provider: 'anthropic' | 'deepseek'; anthropicKey: string; deepseekKey: string; sync: { code: string; enabled: boolean }
     /** 已经贡献给食品库的自定义食物/自建菜 id，贡献面板用来避免重复提示 */
@@ -134,6 +136,7 @@ export function normalizeState(raw: unknown): AppState {
       .map((c) => ensureCat(withPersonality(c)))
   }
   // 图鉴是后加的：存档里没有就按当前猫与历史猫的最终外观补种一次（途中升掉的部件找不回来，可接受）
+  if (raw.eggSpecies === 'dog' || raw.eggSpecies === 'cat') s.eggSpecies = raw.eggSpecies
   s.creatureDex = isCatDex(raw.creatureDex)
     ? raw.creatureDex
     : seedDex([s.creature, ...s.creatureHistory].filter((c): c is NonNullable<typeof c> => !!c).map((c) => c.cat))

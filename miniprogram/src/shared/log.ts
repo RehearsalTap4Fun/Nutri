@@ -40,7 +40,7 @@ export function bumpCreature(
 
   update((s) => {
     const prev = s.creature
-    const next = prev ? mutate(prev, now, rnd) : hatch(uid(), now, rnd)
+    const next = prev ? mutate(prev, now, rnd) : hatch(uid(), now, rnd, s.eggSpecies ?? 'cat')
     result.hatched = !prev
     result.change = prev ? catDiff(prev.cat, next.cat) : null
     result.titles = newTitles(prev ? prev.cat : null, next.cat)

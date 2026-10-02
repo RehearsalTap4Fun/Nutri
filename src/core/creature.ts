@@ -2,8 +2,19 @@
 // 不做多阶段孵化进度），之后每次记录再异变一个特征（不叠加进度条，只留看得见的样子变化）。
 // 用户可以随时「回炉重造」：当前生物存进历史，重新变回一颗蛋。
 
-import { PIXEL_CAT_RULES, catForCreature, hatchCat, isCatSpec, mutateCat, type CatSpec } from './pixelcat'
+import { PIXEL_CAT_RULES, catForCreature, hatchCat, isCatSpec, mutateCat, speciesOf, type CatSpec, type Species } from './pixelcat'
 import { ART_IDENTITY, artPlanForCat, isCatArtIdentity, type CatArtIdentity } from './catArt'
+import { DOG_ART_IDENTITY, dogPlanFor } from './dogArt'
+
+/** 某物种用哪个美术包画 */
+function artIdentityFor(species: Species): CatArtIdentity {
+  return species === 'dog' ? DOG_ART_IDENTITY : ART_IDENTITY
+}
+
+/** 这个外观在它自己物种的美术包里画得出来吗 */
+export function canDraw(spec: CatSpec): boolean {
+  return speciesOf(spec) === 'dog' ? dogPlanFor(spec) !== null : artPlanForCat(spec) !== null
+}
 
 export const BODIES = ['round', 'egg', 'blob', 'droplet'] as const
 export const COLORS = ['coral', 'sage', 'periwinkle', 'amber', 'lilac', 'seafoam', 'blush', 'slate'] as const
@@ -71,11 +82,11 @@ export function randomTraits(rnd: () => number): CreatureTraits {
   }
 }
 
-/** 孵化：一次随机定型，不做渐进式揭露；性格也在这一刻定型，之后不再变；像素猫外观同时定型并存档 */
-export function hatch(id: string, now: number, rnd: () => number): Creature {
+/** 孵化：一次随机定型，不做渐进式揭露；性格也在这一刻定型，之后不再变；外观（猫或狗）同时定型并存档 */
+export function hatch(id: string, now: number, rnd: () => number, species: Species = 'cat'): Creature {
   return {
     id, traits: randomTraits(rnd), personality: pick(PERSONALITIES, rnd), bornAt: now, lastMutatedAt: now, mutations: 0,
-    cat: hatchCat(rnd), catRules: PIXEL_CAT_RULES, catArt: ART_IDENTITY,
+    cat: hatchCat(rnd, species), catRules: PIXEL_CAT_RULES, catArt: artIdentityFor(species),
   }
 }
 
@@ -92,8 +103,10 @@ export function hatch(id: string, now: number, rnd: () => number): Creature {
  * 不认识的值走第 3 条，和存了不认识的部件同样处理。
  */
 export function ensureCat<T extends Creature>(c: T): T {
-  const withArt = isCatArtIdentity(c.catArt) ? c : { ...c, catArt: ART_IDENTITY }
-  if (isCatSpec(withArt.cat) && typeof withArt.catRules === 'string' && artPlanForCat(withArt.cat)) return withArt
+  // 物种只看外观里的标记：狗不能因为任何一步修复被悄悄变回猫
+  const species: Species = c.cat && (c.cat as { species?: unknown }).species === 'dog' ? 'dog' : 'cat'
+  const withArt = isCatArtIdentity(c.catArt) ? c : { ...c, catArt: artIdentityFor(species) }
+  if (isCatSpec(withArt.cat) && typeof withArt.catRules === 'string' && canDraw(withArt.cat)) return withArt
 
   const raw = (withArt.cat ?? {}) as Partial<CatSpec> & Record<string, unknown>
   const patched = {
@@ -105,9 +118,9 @@ export function ensureCat<T extends Creature>(c: T): T {
     // 背景是第六个成长槽（场景包 1.0.0 起），老存档没有这个字段，按「还没长出背景」补
     backdrop: raw.backdrop ?? 'none',
   } as CatSpec
-  if (isCatSpec(patched) && artPlanForCat(patched)) return { ...withArt, cat: patched, catRules: PIXEL_CAT_RULES }
+  if (isCatSpec(patched) && canDraw(patched)) return { ...withArt, cat: patched, catRules: PIXEL_CAT_RULES }
 
-  return { ...withArt, cat: catForCreature(c), catRules: PIXEL_CAT_RULES }
+  return { ...withArt, cat: catForCreature(c, species), catRules: PIXEL_CAT_RULES }
 }
 
 /** 异变：SVG 特征随机换一个槽；像素猫按只进不退规则推进一步。两者都从存档里的当前值出发，不重放历史 */
@@ -119,7 +132,7 @@ export function mutate(c: Creature, now: number, rnd: () => number): Creature {
   const withCat = ensureCat(c)
   return {
     ...withCat, traits: { ...c.traits, [key]: next }, lastMutatedAt: now, mutations: c.mutations + 1,
-    cat: mutateCat(withCat.cat, rnd), catRules: PIXEL_CAT_RULES, catArt: ART_IDENTITY,
+    cat: mutateCat(withCat.cat, rnd), catRules: PIXEL_CAT_RULES, catArt: artIdentityFor(speciesOf(withCat.cat)),
   }
 }
 

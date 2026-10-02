@@ -28,7 +28,7 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
   onInstall?: () => void
   onSetConditions: (c: Condition[], trimester?: 1 | 2 | 3) => void
   onMarkContributed: (id: string) => void
-  onReforgeCreature: () => void
+  onReforgeCreature: (species: 'cat' | 'dog') => void
   sync: { code: string; enabled: boolean; status: SyncStatus }
   onSyncEnable: (code: string, mode: 'new' | 'join') => void
   onSyncDisable: (deleteRemote: boolean) => void
@@ -167,7 +167,7 @@ export function MeView({ profile, targets, state, onEdit, onUndislike, onImport,
 
       <CloudSyncCard code={sync.code} enabled={sync.enabled} status={sync.status} onEnable={onSyncEnable} onDisable={onSyncDisable} onSyncNow={onSyncNow} />
 
-      <CreatureCard creature={state.creature} history={state.creatureHistory} dex={state.creatureDex} onReforge={onReforgeCreature} />
+      <CreatureCard creature={state.creature} history={state.creatureHistory} dex={state.creatureDex} eggSpecies={state.eggSpecies ?? 'cat'} onReforge={onReforgeCreature} />
 
       <ContributeCard customFoods={state.customFoods} customDishes={state.customDishes} contributedIds={state.settings.contributedFoodIds} onMarkContributed={onMarkContributed} />
 

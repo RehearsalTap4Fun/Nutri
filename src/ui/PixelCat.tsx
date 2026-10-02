@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ART_SIZE, artLayersFor, artPlanForCat } from '../core/catArt'
 import { SCENE_DISPLAY_H, SCENE_GEOMETRY, SCENE_H, SCENE_W, backdropLayer } from '../core/catScene'
-import { catKey, type CatSpec } from '../core/pixelcat'
+import { catKey, speciesOf, type CatSpec } from '../core/pixelcat'
+import { composeDog, dogLayersFor, dogPlanFor } from '../core/dogArt'
 import { composePlan, type Rgba } from '../core/pixelize'
 import { composeScene } from '../core/pixelscene'
 import type { Mood } from '../core/creatureTalk'
@@ -18,15 +19,19 @@ import { CREATURE_KEYFRAMES, MoodAccent, POOF_SWAP_AT_MS, POOF_TOTAL_MS, SmokePo
  * 画布是 **96×64 的场景**，不是 64×64 的猫：背景由场景包提供，猫按 (16,0) 落进去（见 catScene.ts）。
  * 没有背景时画布尺寸不变，只是背景那一圈空着——否则长出背景的那一刻版面会跳。
  *
+ * 狗走狗狗包自带的合成器（`composeDog`，内部是原样复制的 runtime.mjs），合成出的 64×64 和猫一样
+ * 按 (16,0) 落进场景。两边图层都是二值 alpha，Canvas 解码不会因预乘丢边缘颜色（打包时校验过）。
+ *
  * 心情点缀、冒烟换脸、减少动态偏好沿用 SVG 小管家那套。心情点缀对齐的是**猫**不是场景，
  * 所以它那层 SVG 按锚点偏移，不铺满画布。
  */
 
 const LAYER_URLS = import.meta.glob('../assets/pixelpack/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 const SCENE_URLS = import.meta.glob('../assets/pixelscene/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const DOG_URLS = import.meta.glob('../assets/caninepack/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 function layerUrl(id: string): string {
-  const url = LAYER_URLS[`../assets/pixelpack/${id}.png`] ?? SCENE_URLS[`../assets/pixelscene/${id}.png`]
+  const url = LAYER_URLS[`../assets/pixelpack/${id}.png`] ?? SCENE_URLS[`../assets/pixelscene/${id}.png`] ?? DOG_URLS[`../assets/caninepack/${id}.png`]
   if (!url) throw new Error(`缺图层 ${id}`)
   return url
 }
@@ -82,6 +87,30 @@ async function layerPixels(id: string, w = N, h = N): Promise<Rgba> {
 
 const composed = new Map<string, Promise<ImageData | null>>()
 
+async function decodeAll(ids: string[]): Promise<(id: string) => Rgba> {
+  const loaded = new Map<string, Rgba>()
+  await Promise.all(ids.map(async (id) => loaded.set(id, await layerPixels(id))))
+  return (id) => {
+    const data = loaded.get(id)
+    if (!data) throw new Error(`缺图层 ${id}`)
+    return data
+  }
+}
+
+/** 64×64 的猫（QMonster 像素包 · pixel-rgba-v1） */
+async function composeCatSubject(spec: CatSpec): Promise<Rgba | null> {
+  const ops = artPlanForCat(spec)
+  if (!ops) return null
+  return composePlan(ops, await decodeAll(artLayersFor(ops)), N)
+}
+
+/** 64×64 的狗（狗狗像素包 · canine-rgba-v1） */
+async function composeDogSubject(spec: CatSpec): Promise<Rgba | null> {
+  const plan = dogPlanFor(spec)
+  if (!plan) return null
+  return composeDog(plan, await decodeAll(dogLayersFor(plan)))
+}
+
 /**
  * 合成一整幕场景（96×64）：先猫后背景，再按锚点叠。包里画不出这只猫时返回 null
  * （孵化被限制在可孵化的岛上，正常不该出现）。
@@ -91,15 +120,8 @@ export function composeCat(spec: CatSpec): Promise<ImageData | null> {
   let p = composed.get(key)
   if (!p) {
     p = (async () => {
-      const ops = artPlanForCat(spec)
-      if (!ops) return null
-      const loaded = new Map<string, Rgba>()
-      await Promise.all(artLayersFor(ops).map(async (id) => loaded.set(id, await layerPixels(id))))
-      const cat = composePlan(ops, (id) => {
-        const data = loaded.get(id)
-        if (!data) throw new Error(`缺像素包图层 ${id}`)
-        return data
-      }, N)
+      const cat = speciesOf(spec) === 'dog' ? await composeDogSubject(spec) : await composeCatSubject(spec)
+      if (!cat) return null
       const bdId = backdropLayer(spec.backdrop)
       const backdrop = bdId ? await layerPixels(bdId, SCENE_W, SCENE_H) : null
       const px = composeScene(backdrop, cat, SCENE_GEOMETRY)
@@ -176,7 +198,7 @@ export function PixelCatView({ spec, size = SCENE_DISPLAY_H, className, mood = '
   const catSize = SCENE_GEOMETRY.subject.width * scale
 
   return (
-    <div className={className} style={{ position: 'relative', width, height: size, flex: 'none' }} role="img" aria-label="健康小管家">
+    <div className={className} style={{ position: 'relative', width, height: size, flex: 'none' }} role="img" aria-label={speciesOf(spec) === 'dog' ? '健康小管家（狗）' : '健康小管家（猫）'}>
       <style>{CREATURE_KEYFRAMES + PIXEL_KEYFRAMES}</style>
       <canvas
         ref={canvasRef}

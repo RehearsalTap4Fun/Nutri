@@ -12,6 +12,7 @@
  */
 import type { Dish, LogEntry, MealSlot, Profile, VitalEntry, WaterEntry } from '../core/types'
 import type { AppState, CustomFood } from './storage'
+import { retire } from '../core/creature'
 import { markKey, waterId } from '../sync/merge'
 import type { MarkColl } from '../sync/merge'
 
@@ -170,4 +171,16 @@ export function enableSync(s: AppState, code: string, mode: 'new' | 'join', now:
 /** keepCode：只在本机关闭时留着码（小程序的做法，方便再打开）；删了云端副本就没必要留 */
 export function disableSync(s: AppState, keepCode = false): AppState {
   return { ...s, settings: { ...s.settings, sync: { code: keepCode ? s.settings.sync.code : '', enabled: false } } }
+}
+
+// ── 健康小管家：毕业换蛋 ──
+
+/** 毕业：当前这只存进历史，变回一颗蛋，并记下这颗蛋要孵成猫还是狗 */
+export function graduateCreature(s: AppState, species: 'cat' | 'dog', now: number): AppState {
+  return {
+    ...s,
+    creature: null,
+    creatureHistory: s.creature ? [...s.creatureHistory, retire(s.creature, now)] : s.creatureHistory,
+    eggSpecies: species,
+  }
 }
