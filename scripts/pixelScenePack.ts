@@ -25,7 +25,7 @@ const ROOT = resolve(HERE, '..')
 const args = process.argv.slice(2)
 const argOf = (n: string) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined }
 const RP = resolve(process.env.RANDOMPET_DIR ?? join(ROOT, '..', 'RandomPet-master'))
-const SCENE = resolve(argOf('--scene') ?? join(RP, 'dist', 'pixel-scene', 'backdrop-candidate'))
+const SCENE = resolve(argOf('--scene') ?? join(RP, 'dist', 'pixel-scene', 'backdrop-approved-1.0.0'))
 const OUT = resolve(argOf('--out') ?? join(ROOT, 'src', 'assets', 'pixelscene'))
 const DRY = args.includes('--dry')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

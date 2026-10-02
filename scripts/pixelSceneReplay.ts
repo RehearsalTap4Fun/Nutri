@@ -18,7 +18,7 @@ import { composeScene, geometryOf, isSceneCatalog, type SceneCatalog } from '../
 const args = process.argv.slice(2)
 const argOf = (n: string) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined }
 const RP = resolve(process.env.RANDOMPET_DIR ?? join(resolve('.'), '..', 'RandomPet-master'))
-const SCENE = resolve(argOf('--scene') ?? join(RP, 'dist', 'pixel-scene', 'backdrop-candidate'))
+const SCENE = resolve(argOf('--scene') ?? join(RP, 'dist', 'pixel-scene', 'backdrop-approved-1.0.0'))
 const PACK = resolve(argOf('--pack') ?? join(RP, 'dist', 'pixel-art', 'v3-approved-1.6.1'))
 const REPORT = resolve(argOf('--report') ?? join(RP, 'docs', 'qa', 'pixel-scene-backdrops', 'report.json'))
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
